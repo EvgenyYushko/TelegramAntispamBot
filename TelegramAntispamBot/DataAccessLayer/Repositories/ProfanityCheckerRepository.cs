@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using TelegramAntispamBot.DomainLayer.Repositories;
 
@@ -7,7 +8,7 @@ namespace TelegramAntispamBot.DataAccessLayer.Repositories
 	public class ProfanityCheckerRepository : IProfanityCheckerRepository
 	{
 		private readonly string[] _bannedWords;
-		private const string FILE_PATH = "Resources/mat.txt";
+		private string FILE_PATH = Path.Combine(AppContext.BaseDirectory, "Resources", "mat.txt");
 
 		public ProfanityCheckerRepository()
 		{
