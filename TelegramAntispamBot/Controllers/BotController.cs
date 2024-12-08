@@ -109,8 +109,8 @@ namespace TelegramAntispamBot.Controllers
 				var wh = await _botClient.GetWebhookInfoAsync();
 				if (wh.IpAddress is null)
 				{
-					var _webhookUrl = "https://telegramantispambot.onrender.com/bot";
-					await _botClient.SetWebhookAsync("_webhookUrl");
+					const string webhookUrl = "https://telegramantispambot.onrender.com/bot";
+					await _botClient.SetWebhookAsync(webhookUrl);
 				}
 			}
 		}
