@@ -59,8 +59,6 @@ namespace TelegramAntispamBot
 				endpoints.MapRazorPages();
 			});
 
-			Console.WriteLine(Environment.GetEnvironmentVariable("TELEGRAM_ANTISPAM_BOT_KEY")?? "NULL 2");
-
 			//var local = false;
 			////var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService()));
 			//if (local)
