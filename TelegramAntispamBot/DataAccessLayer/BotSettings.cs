@@ -25,5 +25,8 @@ namespace TelegramAntispamBot.DataAccessLayer
 		public static readonly string InfoMessage =
 			"Если ты хочешь отправлять ссылки в комментариях канала, " +
 			"то заходи в репозиторий {} и вноси себя в WhiteList (подробнее читай в файле README.md репозитория)";
+
+		public static readonly string InfoMessageProfanityChecker =
+			"Ваше сообщение содержит нецензурное выражение и было удалено";
 	}
 }

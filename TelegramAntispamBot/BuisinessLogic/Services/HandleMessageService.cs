@@ -12,10 +12,12 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 	public class HandleMessageService : IHandleMessageService
 	{
 		private readonly IDeleteMessageService _deleteMessageService;
+		private readonly IProfanityCheckerService _profanityCheckerService;
 
-		public HandleMessageService(IDeleteMessageService deleteMessageService)
+		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService)
 		{
-			this._deleteMessageService = deleteMessageService;
+			_deleteMessageService = deleteMessageService;
+			_profanityCheckerService = profanityCheckerService;
 		}
 
 		/// <inheritdoc />
@@ -28,6 +30,9 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 
 			switch (update.Type)
 			{
+				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
+					await _deleteMessageService.DeleteMessageAsync(botClient, update.Message, cancellationToken, BotSettings.InfoMessageProfanityChecker);
+					break;
 				// Disable comments if new post contains no-comment word
 				case UpdateType.Message when update.Message.From.IsChannel() &&
 											 update.Message.Text.Contains(BotSettings.NoCommentWord):
@@ -39,7 +44,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				// Delete new community-comment if user not in white-list
 				case UpdateType.Message when update.Message.From.IsBot &&
 											 !update.Message.SenderChat.InChannelsWhitelist():
-					await _deleteMessageService.DeleteMessageAsync(botClient, update.Message, cancellationToken);
+					await _deleteMessageService.DeleteMessageAsync(botClient, update.Message, cancellationToken, BotSettings.InfoMessage);
 					break;
 				// Disable comments if edited post contains no-comment word
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsChannel() &&
@@ -52,7 +57,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				// Delete edited community-comment if user not in white-list
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsBot &&
 												   !update.EditedMessage.SenderChat.InChannelsWhitelist():
-					await _deleteMessageService.DeleteMessageAsync(botClient, update.EditedMessage, cancellationToken);
+					await _deleteMessageService.DeleteMessageAsync(botClient, update.EditedMessage, cancellationToken, BotSettings.InfoMessage);
 					break;
 				default:
 					return;

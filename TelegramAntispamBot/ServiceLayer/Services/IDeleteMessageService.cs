@@ -7,6 +7,6 @@ namespace TelegramAntispamBot.ServiceLayer.Services
 {
 	public interface IDeleteMessageService
 	{
-		public Task DeleteMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken);
+		public Task DeleteMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken, string msg);
 	}
 }

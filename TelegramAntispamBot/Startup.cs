@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TelegramAntispamBot.BuisinessLogic.Services;
 using TelegramAntispamBot.Controllers;
+using TelegramAntispamBot.DataAccessLayer.Repositories;
+using TelegramAntispamBot.DomainLayer.Repositories;
 using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot
@@ -30,6 +32,8 @@ namespace TelegramAntispamBot
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddScoped<IHandleMessageService, HandleMessageService>();
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
+			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
+			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,10 +64,10 @@ namespace TelegramAntispamBot
 			});
 
 			//var local = false;
-			////var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService()));
+			//var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())));
 			//if (local)
 			//{
-			//	//s.Test();
+			//	s.Test();
 			//}
 			//else
 			//{
