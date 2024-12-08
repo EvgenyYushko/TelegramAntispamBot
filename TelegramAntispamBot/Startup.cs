@@ -59,16 +59,18 @@ namespace TelegramAntispamBot
 				endpoints.MapRazorPages();
 			});
 
-			var local = false;
-			var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService()));
-			if (local)
-			{
-				s.Test();
-			}
-			else
-			{
-				Task.Run(async () => await s.ConfigureWebhookAsync(false));
-			}
+			Console.WriteLine(Environment.GetEnvironmentVariable("TELEGRAM_ANTISPAM_BOT_KEY")?? "NULL 2");
+
+			//var local = false;
+			////var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService()));
+			//if (local)
+			//{
+			//	//s.Test();
+			//}
+			//else
+			//{
+			//	Task.Run(async () => await s.ConfigureWebhookAsync(false));
+			//}
 		}
 	}
 }
