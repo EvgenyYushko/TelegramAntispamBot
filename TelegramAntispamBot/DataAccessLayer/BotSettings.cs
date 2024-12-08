@@ -7,7 +7,7 @@ namespace TelegramAntispamBot.DataAccessLayer
 {
 	public class BotSettings
 	{
-		public static string NoCommentWord = "#advert";
+		public static string NoCommentWord = "лох";
     
 		//Add your telegram nickname here
 		public static readonly List<string> WhiteList = new()

@@ -49,7 +49,6 @@ namespace TelegramAntispamBot.Controllers
 		[HttpGet("/health")]
 		public IActionResult health()
 		{
-			Console.WriteLine("health - OK");
 			return Ok("OK");
 		}
 		
