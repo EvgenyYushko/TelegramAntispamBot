@@ -12,7 +12,8 @@ namespace TelegramAntispamBot.DataAccessLayer
 		//Add your telegram nickname here
 		public static readonly List<string> WhiteList = new()
 		{
-			"EvgenyYushko"
+			//"EvgenyYushko",
+			"Test"
 		};
     
 		//Channels which are allowed to send messages to chat

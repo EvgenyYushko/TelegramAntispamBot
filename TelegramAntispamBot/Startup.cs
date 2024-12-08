@@ -27,7 +27,7 @@ namespace TelegramAntispamBot
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddRazorPages();
-			services.AddControllers();
+			services.AddControllers().AddNewtonsoftJson();
 			services.AddScoped<IHandleMessageService, HandleMessageService>();
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 		}
