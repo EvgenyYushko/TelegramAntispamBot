@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using TelegramAntispamBot.ServiceLayer.Services;
 
@@ -15,12 +16,20 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 			var messageText = message.Text;
 			var messageId = message.MessageId;
 			Console.WriteLine($"Message for delete: '{messageText}' (id: {messageId})");
-
+		
 			await botClient.DeleteMessageAsync(chatId, messageId, cancellationToken);
 
 			if (message.From is { Username: { } })
 			{
-				await botClient.SendTextMessageAsync(message.From.Id, msg);
+				try
+				{
+					await botClient.SendTextMessageAsync(message.From.Id, msg, cancellationToken: cancellationToken);
+				}
+				catch (ApiRequestException ex) when (ex.ErrorCode == 403)
+				{
+					Console.WriteLine("Пользователь не взаимодействовал с ботом или заблокировал его.");
+					await botClient.SendTextMessageAsync(chatId, msg, cancellationToken: cancellationToken);
+				}
 			}
 		}
 	}
