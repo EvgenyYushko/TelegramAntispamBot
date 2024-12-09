@@ -28,8 +28,25 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				return;
 			}
 
+			var newMember = update.ChatMember?.NewChatMember;
+			var oldMember = update.ChatMember?.OldChatMember;
+
+			// Проверяем, если пользователь добавлен
+			if (newMember is ChatMemberMember && oldMember is ChatMemberLeft)
+			{
+				string welcomeMessage = $"Добро пожаловать, {newMember.User.FirstName}!";
+				await botClient.SendTextMessageAsync(
+					chatId: update.Message.Chat.Id,
+					text: welcomeMessage,
+					cancellationToken: cancellationToken
+				);
+			}
+
 			switch (update.Type)
 			{
+				case UpdateType.ChatMember when update.ChatMember is not null:
+					await HandleChatMemberUpdateAsync(botClient, update.ChatMember , cancellationToken);
+					break;
 				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
 					await _deleteMessageService.DeleteMessageAsync(botClient, update.Message, cancellationToken, BotSettings.InfoMessageProfanityChecker);
 					break;
@@ -61,6 +78,19 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 					break;
 				default:
 					return;
+			}
+		}
+
+		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, ChatMemberUpdated chatMemberUpdate, CancellationToken cancellationToken)
+		{
+			var newMember = chatMemberUpdate.NewChatMember;
+			var oldMember = chatMemberUpdate.OldChatMember;
+
+			// Проверяем, если пользователь добавлен
+			if (newMember is ChatMemberMember && oldMember is ChatMemberLeft)
+			{
+				var welcomeMessage = $"Добро пожаловать, {newMember.User.FirstName}!";
+				await botClient.SendTextMessageAsync(chatId: chatMemberUpdate.Chat.Id, text: welcomeMessage, cancellationToken: cancellationToken);
 			}
 		}
 	}
