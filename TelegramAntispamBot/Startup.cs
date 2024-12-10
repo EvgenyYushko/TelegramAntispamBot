@@ -39,11 +39,8 @@ namespace TelegramAntispamBot
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			var local = false;
-
 			if (env.IsDevelopment())
 			{
-				local = true;
 				app.UseDeveloperExceptionPage();
 			}
 			else
@@ -66,11 +63,18 @@ namespace TelegramAntispamBot
 				endpoints.MapRazorPages();
 			});
 
+			var local = false;
 			if (local)
 			{
 				var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())));
 				s.Test();
 			}
+			else
+			{
+				var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())));
+				s.ConfigureWebhookAsync(false);
+			}
+
 		}
 	}
 }

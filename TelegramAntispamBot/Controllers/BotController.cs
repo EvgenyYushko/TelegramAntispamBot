@@ -26,7 +26,6 @@ namespace TelegramAntispamBot.Controllers
 			_messageService = messageService;
 			var botToken = configuration.GetValue<string>("TELEGRAM_ANTISPAM_BOT_KEY") ?? Environment.GetEnvironmentVariable("TELEGRAM_ANTISPAM_BOT_KEY");
 			_botClient = new TelegramBotClient(botToken ?? throw new Exception("TelegrammToken is not be null"));
-			Task.Run(async () => await ConfigureWebhookAsync(false));
 		}
 
 		[HttpPost]
