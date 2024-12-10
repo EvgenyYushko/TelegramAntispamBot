@@ -38,10 +38,11 @@ jobs:
       if: success() 
       env:
         RENDER_ANTISPAM_BOT_KEY: ${{ secrets.RENDER_ANTISPAM_BOT_KEY }} # Секретный ключ API Render
+      shell: pwsh
       run: |
-        curl -X POST \
-        -H "Authorization: Bearer $RENDER_ANTISPAM_BOT_KEY" \
-        -H "Content-Type: application/json" \
-        -d '{}' \
-        https://api.render.com/v1/services/srv-ctaoq5hu0jms73f1l3q0/deploys    
-   
+        $headers = @{
+            "Authorization" = "Bearer $env:RENDER_API_KEY"
+            "Content-Type" = "application/json"
+        }
+        $body = "{}" | ConvertTo-Json
+        Invoke-RestMethod -Uri "https://api.render.com/v1/services/srv-ctaoq5hu0jms73f1l3q0/deploys" -Method Post -Headers $headers -Body $body   
