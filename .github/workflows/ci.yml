@@ -41,7 +41,7 @@ jobs:
       shell: pwsh
       run: |
         $headers = @{
-            "Authorization" = "Bearer $env:RENDER_API_KEY"
+            "Authorization" = "Bearer $env:RENDER_ANTISPAM_BOT_KEY"
             "Content-Type" = "application/json"
         }
         $body = "{}" | ConvertTo-Json
