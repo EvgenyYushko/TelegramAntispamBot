@@ -37,7 +37,7 @@ namespace TelegramAntispamBot.Controllers
 			try
 			{
 				var cancellationToken = new CancellationToken();
-				await _messageService.HandleUpdateAsync(_botClient, update, cancellationToken);
+				await _messageService.HandleUpdateAsync(_botClient, update, update.Type, cancellationToken);
 			}
 			catch (Exception e)
 			{

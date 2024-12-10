@@ -21,7 +21,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		}
 
 		/// <inheritdoc />
-		public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+		public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, UpdateType type, CancellationToken cancellationToken)
 		{
 			if (update.HasEmptyMessage())
 			{
@@ -42,7 +42,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				);
 			}
 
-			switch (update.Type)
+			switch (type)
 			{
 				case UpdateType.ChatMember when update.ChatMember is not null:
 					await HandleChatMemberUpdateAsync(botClient, update.ChatMember , cancellationToken);
