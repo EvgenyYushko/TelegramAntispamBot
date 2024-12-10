@@ -39,12 +39,15 @@ namespace TelegramAntispamBot
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
+			bool local;
 			if (env.IsDevelopment())
 			{
+				local = true;
 				app.UseDeveloperExceptionPage();
 			}
 			else
 			{
+				local = false;
 				app.UseExceptionHandler("/Error");
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
@@ -63,7 +66,7 @@ namespace TelegramAntispamBot
 				endpoints.MapRazorPages();
 			});
 
-			var local = false;
+			
 			if (local)
 			{
 				var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())));
