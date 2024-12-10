@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -25,21 +26,19 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		{
 			if (update.HasEmptyMessage())
 			{
+				var newMember = update.Message.NewChatMembers?.FirstOrDefault();
+				// Проверяем, если пользователь добавлен
+				if (newMember != null)
+				{
+					var welcomeMessage = $"Добро пожаловать, {newMember.Username}!";
+					await botClient.SendTextMessageAsync(
+						chatId: update.Message.Chat.Id,
+						text: welcomeMessage,
+						cancellationToken: cancellationToken
+					);
+				}
+
 				return;
-			}
-
-			var newMember = update.ChatMember?.NewChatMember;
-			var oldMember = update.ChatMember?.OldChatMember;
-
-			// Проверяем, если пользователь добавлен
-			if (newMember is ChatMemberMember && oldMember is ChatMemberLeft)
-			{
-				string welcomeMessage = $"Добро пожаловать, {newMember.User.FirstName}!";
-				await botClient.SendTextMessageAsync(
-					chatId: update.Message.Chat.Id,
-					text: welcomeMessage,
-					cancellationToken: cancellationToken
-				);
 			}
 
 			switch (type)
