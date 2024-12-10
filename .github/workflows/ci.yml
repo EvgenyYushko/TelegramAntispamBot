@@ -44,5 +44,5 @@ jobs:
             "Authorization" = "Bearer $env:RENDER_ANTISPAM_BOT_KEY"
             "Content-Type" = "application/json"
         }
-        $body = "{}" | ConvertTo-Json
+        $body = "{}"
         Invoke-RestMethod -Uri "https://api.render.com/v1/services/srv-ctaoq5hu0jms73f1l3q0/deploys" -Method Post -Headers $headers -Body $body   
