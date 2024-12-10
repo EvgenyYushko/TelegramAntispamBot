@@ -13,7 +13,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		public async Task DeleteMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken, string msg)
 		{
 			var chatId = message.Chat.Id;
-			var messageText = message.Text;
+			var messageText = message.Text; 
 			var messageId = message.MessageId;
 			Console.WriteLine($"Message for delete: '{messageText}' (id: {messageId})");
 		
