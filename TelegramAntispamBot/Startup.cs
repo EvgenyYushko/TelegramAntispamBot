@@ -2,11 +2,13 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
 using TelegramAntispamBot.BuisinessLogic.Services;
+using TelegramAntispamBot.Common;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.DataAccessLayer.Repositories;
 using TelegramAntispamBot.DomainLayer.Repositories;
@@ -36,6 +38,9 @@ namespace TelegramAntispamBot
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
+
+			services.AddDbContext<AppDbContext>(options =>
+				options.UseNpgsql(Configuration.GetConnectionString("PostgresDb")));
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
 			_telegram = new TelegramInject
@@ -80,7 +85,9 @@ namespace TelegramAntispamBot
 
 			if (local)
 			{
-				var testController = new BotController(new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())), _telegram);
+				var testController = new BotController(new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository()), null)
+					, _telegram
+					);
 				testController.RunLocalTest();
 			}
 

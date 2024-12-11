@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -15,8 +18,9 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		private readonly IDeleteMessageService _deleteMessageService;
 		private readonly IProfanityCheckerService _profanityCheckerService;
 
-		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService)
+		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService, AppDbContext appDbContext)
 		{
+			Console.WriteLine($"ContextId = {appDbContext.ContextId}");
 			_deleteMessageService = deleteMessageService;
 			_profanityCheckerService = profanityCheckerService;
 		}
@@ -67,6 +71,16 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				default:
 					return;
 			}
+		}
+
+		private static IServiceScope CreateScope()
+		{
+			var services = new ServiceCollection();
+			services.AddDbContext<AppDbContext>(options =>
+				options.UseNpgsql("YOUR_CONNECTION_STRING"));
+
+			var provider = services.BuildServiceProvider();
+			return provider.CreateScope();
 		}
 
 		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
