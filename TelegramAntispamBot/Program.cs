@@ -16,5 +16,5 @@ namespace TelegramAntispamBot
 				{
 					webBuilder.UseStartup<Startup>();
 				});
-	}
+	} 
 }
