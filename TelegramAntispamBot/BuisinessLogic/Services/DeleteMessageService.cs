@@ -15,8 +15,8 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 			var chatId = message.Chat.Id;
 			var messageText = message.Text; 
 			var messageId = message.MessageId;
+
 			Console.WriteLine($"Message for delete: '{messageText}' (id: {messageId})");
-		
 			await botClient.DeleteMessageAsync(chatId, messageId, cancellationToken);
 
 			if (message.From is { Username: { } })
@@ -27,8 +27,12 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				}
 				catch (ApiRequestException ex) when (ex.ErrorCode == 403)
 				{
-					Console.WriteLine("Пользователь не взаимодействовал с ботом или заблокировал его.");
+					Console.WriteLine("User does not contact the bot or has blocked it");
 					await botClient.SendTextMessageAsync(chatId, msg, cancellationToken: cancellationToken);
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine($"User error send message after delete message: {e}");
 				}
 			}
 		}

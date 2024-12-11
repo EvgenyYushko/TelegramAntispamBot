@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -29,7 +28,7 @@ namespace TelegramAntispamBot.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Post([FromBody] Update update)
 		{
-			Console.WriteLine($"Bot {await _botClient.GetMeAsync()} is running..."); ;
+			Console.WriteLine("Invike method Post()");
 
 			try
 			{
@@ -38,7 +37,7 @@ namespace TelegramAntispamBot.Controllers
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e);
+				Console.WriteLine(e.ToString());
 			}
 
 			return Ok();
@@ -91,7 +90,7 @@ namespace TelegramAntispamBot.Controllers
 
 		private static ValueTask BotClient_OnApiResponseReceived(ITelegramBotClient botClient,
 			Telegram.Bot.Args.ApiResponseEventArgs args, CancellationToken cancellationToken = default) => default;
-		
+
 		#endregion
 	}
 }

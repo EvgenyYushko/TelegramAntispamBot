@@ -83,6 +83,8 @@ namespace TelegramAntispamBot
 				var testController = new BotController(new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())), _telegram);
 				testController.RunLocalTest();
 			}
+
+			Console.WriteLine($"Bot {Task.Run(async ()=> await _telegram.TelegramClient.GetMeAsync()).Result.Username} is running...");
 		}
 
 		public async Task ConfigureWebhookAsync(bool local)

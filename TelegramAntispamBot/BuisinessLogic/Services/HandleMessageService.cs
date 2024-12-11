@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramAntispamBot.DataAccessLayer;
+using TelegramAntispamBot.Common;
 using TelegramAntispamBot.Extentions;
 using TelegramAntispamBot.ServiceLayer.Services;
 
@@ -49,7 +49,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 					await _deleteMessageService.DeleteMessageAsync(botClient, update.Message, cancellationToken, BotSettings.InfoMessage);
 					break;
 				case UpdateType.Message when update.Message.Text.Equals("/help") || update.Message.Text.Equals("/help@YN_AntispamBot"):
-					await SenWelcomeMessage(botClient, update, cancellationToken, update.Message.From);
+					await SendWelcomeMessage(botClient, update, cancellationToken, update.Message.From);
 					break;
 				// Disable comments if edited post contains no-comment word
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsChannel() &&
@@ -75,21 +75,13 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 			// Проверяем, если пользователь добавлен 
 			if (newMember != null)
 			{
-				await SenWelcomeMessage(botClient, update, cancellationToken, newMember);
+				await SendWelcomeMessage(botClient, update, cancellationToken, newMember);
 			}
 		}
 
-		private static async Task SenWelcomeMessage(ITelegramBotClient botClient, Update update,
-			CancellationToken cancellationToken, User user)
+		private static async Task SendWelcomeMessage(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
 		{
-			var welcomeMessage = $"Добро пожаловать, {user.FirstName}!\n\n" +
-								$"Тебя приветствует Бот-администратор, я буду делать следующее:  \r\n  \r\n\u2705 Удалять сообщения и посты с нецензурными выражениями \r\n\u2705 В постах удалять комментарии содержащие ссылки  \r\n\u2705 Не удалять комментарии со ссылками от пользователей из белого списка  \r\n\u2705 Не удалять комментарии со ссылками от каналов из белого списка  \r\n\u2705 Отключать возможность комментирования определенных постов";
-
-			await botClient.SendTextMessageAsync(
-				chatId: update.Message.Chat.Id,
-				text: welcomeMessage,
-				cancellationToken: cancellationToken
-			);
+			await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotSettings.GetWelcomeMessage(user), cancellationToken: token);
 		}
 	}
 }

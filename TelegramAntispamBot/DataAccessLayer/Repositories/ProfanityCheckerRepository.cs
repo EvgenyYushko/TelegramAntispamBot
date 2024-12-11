@@ -15,7 +15,7 @@ namespace TelegramAntispamBot.DataAccessLayer.Repositories
 			// Загружаем слова из файла в массив
 			if (!File.Exists(FILE_PATH))
 			{
-				throw new FileNotFoundException($"Файл {FILE_PATH} не найден.");
+				throw new FileNotFoundException($"File {FILE_PATH} not Found.");
 			}
 
 			_bannedWords = File.ReadAllLines(FILE_PATH)
