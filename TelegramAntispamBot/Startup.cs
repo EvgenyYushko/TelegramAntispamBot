@@ -1,23 +1,25 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Telegram.Bot;
 using TelegramAntispamBot.BuisinessLogic.Services;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.DataAccessLayer.Repositories;
 using TelegramAntispamBot.DomainLayer.Repositories;
+using TelegramAntispamBot.InjectSettings;
 using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot
 {
 	public class Startup
 	{
+		public const string TELEGRAM_ANTISPAM_BOT_KEY = "TELEGRAM_ANTISPAM_BOT_KEY";
+		private TelegramInject _telegram;
+
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
@@ -34,6 +36,14 @@ namespace TelegramAntispamBot
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
+
+			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
+			_telegram = new TelegramInject
+			{
+				TelegramClient = new TelegramBotClient(botToken ?? throw new Exception("TelegrammToken is not be null"))
+			};
+
+			services.AddSingleton(_telegram);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,6 +63,8 @@ namespace TelegramAntispamBot
 				app.UseHsts();
 			}
 
+			Task.Run(async () => await ConfigureWebhookAsync(local));
+
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
 
@@ -66,16 +78,27 @@ namespace TelegramAntispamBot
 				endpoints.MapRazorPages();
 			});
 
-			
 			if (local)
 			{
-				var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())));
-				s.Test();
+				var testController = new BotController(new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())), _telegram);
+				testController.RunLocalTest();
+			}
+		}
+
+		public async Task ConfigureWebhookAsync(bool local)
+		{
+			if (local)
+			{
+				await _telegram.TelegramClient.DeleteWebhookAsync();
 			}
 			else
 			{
-				var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())));
-				s.ConfigureWebhookAsync(false);
+				var wh = await _telegram.TelegramClient.GetWebhookInfoAsync();
+				if (wh.IpAddress is null)
+				{
+					const string webhookUrl = "https://telegramantispambot.onrender.com/bot";
+					await _telegram.TelegramClient.SetWebhookAsync(webhookUrl);
+				}
 			}
 		}
 	}

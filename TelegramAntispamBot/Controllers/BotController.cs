@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +8,7 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramAntispamBot.InjectSettings;
 using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot.Controllers
@@ -19,13 +18,12 @@ namespace TelegramAntispamBot.Controllers
 	public class BotController : ControllerBase
 	{
 		private readonly IHandleMessageService _messageService;
-		private TelegramBotClient _botClient;
+		private readonly TelegramBotClient _botClient;
 
-		public BotController(IConfiguration configuration, IHandleMessageService messageService)
-		{//
+		public BotController(IHandleMessageService messageService, TelegramInject telegram)
+		{
 			_messageService = messageService;
-			var botToken = configuration.GetValue<string>("TELEGRAM_ANTISPAM_BOT_KEY") ?? Environment.GetEnvironmentVariable("TELEGRAM_ANTISPAM_BOT_KEY");
-			_botClient = new TelegramBotClient(botToken ?? throw new Exception("TelegrammToken is not be null"));
+			_botClient = telegram.TelegramClient;
 		}
 
 		[HttpPost]
@@ -35,8 +33,8 @@ namespace TelegramAntispamBot.Controllers
 
 			try
 			{
-				var cancellationToken = new CancellationToken();
-				await _messageService.HandleUpdateAsync(_botClient, update, update.Type, cancellationToken);
+				var token = new CancellationToken();
+				await _messageService.HandleUpdateAsync(_botClient, update, update.Type, token);
 			}
 			catch (Exception e)
 			{
@@ -49,12 +47,12 @@ namespace TelegramAntispamBot.Controllers
 		[HttpGet("/health")]
 		public IActionResult health()
 		{
-			return Ok("OK");
+			return Ok();
 		}
-		
-		#region Test
 
-		public void Test()
+		#region ForLocalTest
+
+		public void RunLocalTest()
 		{
 			using var cts = new CancellationTokenSource();
 			// Запуск бота с обработкой сообщений
@@ -69,8 +67,6 @@ namespace TelegramAntispamBot.Controllers
 			);
 			_botClient.OnApiResponseReceived += BotClient_OnApiResponseReceived;
 			_botClient.OnMakingApiRequest += BotClient_OnMakingApiRequest;
-
-			Task.Run(async () => await ConfigureWebhookAsync(true));
 		}
 
 		private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -95,23 +91,7 @@ namespace TelegramAntispamBot.Controllers
 
 		private static ValueTask BotClient_OnApiResponseReceived(ITelegramBotClient botClient,
 			Telegram.Bot.Args.ApiResponseEventArgs args, CancellationToken cancellationToken = default) => default;
-
-		public async Task ConfigureWebhookAsync(bool local)
-		{
-			if (local)
-			{
-				await _botClient.DeleteWebhookAsync();
-			}
-			else
-			{
-				var wh = await _botClient.GetWebhookInfoAsync();
-				if (wh.IpAddress is null)
-				{
-					const string webhookUrl = "https://telegramantispambot.onrender.com/bot";
-					await _botClient.SetWebhookAsync(webhookUrl);
-				}
-			}
-		}
+		
 		#endregion
 	}
 }
