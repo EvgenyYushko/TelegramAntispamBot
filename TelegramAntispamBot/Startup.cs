@@ -77,7 +77,6 @@ namespace TelegramAntispamBot
 				var s = new BotController(Configuration, new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())));
 				s.ConfigureWebhookAsync(false);
 			}
-
 		}
 	}
 }

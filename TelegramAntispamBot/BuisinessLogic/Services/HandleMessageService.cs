@@ -26,26 +26,12 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		{
 			if (update.HasEmptyMessage())
 			{
-				var newMember = update.Message.NewChatMembers?.FirstOrDefault();
-				// Проверяем, если пользователь добавлен
-				if (newMember != null)
-				{
-					var welcomeMessage = $"Добро пожаловать, {newMember.Username}!";
-					await botClient.SendTextMessageAsync(
-						chatId: update.Message.Chat.Id,
-						text: welcomeMessage,
-						cancellationToken: cancellationToken
-					);
-				}
-
+				await HandleChatMemberUpdateAsync(botClient, update, cancellationToken);
 				return;
 			}
 
 			switch (type)
 			{
-				case UpdateType.ChatMember when update.ChatMember is not null:
-					await HandleChatMemberUpdateAsync(botClient, update.ChatMember , cancellationToken);
-					break;
 				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
 					await _deleteMessageService.DeleteMessageAsync(botClient, update.Message, cancellationToken, BotSettings.InfoMessageProfanityChecker);
 					break;
@@ -61,6 +47,9 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				case UpdateType.Message when update.Message.From.IsBot &&
 											 !update.Message.SenderChat.InChannelsWhitelist():
 					await _deleteMessageService.DeleteMessageAsync(botClient, update.Message, cancellationToken, BotSettings.InfoMessage);
+					break;
+				case UpdateType.Message when update.Message.Text.Equals("/help") || update.Message.Text.Equals("/help@YN_AntispamBot"):
+					await SenWelcomeMessage(botClient, update, cancellationToken, update.Message.From);
 					break;
 				// Disable comments if edited post contains no-comment word
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsChannel() &&
@@ -80,17 +69,27 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 			}
 		}
 
-		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, ChatMemberUpdated chatMemberUpdate, CancellationToken cancellationToken)
+		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
 		{
-			var newMember = chatMemberUpdate.NewChatMember;
-			var oldMember = chatMemberUpdate.OldChatMember;
-
+			var newMember = update.Message.NewChatMembers?.FirstOrDefault();
 			// Проверяем, если пользователь добавлен
-			if (newMember is ChatMemberMember && oldMember is ChatMemberLeft)
+			if (newMember != null)
 			{
-				var welcomeMessage = $"Добро пожаловать, {newMember.User.FirstName}!";
-				await botClient.SendTextMessageAsync(chatId: chatMemberUpdate.Chat.Id, text: welcomeMessage, cancellationToken: cancellationToken);
+				await SenWelcomeMessage(botClient, update, cancellationToken, newMember);
 			}
+		}
+
+		private static async Task SenWelcomeMessage(ITelegramBotClient botClient, Update update,
+			CancellationToken cancellationToken, User user)
+		{
+			var welcomeMessage = $"Добро пожаловать, {user.FirstName}!\n\n" +
+								$"Тебя приветствует Бот-администратор, я буду делать следующее:  \r\n  \r\n\u2705 Удалять сообщения и посты с нецензурными выражениями \r\n\u2705 В постах удалять комментарии содержащие ссылки  \r\n\u2705 Не удалять комментарии со ссылками от пользователей из белого списка  \r\n\u2705 Не удалять комментарии со ссылками от каналов из белого списка  \r\n\u2705 Отключать возможность комментирования определенных постов";
+
+			await botClient.SendTextMessageAsync(
+				chatId: update.Message.Chat.Id,
+				text: welcomeMessage,
+				cancellationToken: cancellationToken
+			);
 		}
 	}
 }

@@ -1,14 +1,15 @@
 ﻿@page
 @model PrivacyModel
 @{
-    ViewData["Title"] = "Privacy Policy";
+    var msg = "Политика конфиденциальности";
+    ViewData["Title"] = msg;
     var botOwner = "https://t.me/EvgenyYushko";
 }
 
 <div class="container my-5">
     <div class="card shadow-lg">
         <div class="card-header bg-secondary text-white text-center py-4">
-            <h1 class="display-5">🔒 Политика конфиденциальности</h1>
+            <h1 class="display-5">🔒 @msg</h1>
             <p class="mb-0">Ваши данные в безопасности</p>
         </div>
         <div class="card-body">
