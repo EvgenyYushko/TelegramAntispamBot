@@ -7,7 +7,7 @@ namespace TelegramAntispamBot
 	{
 		public static void Main(string[] args)
 		{
-			CreateHostBuilder(args).Build().Run();///2
+			CreateHostBuilder(args).Build().Run();///3
 		}
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
