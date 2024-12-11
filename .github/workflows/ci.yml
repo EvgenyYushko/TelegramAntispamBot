@@ -1,4 +1,4 @@
-name: .NET
+name: CI
 
 on: 
   pull_request:
@@ -28,18 +28,4 @@ jobs:
 
     # Запуск тестов
     - name: Run unit tests
-      run: dotnet test TelegramAntispamBot.Tests/TelegramAntispamBot.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=test_results.trx"
-          
-    # Запуск билда на Render после успешных тестов
-    - name: Trigger Render build
-      if: success() 
-      env:
-        RENDER_ANTISPAM_BOT_KEY: ${{ secrets.RENDER_ANTISPAM_BOT_KEY }} # Секретный ключ API Render
-      shell: pwsh
-      run: |
-        $headers = @{
-            "Authorization" = "Bearer $env:RENDER_ANTISPAM_BOT_KEY"
-            "Content-Type" = "application/json"
-        }
-        $body = "{}"
-        Invoke-RestMethod -Uri "https://api.render.com/v1/services/srv-ctaoq5hu0jms73f1l3q0/deploys" -Method Post -Headers $headers -Body $body   
+      run: dotnet test TelegramAntispamBot.Tests/TelegramAntispamBot.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=test_results.trx"            
