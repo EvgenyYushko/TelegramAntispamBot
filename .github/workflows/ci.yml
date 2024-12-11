@@ -5,7 +5,7 @@ on:
     branches:
       - main
 jobs:
-  test:
+  check-test:
     runs-on: windows-latest
 
     steps:
