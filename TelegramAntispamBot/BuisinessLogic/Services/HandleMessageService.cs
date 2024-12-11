@@ -72,7 +72,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
 		{
 			var newMember = update.Message.NewChatMembers?.FirstOrDefault();
-			// Проверяем, если пользователь добавлен
+			// Проверяем, если пользователь добавлен 
 			if (newMember != null)
 			{
 				await SenWelcomeMessage(botClient, update, cancellationToken, newMember);
