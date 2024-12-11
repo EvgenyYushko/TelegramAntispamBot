@@ -1,0 +1,23 @@
+name: CD
+
+on: 
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+    # Запуск билда на Render
+    - name: Trigger Render build     
+      env:
+        RENDER_ANTISPAM_BOT_KEY: ${{ secrets.RENDER_ANTISPAM_BOT_KEY }} # Секретный ключ API Render
+      shell: pwsh
+      run: |
+        $headers = @{
+            "Authorization" = "Bearer $env:RENDER_ANTISPAM_BOT_KEY"
+            "Content-Type" = "application/json"
+        }
+        $body = "{}"
+        Invoke-RestMethod -Uri "https://api.render.com/v1/services/srv-ctaoq5hu0jms73f1l3q0/deploys" -Method Post -Headers $headers -Body $body   
