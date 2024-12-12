@@ -16,7 +16,6 @@ namespace TelegramAntispamBot.Tests
 		private Mock<IDeleteMessageService> _deleteMessageService;
 		private Mock<ITelegramBotClient> _botClient;
 		private Mock<IProfanityCheckerService> _profanityCheckerService;
-		private Mock<AppDbContext> AppDbContext;
 
 		private CancellationToken _cancellationToken;
 		private IHandleMessageService _service;
@@ -28,8 +27,7 @@ namespace TelegramAntispamBot.Tests
 			_botClient = new();
 			_profanityCheckerService = new();
 			_cancellationToken = new();
-			AppDbContext = new();
-			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, AppDbContext.Object);
+			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object);
 		}
 
 		[Test]
