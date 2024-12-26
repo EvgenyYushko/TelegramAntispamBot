@@ -17,12 +17,12 @@ namespace TelegramAntispamBot.Controllers
 	public class BotController : ControllerBase
 	{
 		private readonly IHandleMessageService _messageService;
-		private readonly TelegramBotClient _botClient;
+		private readonly TelegramInject _botClient;
 
 		public BotController(IHandleMessageService messageService, TelegramInject telegram)
 		{
 			_messageService = messageService;
-			_botClient = telegram.TelegramClient;
+			_botClient = telegram;
 		}
 
 		[HttpPost]
@@ -55,7 +55,7 @@ namespace TelegramAntispamBot.Controllers
 		{
 			using var cts = new CancellationTokenSource();
 			// Запуск бота с обработкой сообщений
-			_botClient.StartReceiving(
+			_botClient.TelegramClient.StartReceiving(
 				HandleUpdateAsync,
 				HandleErrorAsync,
 				new ReceiverOptions
@@ -64,8 +64,8 @@ namespace TelegramAntispamBot.Controllers
 				},
 				cancellationToken: cts.Token
 			);
-			_botClient.OnApiResponseReceived += BotClient_OnApiResponseReceived;
-			_botClient.OnMakingApiRequest += BotClient_OnMakingApiRequest;
+			_botClient.TelegramClient.OnApiResponseReceived += BotClient_OnApiResponseReceived;
+			_botClient.TelegramClient.OnMakingApiRequest += BotClient_OnMakingApiRequest;
 		}
 
 		private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)

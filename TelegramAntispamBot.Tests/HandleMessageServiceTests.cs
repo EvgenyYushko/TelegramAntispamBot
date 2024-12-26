@@ -7,6 +7,7 @@ using Telegram.Bot.Types.Enums;
 using TelegramAntispamBot.BuisinessLogic.Services;
 using TelegramAntispamBot.Common;
 using TelegramAntispamBot.DataAccessLayer;
+using TelegramAntispamBot.InjectSettings;
 using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot.Tests
@@ -14,8 +15,9 @@ namespace TelegramAntispamBot.Tests
 	public class HandleMessageServiceTests
 	{
 		private Mock<IDeleteMessageService> _deleteMessageService;
-		private Mock<ITelegramBotClient> _botClient;
+		private Mock<TelegramInject> _botClient;
 		private Mock<IProfanityCheckerService> _profanityCheckerService;
+		private Mock<IUserInfoService> _userInfoService;
 
 		private CancellationToken _cancellationToken;
 		private IHandleMessageService _service;
@@ -27,7 +29,8 @@ namespace TelegramAntispamBot.Tests
 			_botClient = new();
 			_profanityCheckerService = new();
 			_cancellationToken = new();
-			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object);
+			_userInfoService = new();
+			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, _userInfoService.Object);
 		}
 
 		[Test]

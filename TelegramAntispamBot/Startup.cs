@@ -36,6 +36,8 @@ namespace TelegramAntispamBot
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
+			services.AddSingleton<UsersRepository>();
+			services.AddScoped<IUserInfoService, UserInfoService>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
 			_telegram = new TelegramInject
@@ -80,7 +82,11 @@ namespace TelegramAntispamBot
 
 			if (local)
 			{
-				var testController = new BotController(new HandleMessageService(new DeleteMessageService(), new ProfanityCheckerService(new ProfanityCheckerRepository())), _telegram);
+				var testController = new BotController(new HandleMessageService
+					(new DeleteMessageService()
+					, new ProfanityCheckerService(new ProfanityCheckerRepository())
+					, new UserInfoService(new UsersRepository()))
+					, _telegram);
 				testController.RunLocalTest();
 			}
 

@@ -18,7 +18,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 
 			Console.WriteLine($"Message for delete: '{messageText}' (id: {messageId})");
 			await botClient.DeleteMessageAsync(chatId, messageId, cancellationToken);
-
+			
 			if (message.From is { Username: { } })
 			{
 				try
