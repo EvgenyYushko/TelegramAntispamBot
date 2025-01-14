@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using TelegramAntispamBot.DataAccessLayer.Repositories;
 using TelegramAntispamBot.DomainLayer.Models;
 
@@ -32,6 +33,11 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		public UserInfo FindByPullId(string pullId)
 		{
 			return _usersRepository.FindByPullId(pullId);
+		}
+
+		public async Task AddUserToBan(UserInfo userInfo)
+		{
+			await _usersRepository.AddUserToBanList(userInfo);
 		}
 	}
 }

@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TelegramAntispamBot.DomainLayer.Models;
 
 namespace TelegramAntispamBot.DataAccessLayer.Repositories
 {
 	public class UsersRepository
 	{
+		private readonly ApplicationDbContext _context;
+
 		private List<UserInfo> UsersInfo { get; set; }
 
-		public UsersRepository()
+		public UsersRepository(ApplicationDbContext context)
 		{
+			_context = context;
 			UsersInfo = new();
 		}
 
@@ -42,6 +46,18 @@ namespace TelegramAntispamBot.DataAccessLayer.Repositories
 		public UserInfo FindByPullId(string pullId) 
 		{
 			return UsersInfo.Cast<UserInfo>().FirstOrDefault(u => u.PullModel.PullId == pullId);
-		}	
+		}
+
+		public async Task AddUserToBanList(UserInfo user)
+		{
+			var userEntity = new UserEntity()
+			{
+				Id = user.User.Id,
+				UserName = user.User.Username,
+				DateAdd = DateTime.Now
+			};
+			await _context.BanedUsers.AddAsync(userEntity);
+			await _context.SaveChangesAsync();
+		}
 	}
 }

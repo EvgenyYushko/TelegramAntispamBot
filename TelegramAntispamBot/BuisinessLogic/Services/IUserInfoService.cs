@@ -1,4 +1,5 @@
-﻿using TelegramAntispamBot.DomainLayer.Models;
+﻿using System.Threading.Tasks;
+using TelegramAntispamBot.DomainLayer.Models;
 
 namespace TelegramAntispamBot.BuisinessLogic.Services
 {
@@ -9,5 +10,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		public bool TryAdd(UserInfo userInfo);
 
 		public UserInfo FindByPullId(string pullId);
+
+		public Task AddUserToBan(UserInfo userInfo);
 	}
 }

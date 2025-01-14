@@ -149,7 +149,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 
 			var userInfo = _userInfoService.Get(user.Id);
 
-			userInfo.PullModel.PullTimer = new Timer(OnTimerElapsed, user.Id, TimeSpan.FromSeconds(10), Timeout.InfiniteTimeSpan);
+			userInfo.PullModel.PullTimer = new Timer(OnTimerElapsed, user.Id, TimeSpan.FromSeconds(20), Timeout.InfiniteTimeSpan);
 			userInfo.PullModel.Message = update.Message;
 			userInfo.PullModel.PollMessageId = pollMessage.MessageId;
 			userInfo.PullModel.PullId = pollMessage.Poll.Id;
@@ -180,26 +180,46 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				throw new Exception("User not finde by pullId");
 			}
 
-			if (user.PullModel.PullTimer is null && ok.VoterCount > no.VoterCount)
+			if (user.PullModel.PullTimer is null)
 			{
-				if(ok.VoterCount > 1)
+				if (ok.VoterCount > no.VoterCount)
 				{
-					Task.Run(async () => await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"Большенство пользователей проголосовало за исключения " +
-						$"{user.User.Username} из чата. \n\nПоэтому {user.User.Username} покидает чат!")).Wait();
-					Task.Run(async () => await _telegramClient.BanChatMemberAsync(user.PullModel.Message.Chat.Id, user.PullModel.Message.From.Id)).Wait();
+					if (ok.VoterCount > 1)
+					{
+						Task.Run(async () => await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"Большенство пользователей проголосовало за исключения " +
+							$"{user.User.Username} из чата. \n\nПоэтому {user.User.Username} покидает чат!")).Wait();
+
+						try
+						{
+							Task.Run(async () => await _telegramClient.BanChatMemberAsync(user.PullModel.Message.Chat.Id, user.PullModel.Message.From.Id)).Wait();
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine(e);
+						}
+
+						try
+						{
+							Task.Run(async () => await _userInfoService.AddUserToBan(user)).Wait();
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine(e);
+						}
+					}
+					else
+					{
+						Task.Run(async () => await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"Голосование не сотоялось т.к. нужно больше одного голоса.")).Wait();
+					}
 				}
 				else
 				{
-					Task.Run(async () => await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"Голосование не сотоялось т.к. нужно больше одного голоса.")).Wait();
+					Task.Run(async () => await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"По результатам голосования пользователь " +
+						$"{user.User.Username} остаётся в чате")).Wait();
 				}
 
-				return;
+				user.ResetPull();
 			}
-
-			Task.Run(async () => await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"По результатам голосования пользователь " +
-				$"{user.User.Username} остаётся в чате")).Wait();
-
-			user.ResetPull();
 		}
 	}
 }
