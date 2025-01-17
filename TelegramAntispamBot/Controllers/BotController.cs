@@ -46,7 +46,7 @@ namespace TelegramAntispamBot.Controllers
 		[HttpGet("/health")]
 		public IActionResult health()
 		{
-			return Ok();
+			return Ok("OK");
 		}
 
 		#region ForLocalTest
