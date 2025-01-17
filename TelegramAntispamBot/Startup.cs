@@ -101,7 +101,7 @@ namespace TelegramAntispamBot
 				var scope = app.ApplicationServices.CreateScope();
 				{
 					var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-					// Вызовите необходимые методы или инициализацию
+					// Г‚Г»Г§Г®ГўГЁГІГҐ Г­ГҐГ®ГЎГµГ®Г¤ГЁГ¬Г»ГҐ Г¬ГҐГІГ®Г¤Г» ГЁГ«ГЁ ГЁГ­ГЁГ¶ГЁГ Г«ГЁГ§Г Г¶ГЁГѕ
 
 					var testController = new BotController(new HandleMessageService
 						(new DeleteMessageService()
@@ -134,7 +134,7 @@ namespace TelegramAntispamBot
 
 		static void StartKeepAliveTimer()
 		{
-			_keepAliveTimer = new Timer(async _ => await SendKeepAliveRequest(), null, TimeSpan.Zero, TimeSpan.FromMinutes(20));
+			_keepAliveTimer = new Timer(async _ => await SendKeepAliveRequest(), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
 			Console.WriteLine("StartKeepAliveTimer");
 		}
 
@@ -145,7 +145,7 @@ namespace TelegramAntispamBot
 			{
 				client.BaseAddress = new Uri(URL_SITE);
 
-				// Настройка пропуска проверки SSL-сертификата (только для локальной разработки)
+				// ГЌГ Г±ГІГ°Г®Г©ГЄГ  ГЇГ°Г®ГЇГіГ±ГЄГ  ГЇГ°Г®ГўГҐГ°ГЄГЁ SSL-Г±ГҐГ°ГІГЁГґГЁГЄГ ГІГ  (ГІГ®Г«ГјГЄГ® Г¤Г«Гї Г«Г®ГЄГ Г«ГјГ­Г®Г© Г°Г Г§Г°Г ГЎГ®ГІГЄГЁ)
 				var handler = new HttpClientHandler
 				{
 					ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
@@ -157,7 +157,7 @@ namespace TelegramAntispamBot
 					{
 						var response = await secureClient.GetAsync($"{URL_SITE}/health");
 
-						// Проверяем успешность запроса
+						// ГЏГ°Г®ГўГҐГ°ГїГҐГ¬ ГіГ±ГЇГҐГёГ­Г®Г±ГІГј Г§Г ГЇГ°Г®Г±Г 
 						if (response.IsSuccessStatusCode)
 						{
 							var responseContent = await response.Content.ReadAsStringAsync();
@@ -170,7 +170,7 @@ namespace TelegramAntispamBot
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine($"Ошибка при выполнении запроса: {ex.Message}");
+						Console.WriteLine($"ГЋГёГЁГЎГЄГ  ГЇГ°ГЁ ГўГ»ГЇГ®Г«Г­ГҐГ­ГЁГЁ Г§Г ГЇГ°Г®Г±Г : {ex.Message}");
 					}
 				}
 			}
