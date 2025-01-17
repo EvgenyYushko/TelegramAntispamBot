@@ -12,7 +12,7 @@ namespace TelegramAntispamBot.Common
 		//Add your telegram nickname here
 		public static readonly List<string> WhiteList = new()
 		{
-			//"EvgenyYushko",
+			"EvgenyYushko",
 			"Test"
 		};
     
