@@ -59,5 +59,11 @@ namespace TelegramAntispamBot.DataAccessLayer.Repositories
 			await _context.BanedUsers.AddAsync(userEntity);
 			await _context.SaveChangesAsync();
 		}
+
+		public List<UserEntity> GetAllBanedUsers()
+		{
+			var s = _context.BanedUsers.ToList();
+			return s;
+		}
 	}
 }

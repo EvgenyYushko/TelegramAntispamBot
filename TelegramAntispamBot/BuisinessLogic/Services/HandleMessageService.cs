@@ -71,6 +71,9 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 				case UpdateType.Message when update.Message.Text.Equals("/help") || update.Message.Text.Equals("/help@YN_AntispamBot"):
 					await SendWelcomeMessage(_telegramClient, update, cancellationToken, update.Message.From);
 					break;
+				case UpdateType.Message when update.Message.Text.Equals("/allbannedusers") || update.Message.Text.Equals("/allbannedusers@YN_AntispamBot"):
+					await GetAllBannedUsers(_telegramClient, update, cancellationToken, update.Message.From);
+					break;
 				case UpdateType.Message when update.Message.Text.Equals("/banrequest") || update.Message.Text.Equals("/banrequest@YN_AntispamBot"):
 					await SendPull(botClient, update, update.Message.From);
 					break;
@@ -134,6 +137,14 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		{
 			await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotSettings.GetWelcomeMessage(user),
 				cancellationToken: token);
+		}
+
+		private async Task GetAllBannedUsers(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
+		{
+			var banedUers = _userInfoService.GetAllBanedUsers();
+			var usersMsg = "Список заблокированных пользователей ботом за всё время :\n\n" + string.Join("\n", banedUers);
+
+			await botClient.SendTextMessageAsync(update.Message.Chat.Id, usersMsg, cancellationToken: token);
 		}
 
 		private async Task SendPull(TelegramInject botClient, Update update, User user)

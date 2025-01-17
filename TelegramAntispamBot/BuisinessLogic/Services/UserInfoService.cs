@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using TelegramAntispamBot.DataAccessLayer;
 using TelegramAntispamBot.DataAccessLayer.Repositories;
 using TelegramAntispamBot.DomainLayer.Models;
 
@@ -38,6 +40,11 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 		public async Task AddUserToBan(UserInfo userInfo)
 		{
 			await _usersRepository.AddUserToBanList(userInfo);
+		}
+
+		public List<UserEntity> GetAllBanedUsers()
+		{
+			return _usersRepository.GetAllBanedUsers();
 		}
 	}
 }
