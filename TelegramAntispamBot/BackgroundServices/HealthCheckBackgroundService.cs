@@ -6,18 +6,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using TelegramAntispamBot.DomainLayer.Models;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
 	public class HealthCheckBackgroundService : BackgroundService
 	{
-		private const string URL_SITE = "https://telegramantispambot.onrender.com";
-
-		private const string HealthUrl = "/health";
+		private const string HEALTH_URL = "/health";
+		private readonly AppOptions _appSettings;
 		private readonly HttpClient _httpClient;
 
-		public HealthCheckBackgroundService()
+		public HealthCheckBackgroundService(IOptions<AppOptions> appSettings)
 		{
+			_appSettings = appSettings.Value;
             _httpClient = new HttpClient();
 		}
 
@@ -28,12 +30,11 @@ namespace TelegramAntispamBot.BackgroundServices
 			{
 				try
 				{
-					var response = await _httpClient.GetAsync(URL_SITE + HealthUrl, stoppingToken);
+					var response = await _httpClient.GetAsync(_appSettings.Domain + HEALTH_URL, stoppingToken);
 					if (response.IsSuccessStatusCode)
 					{
 						var content = await response.Content.ReadAsStringAsync(stoppingToken);
 						Console.WriteLine(content);
-						Console.WriteLine("Teeesssst");
 					}
 					else
 					{
@@ -51,7 +52,7 @@ namespace TelegramAntispamBot.BackgroundServices
 
 		public override void Dispose()
 		{
-			//_httpClient.Dispose();
+			_httpClient.Dispose();
 			base.Dispose();
 		}
 	}
