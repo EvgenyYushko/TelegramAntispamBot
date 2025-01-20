@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
+using TelegramAntispamBot.BackgroundServices;
 using TelegramAntispamBot.BuisinessLogic.Services;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.DataAccessLayer;
@@ -44,6 +45,7 @@ namespace TelegramAntispamBot
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
 			services.AddScoped<UsersRepository>();
 			services.AddSingleton<IUserInfoService, UserInfoService>();
+			services.AddHostedService<HealthCheckBackgroundService>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
 			_telegram = new TelegramInject
@@ -78,7 +80,7 @@ namespace TelegramAntispamBot
 				app.UseHsts();
 				var dbContext = app.ApplicationServices.GetRequiredService<ApplicationDbContext>();
 				dbContext.Database.Migrate();
-				StartKeepAliveTimer();
+				//StartKeepAliveTimer();
 			}
 
 			Task.Run(async () => await ConfigureWebhookAsync(local));
