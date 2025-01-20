@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace TelegramAntispamBot.Common
@@ -8,14 +6,15 @@ namespace TelegramAntispamBot.Common
 	public class BotSettings
 	{
 		public static string NoCommentWord = "лох";
-    
+
 		//Add your telegram nickname here
 		public static readonly List<string> WhiteList = new()
 		{
 			"EvgenyYushko",
+			"dizment008",
 			"Test"
 		};
-    
+
 		//Channels which are allowed to send messages to chat
 		public static readonly List<string> ChannelsWhiteList = new()
 		{
@@ -24,11 +23,11 @@ namespace TelegramAntispamBot.Common
 
 		public static readonly string InfoMessage =
 			"Если ты хочешь отправлять ссылки в комментариях канала, " +
-			"то заходи в репозиторий {} и вноси себя в WhiteList (подробнее читай в файле README.md репозитория)";
+			"то заходи в репозиторий https://github.com/EvgenyYushko/TelegramAntispamBot и вноси себя в WhiteList (подробнее читай в файле README репозитория)";
 
 		public static readonly string InfoMessageProfanityChecker =
 			"Ваше сообщение содержит нецензурное выражение и было удалено";
-		
+
 		public static string GetWelcomeMessage(User user) =>
 			$"Добро пожаловать, {user.FirstName}!\n\n" +
 			"Тебя приветствует Бот-администратор, я буду делать следующее:  \r\n  \r\n" +

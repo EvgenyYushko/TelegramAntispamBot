@@ -97,7 +97,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.EditedMessage, cancellationToken, BotSettings.InfoMessage);
 					break;
 				default:
-					return;
+					return; 
 			}
 		}
 
