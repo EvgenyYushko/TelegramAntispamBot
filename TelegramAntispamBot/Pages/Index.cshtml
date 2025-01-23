@@ -1,20 +1,21 @@
 ﻿@page
 @model IndexModel
 @{
-  
-    var botName = "Антиспам бот";
+
+    var botName = @Localizer["Header"];
     var botLink = "https://t.me/YN_AntispamBot";
     var botOwner = "https://t.me/EvgenyYushko";
 
     ViewData["Title"] = botName;
 }
-
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 <div class="container my-5">
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white text-center py-4">
             <h1 class="display-5">🤖 @botName</h1>
-            <p class="mb-0">Умный помощник в вашем чате</p>
+            <p class="mb-0">@Localizer["Header1"]</p>
         </div>
         <div class="card-body">
             <h3 class="text-center mb-4">📚 Описание</h3>

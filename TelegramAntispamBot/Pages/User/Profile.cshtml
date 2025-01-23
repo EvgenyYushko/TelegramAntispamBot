@@ -1,163 +1,141 @@
 ﻿@page
 @model TelegramAntispamBot.Pages.User.ProfileModel
-@{ var user = Model.CurrentUser; }
+@{ Layout = "~/Pages/Shared/_Layout.cshtml";
+    var user = Model.CurrentUser;
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f5f5f5;
+}
+
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<style>
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #333;
             margin: 0;
-            padding: 0;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+        .header p {
+            font-size: 1rem;
+            color: #555;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
+    .profile-details {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .profile-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f9f9f9;
+    }
+
+        .profile-item span {
+            font-size: 1rem;
+            color: #333;
         }
 
-            .header h1 {
-                font-size: 2rem;
-                color: #333;
-                margin: 0;
-            }
-
-            .header p {
-                font-size: 1rem;
-                color: #555;
-            }
-
-        .profile-details {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 10px 0;
-        }
-
-        .profile-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f9f9f9;
-        }
-
-            .profile-item span {
-                font-size: 1rem;
-                color: #333;
-            }
-
-                .profile-item span.label {
-                    font-weight: bold;
-                }
-
-        .button-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-            .button-container button {
-                margin: 10px;
-                padding: 15px 25px;
-                font-size: 18px;
+            .profile-item span.label {
                 font-weight: bold;
-                cursor: pointer;
-                border: none;
-                background-color: #007bff;
-                color: white;
-                border-radius: 8px;
-                transition: background-color 0.3s, transform 0.2s;
-                box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
             }
 
-                .button-container button:hover {
-                    background-color: #0056b3;
-                    transform: translateY(-2px);
-                }
+    .button-container {
+        text-align: center;
+        margin-top: 20px;
+    }
 
-                .button-container button:active {
-                    background-color: #004494;
-                    transform: translateY(0);
-                }
-
-        .admin-button {
-            display: inline-block;
+        .button-container button {
             margin: 10px;
             padding: 15px 25px;
             font-size: 18px;
             font-weight: bold;
-            text-decoration: none;
-            text-align: center;
+            cursor: pointer;
             border: none;
-            background-color: #28a745;
+            background-color: #007bff;
             color: white;
             border-radius: 8px;
             transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
         }
 
-            .admin-button:hover {
-                background-color: #218838;
+            .button-container button:hover {
+                background-color: #0056b3;
                 transform: translateY(-2px);
             }
 
-            .admin-button:active {
-                background-color: #196f3d;
+            .button-container button:active {
+                background-color: #004494;
                 transform: translateY(0);
             }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Welcome, @user.UserName!</h1>
-            <p>Here you can view your profile details and manage your account.</p>
-        </div>
 
-        <div class="profile-details">
-            <div class="profile-item">
-                <span class="label">Username:</span>
-                <span>@user.UserName</span>
-            </div>
-            <div class="profile-item">
-                <span class="label">Email:</span>
-                <span>@user.Email</span>
-            </div>
-            <div class="profile-item">
-                <span class="label">Roles:</span>
-                <span>@string.Join(", ", user.Roles.First())</span>
-            </div>
-        </div>
+    .admin-button {
+        display: inline-block;
+        margin: 10px;
+        padding: 15px 25px;
+        font-size: 18px;
+        font-weight: bold;
+        text-decoration: none;
+        text-align: center;
+        border: none;
+        background-color: #28a745;
+        color: white;
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.2s;
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
 
-        @if (User.Identity.IsAuthenticated)
-        {
-            <div class="button-container">
-                <a href="/Admin/Analytics" class="admin-button">Статистика сайта</a>
-            </div>
+        .admin-button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
         }
 
-        <div class="button-container">
-            <button onclick="location.href='@Url.Page("/Account/Logout")'">Выйти</button>
+        .admin-button:active {
+            background-color: #196f3d;
+            transform: translateY(0);
+        }
+</style>
+
+<div class="container">
+    <div class="header">
+        <h1>Welcome, @user.UserName!</h1>
+        <p>Here you can view your profile details and manage your account.</p>
+    </div>
+
+    <div class="profile-details">
+        <div class="profile-item">
+            <span class="label">Username:</span>
+            <span>@user.UserName</span>
+        </div>
+        <div class="profile-item">
+            <span class="label">Email:</span>
+            <span>@user.Email</span>
+        </div>
+        <div class="profile-item">
+            <span class="label">Roles:</span>
+            <span>@string.Join(", ", user.Roles.First())</span>
         </div>
     </div>
-</body>
-</html>
 
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div policy="Admin" class="button-container">
+            <a href="/Admin/Analytics" class="admin-button">Статистика сайта</a>
+        </div>
+    }
 
-
+    <div class="button-container">
+        <button onclick="location.href='@Url.Page("/Account/Logout")'">Выйти</button>
+    </div>
+</div>

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using BuisinessLogic.Handlers;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,8 +28,8 @@ using Telegram.Bot;
 using TelegramAntispamBot.BackgroundServices;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
-using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 using static Infrastructure.Constants.TelegramConstatns;
+using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 
 namespace TelegramAntispamBot
 {
@@ -47,6 +49,23 @@ namespace TelegramAntispamBot
 			services.Configure<AppOptions>(Configuration.GetSection(nameof(AppOptions)));
 			services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
 			services.Configure<AuthorizationOptions>(Configuration.GetSection(nameof(AuthorizationOptions)));
+
+			services.AddLocalization(options => options.ResourcesPath = "Resources");
+			services.AddControllersWithViews()
+				.AddViewLocalization();// добавляем локализацию представлений;
+
+			services.Configure<RequestLocalizationOptions>(options =>
+			{
+				var supportedCultures = new[]
+				{
+					new CultureInfo("en"),
+					new CultureInfo("ru"),
+				};
+
+				options.DefaultRequestCulture = new RequestCulture("en");
+				options.SupportedCultures = supportedCultures;
+				options.SupportedUICultures = supportedCultures;
+			});
 		}
 
 		public void ConfigureServices(IServiceCollection services)
@@ -56,6 +75,7 @@ namespace TelegramAntispamBot
 
 			services.AddRazorPages();
 			services.AddControllers().AddNewtonsoftJson();
+			services.AddHttpContextAccessor();
 			services.AddScoped<IHandleMessageService, HandleMessageService>();
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
@@ -124,6 +144,7 @@ namespace TelegramAntispamBot
 
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
+			app.UseRequestLocalization();
 			app.UseRouting();
 			app.UseAuthentication();
 			app.UseAuthorization();
@@ -150,6 +171,7 @@ namespace TelegramAntispamBot
 
 			Console.WriteLine($"Bot {Task.Run(async () => await _telegram.TelegramClient.GetMeAsync()).Result.Username} is running...");
 		}
+
 
 		public async Task ConfigureWebhookAsync(bool local)
 		{

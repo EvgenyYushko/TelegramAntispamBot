@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var currentCulture = Thread.CurrentThread.CurrentCulture.Name;
+}
+
+@using System.Threading
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -31,6 +37,20 @@
             text-align: center;
             padding: 15px 0;
         }
+
+        .language-switcher {
+            margin: 10px;
+            text-align: right;
+        }
+
+            .language-switcher select {
+                padding: 5px 10px;
+                font-size: 1rem;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #fff;
+                cursor: pointer;
+            }
     </style>
 </head>
 <body>
@@ -64,8 +84,16 @@
         </main>
 
         <footer class="border-top footer text-muted">
-            <div class="container">
-                &copy; 2024 - Антиспам бот - <a asp-area="" asp-page="/Privacy">Политики конфиденциальности</a>
+            <div class="container d-flex justify-content-center align-items-center gap-3">
+                <span>
+                    &copy; 2024 - Антиспам бот - <a asp-area="" asp-page="/Privacy">Политики конфиденциальности</a>
+                </span>
+                <form method="post" asp-page="/SetLanguageModel" class="d-inline">
+                    <select name="language" onchange="this.form.submit()" class="form-select form-select-sm d-inline-block w-auto">
+                        <option value="ru" selected="@(currentCulture == "ru")">Русский</option>
+                        <option value="en" selected="@(currentCulture == "en")">English</option>
+                    </select>
+                </form>
             </div>
         </footer>
     </div>
