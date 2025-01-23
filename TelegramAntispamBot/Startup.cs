@@ -1,6 +1,16 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using BuisinessLogic.Handlers;
+using BuisinessLogic.Services.Authorization;
+using BuisinessLogic.Services.Telegram;
+using DataAccessLayer;
+using DataAccessLayer.Repositories;
+using DomainLayer.Models.Authorization;
+using DomainLayer.Repositories;
+using Infrastructure.Enumerations;
+using Infrastructure.InjectSettings;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -10,22 +20,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using ServiceLayer.Services.Authorization;
+using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
-using TelegramAntispamBot.Authentication.Handlers;
 using TelegramAntispamBot.BackgroundServices;
-using TelegramAntispamBot.BuisinessLogic.Services;
-using TelegramAntispamBot.BuisinessLogic.Services.Auth;
 using TelegramAntispamBot.Controllers;
-using TelegramAntispamBot.DataAccessLayer;
-using TelegramAntispamBot.DataAccessLayer.Repositories;
-using TelegramAntispamBot.DomainLayer.Models;
-using TelegramAntispamBot.DomainLayer.Models.Auth;
-using TelegramAntispamBot.DomainLayer.Repositories;
-using TelegramAntispamBot.Enumerations;
-using TelegramAntispamBot.InjectSettings;
-using TelegramAntispamBot.ServiceLayer.Authorization;
-using TelegramAntispamBot.ServiceLayer.Services;
-using AuthorizationOptions = TelegramAntispamBot.DomainLayer.Models.Auth.AuthorizationOptions;
+using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 
 
 namespace TelegramAntispamBot
@@ -62,7 +62,7 @@ namespace TelegramAntispamBot
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
-			services.AddScoped<UsersRepository>();
+			services.AddScoped<IUsersTelegramRepository, UsersTelegramRepository>();
 			services.AddSingleton<IUserInfoService, UserInfoService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 
@@ -86,10 +86,11 @@ namespace TelegramAntispamBot
 			{
 				connectionString = Configuration.GetConnectionString("DefaultConnection");
 			}
-			services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+
+			services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseNpgsql(connectionString, options => options.MigrationsAssembly("DataAccessLayer")));
 		}
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			bool local;
@@ -102,7 +103,6 @@ namespace TelegramAntispamBot
 			{
 				local = false;
 				app.UseExceptionHandler("/Error");
-				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
 				var dbContext = app.ApplicationServices.GetRequiredService<ApplicationDbContext>();
 				dbContext.Database.Migrate();
@@ -130,7 +130,7 @@ namespace TelegramAntispamBot
 					var testController = new BotController(new HandleMessageService
 						(new DeleteMessageService()
 						, new ProfanityCheckerService(new ProfanityCheckerRepository())
-						, new UserInfoService(new UsersRepository(dbContext)))
+						, new UserInfoService(new UsersTelegramRepository(dbContext)))
 						, _telegram);
 					testController.RunLocalTest();
 				}

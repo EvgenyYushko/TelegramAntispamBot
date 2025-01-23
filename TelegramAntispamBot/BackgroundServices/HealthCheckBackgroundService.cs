@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Infrastructure.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using TelegramAntispamBot.DomainLayer.Models;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
@@ -20,7 +17,7 @@ namespace TelegramAntispamBot.BackgroundServices
 		public HealthCheckBackgroundService(IOptions<AppOptions> appSettings)
 		{
 			_appSettings = appSettings.Value;
-            _httpClient = new HttpClient();
+			_httpClient = new HttpClient();
 		}
 
 		/// <inheritdoc />

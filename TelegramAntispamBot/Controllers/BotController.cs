@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Infrastructure.InjectSettings;
 using Microsoft.AspNetCore.Mvc;
+using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramAntispamBot.InjectSettings;
-using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot.Controllers
 {

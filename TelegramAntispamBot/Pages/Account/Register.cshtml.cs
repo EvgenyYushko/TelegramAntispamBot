@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using TelegramAntispamBot.DomainLayer.Repositories;
-using TelegramAntispamBot.Enumerations;
+using ServiceLayer.Services;
+using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Pages.Base;
-using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot.Pages.Account
 {

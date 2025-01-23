@@ -1,14 +1,14 @@
 using System.Threading;
+using BuisinessLogic.Handlers;
+using Infrastructure.Common;
+using Infrastructure.InjectSettings;
 using Moq;
 using NUnit.Framework;
+using ServiceLayer.Services;
+using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramAntispamBot.BuisinessLogic.Services;
-using TelegramAntispamBot.Common;
-using TelegramAntispamBot.DataAccessLayer;
-using TelegramAntispamBot.InjectSettings;
-using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot.Tests
 {

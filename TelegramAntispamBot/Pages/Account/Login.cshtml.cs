@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TelegramAntispamBot.DomainLayer.Repositories;
+using ServiceLayer.Services;
+using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Pages.Base;
-using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot.Pages.Account
 {
