@@ -12,7 +12,7 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["TelegramAntispamBot/TelegramAntispamBot.csproj", "TelegramAntispamBot/"]
 RUN dotnet restore "TelegramAntispamBot/TelegramAntispamBot.csproj"
-COPY ["TelegramAntispamBot/", "TelegramAntispamBot/"]
+COPY . .
 WORKDIR "/src/TelegramAntispamBot"
 RUN dotnet build "TelegramAntispamBot.csproj" -c Release -o /app/build
 
