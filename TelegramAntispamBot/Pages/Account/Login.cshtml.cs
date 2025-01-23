@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services;
+using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Pages.Base;
 
@@ -9,9 +10,9 @@ namespace TelegramAntispamBot.Pages.Account
 {
 	public class LoginModel : PageModelBase
 	{
-		private readonly IUsersService _userService;
+		private readonly IUserService _userService;
 
-		public LoginModel(IUsersService usersService)
+		public LoginModel(IUserService usersService)
 		{
 			_userService = usersService;
 		}

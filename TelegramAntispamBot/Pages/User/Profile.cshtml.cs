@@ -1,23 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using ServiceLayer.Models;
-using ServiceLayer.Services;
-using ServiceLayer.Services.Telegram;
+using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Base;
 
 namespace TelegramAntispamBot.Pages.User
 {
 	[Authorize(Policy = "User")]
-    public class ProfileModel : PageModelBase
-    {
-		private readonly IUsersService _usersService;
+	public class ProfileModel : PageModelBase
+	{
+		private readonly IUserService _usersService;
 
-		public ProfileModel(IUsersService usersService) 
+		public ProfileModel(IUserService usersService)
 		{
 			_usersService = usersService;
 		}
@@ -25,8 +20,8 @@ namespace TelegramAntispamBot.Pages.User
 		[BindProperty]
 		public UserAccount CurrentUser { get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
-        {
+		public async Task<IActionResult> OnGetAsync()
+		{
 			if (User.Identity.IsAuthenticated)
 			{
 				CurrentUser = await _usersService.GetUserById(UserId);
@@ -36,5 +31,5 @@ namespace TelegramAntispamBot.Pages.User
 
 			return RedirectToPage("/Account/Register");
 		}
-    }
+	}
 }

@@ -2,7 +2,7 @@
 
 namespace ServiceLayer.Models
 {
-	public class UserBannedEntity
+	public class TelegramBannedUsersEntity
 	{
 		public long Id { get; set; }
 

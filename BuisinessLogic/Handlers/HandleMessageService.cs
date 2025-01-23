@@ -9,7 +9,7 @@ using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using static Infrastructure.Helpers.UserHelper;
+using static Infrastructure.Helpers.TelegramUserHelper;
 
 namespace BuisinessLogic.Handlers
 {
@@ -17,10 +17,10 @@ namespace BuisinessLogic.Handlers
 	{
 		private readonly IDeleteMessageService _deleteMessageService;
 		private readonly IProfanityCheckerService _profanityCheckerService;
-		private readonly IUserInfoService _userInfoService;
+		private readonly ITelegramUserService _userInfoService;
 		TelegramBotClient _telegramClient;
 
-		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService, IUserInfoService userInfoService)
+		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService, ITelegramUserService userInfoService)
 		{
 			_deleteMessageService = deleteMessageService;
 			_profanityCheckerService = profanityCheckerService;

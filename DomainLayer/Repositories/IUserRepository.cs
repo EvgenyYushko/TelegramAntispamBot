@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DomainLayer.Models;
 using Infrastructure.Enumerations;
 using ServiceLayer.Models;
 
 namespace DomainLayer.Repositories
 {
-	public interface IUsersAccountRepository
+	public interface IUserRepository
 	{
 		Task Add(UserAccount user);
 		Task<UserAccount> GetByEmail(string email);

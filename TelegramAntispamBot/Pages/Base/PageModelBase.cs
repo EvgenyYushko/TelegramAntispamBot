@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Threading.Tasks;
+using Infrastructure.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -27,7 +26,7 @@ namespace TelegramAntispamBot.Pages.Base
 
 				if (jsonToken != null)
 				{
-					UserId = Guid.Parse(jsonToken.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value);
+					UserId = Guid.Parse(jsonToken.Claims.FirstOrDefault(c => c.Type == CustomClaims.UserId)?.Value);
 				}
 			}
 

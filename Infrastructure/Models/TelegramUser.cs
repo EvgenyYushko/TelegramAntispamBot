@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Models
 {
-	public class UserInfo
+	public class TelegramUser
 	{
 		public User User { get; set; }
 
@@ -10,7 +10,7 @@ namespace Infrastructure.Models
 
 		public override bool Equals(object obj)
 		{
-			return obj is UserInfo u && u.User.Id == User.Id;
+			return obj is TelegramUser u && u.User.Id == User.Id;
 		}
 	}
 }

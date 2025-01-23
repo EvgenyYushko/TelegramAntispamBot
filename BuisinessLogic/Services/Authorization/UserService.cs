@@ -7,16 +7,13 @@ using ServiceLayer.Services.Telegram;
 
 namespace BuisinessLogic.Services.Authorization
 {
-	public class UserService : IUsersService
+	public class UserService : IUserService
 	{
 		private readonly IPasswordHasher _passwordHasher;
-		private readonly IUsersAccountRepository _usersRepository;
+		private readonly IUserRepository _usersRepository;
 		private readonly IJwtProvider _jwtProvider;
 
-		public UserService(
-			IUsersAccountRepository usersRepository,
-			IPasswordHasher passwordHasher,
-			IJwtProvider jwtProvider)
+		public UserService(IUserRepository usersRepository, IPasswordHasher passwordHasher, IJwtProvider jwtProvider)
 		{
 			_usersRepository = usersRepository;
 			_passwordHasher = passwordHasher;

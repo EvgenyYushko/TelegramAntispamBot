@@ -2,9 +2,9 @@
 
 namespace Infrastructure.Helpers
 {
-	public static class UserHelper
+	public static class TelegramUserHelper
 	{
-		public static void ResetPull(this UserInfo user)
+		public static void ResetPull(this TelegramUser user)
 		{
 			user.PullModel.PollMessageId = 0;
 			user.PullModel.Message = null;

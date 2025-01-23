@@ -9,8 +9,4 @@
     <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Telergam\" />
-  </ItemGroup>
-
 </Project>

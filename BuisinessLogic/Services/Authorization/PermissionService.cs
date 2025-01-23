@@ -9,9 +9,9 @@ namespace BuisinessLogic.Services.Authorization
 {
 	public class PermissionService : IPermissionService
 	{
-		private readonly IUsersAccountRepository _usersRepository;
+		private readonly IUserRepository _usersRepository;
 
-		public PermissionService(IUsersAccountRepository usersRepository) 
+		public PermissionService(IUserRepository usersRepository) 
 		{
 			_usersRepository = usersRepository;
 		}

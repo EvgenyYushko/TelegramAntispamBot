@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using ServiceLayer.Models;
 
-namespace ServiceLayer.Services.Telegram
+namespace ServiceLayer.Services.Authorization
 {
-	public interface IUsersService
+	public interface IUserService
 	{
 		Task Register(string userName, string email, string password, string role);
 

@@ -5,22 +5,23 @@ using System.Threading.Tasks;
 using DomainLayer.Repositories;
 using Infrastructure.Models;
 using ServiceLayer.Models;
+using static Infrastructure.Common.TimeZoneHelper;
 
 namespace DataAccessLayer.Repositories
 {
-	public class UsersTelegramRepository : IUsersTelegramRepository
+	public class TelegramUserRepository : ITelegramUserRepository
 	{
 		private readonly ApplicationDbContext _context;
 
-		private List<UserInfo> UsersInfo { get; set; }
+		private List<TelegramUser> UsersInfo { get; set; }
 
-		public UsersTelegramRepository(ApplicationDbContext context)
+		public TelegramUserRepository(ApplicationDbContext context)
 		{
 			_context = context;
 			UsersInfo = new();
 		}
 
-		public UserInfo Get(long id)
+		public TelegramUser Get(long id)
 		{
 			foreach (var user in UsersInfo)
 			{
@@ -33,7 +34,7 @@ namespace DataAccessLayer.Repositories
 			return null;
 		}
 
-		public bool TryAdd(UserInfo userInfo)
+		public bool TryAdd(TelegramUser userInfo)
 		{
 			if (UsersInfo.Contains(userInfo))
 			{
@@ -45,24 +46,24 @@ namespace DataAccessLayer.Repositories
 			return true;
 		}
 
-		public UserInfo FindByPullId(string pullId) 
+		public TelegramUser FindByPullId(string pullId) 
 		{
-			return UsersInfo.Cast<UserInfo>().FirstOrDefault(u => u.PullModel.PullId == pullId);
+			return UsersInfo.Cast<TelegramUser>().FirstOrDefault(u => u.PullModel.PullId == pullId);
 		}
 
-		public async Task AddUserToBanList(UserInfo user)
+		public async Task AddUserToBanList(TelegramUser user)
 		{
-			var userEntity = new UserBannedEntity()
+			var userEntity = new TelegramBannedUsersEntity()
 			{
 				Id = user.User.Id,
 				UserName = user.User.Username,
-				DateAdd = DateTime.Now
+				DateAdd = DateTimeNow
 			};
 			await _context.BanedUsers.AddAsync(userEntity);
 			await _context.SaveChangesAsync();
 		}
 
-		public List<UserBannedEntity> GetAllBanedUsers()
+		public List<TelegramBannedUsersEntity> GetAllBanedUsers()
 		{
 			var s = _context.BanedUsers.ToList();
 			return s;

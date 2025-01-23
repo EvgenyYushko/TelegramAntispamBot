@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using static Infrastructure.Common.TimeZoneHelper;
 
 namespace TelegramAntispamBot.Controllers
 {
@@ -10,7 +11,7 @@ namespace TelegramAntispamBot.Controllers
 		[HttpGet("/health")]
 		public IActionResult GetHealthStatus()
 		{
-			return Ok($"App is running {DateTime.Now}");
+			return Ok($"App is running {DateTimeNow}");
 		}
 	}
 }

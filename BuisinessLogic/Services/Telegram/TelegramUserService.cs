@@ -8,21 +8,21 @@ using ServiceLayer.Services.Telegram;
 
 namespace BuisinessLogic.Services.Telegram
 {
-	public class UserInfoService : IUserInfoService
+	public class TelegramUserService : ITelegramUserService
 	{
-		private readonly IUsersTelegramRepository _usersRepository;
+		private readonly ITelegramUserRepository _usersRepository;
 
-		public UserInfoService(IUsersTelegramRepository usersRepository)
+		public TelegramUserService(ITelegramUserRepository usersRepository)
 		{
 			_usersRepository = usersRepository;
 		}
 
-		public UserInfo Get(long id)
+		public TelegramUser Get(long id)
 		{
 			return _usersRepository.Get(id);
 		}
 
-		public bool TryAdd(UserInfo userInfo)
+		public bool TryAdd(TelegramUser userInfo)
 		{
 			var res = _usersRepository.TryAdd(userInfo);
 			if (res)
@@ -33,17 +33,17 @@ namespace BuisinessLogic.Services.Telegram
 			return res;
 		}
 
-		public UserInfo FindByPullId(string pullId)
+		public TelegramUser FindByPullId(string pullId)
 		{
 			return _usersRepository.FindByPullId(pullId);
 		}
 
-		public async Task AddUserToBan(UserInfo userInfo)
+		public async Task AddUserToBan(TelegramUser userInfo)
 		{
 			await _usersRepository.AddUserToBanList(userInfo);
 		}
 
-		public List<UserBannedEntity> GetAllBanedUsers()
+		public List<TelegramBannedUsersEntity> GetAllBanedUsers()
 		{
 			return _usersRepository.GetAllBanedUsers();
 		}

@@ -26,13 +26,12 @@ using Telegram.Bot;
 using TelegramAntispamBot.BackgroundServices;
 using TelegramAntispamBot.Controllers;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
-
+using static Infrastructure.Constants.TelegramConstatns;
 
 namespace TelegramAntispamBot
 {
 	public class Startup
 	{
-		public const string TELEGRAM_ANTISPAM_BOT_KEY = "TELEGRAM_ANTISPAM_BOT_KEY";
 		private TelegramInject _telegram;
 
 		public Startup(IConfiguration configuration)
@@ -52,9 +51,7 @@ namespace TelegramAntispamBot
 		public void ConfigureServices(IServiceCollection services)
 		{
 			ConfigureSettings(services);
-
-			AddAppAuthentication(services, Configuration.GetSection("JwtOptions").Get<JwtOptions>());
-			ApdAppAuthorization(services);
+			ConfigureAuthorization(services);
 
 			services.AddRazorPages();
 			services.AddControllers().AddNewtonsoftJson();
@@ -62,12 +59,12 @@ namespace TelegramAntispamBot
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
-			services.AddScoped<IUsersTelegramRepository, UsersTelegramRepository>();
-			services.AddSingleton<IUserInfoService, UserInfoService>();
+			services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
+			services.AddSingleton<ITelegramUserService, TelegramUserService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 
-			services.AddScoped<IUsersAccountRepository, UsersAccountRepository>();
-			services.AddScoped<IUsersService, UserService>();
+			services.AddScoped<IUserRepository, UserRepository>();
+			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IPermissionService, PermissionService>();
 			services.AddScoped<IJwtProvider, JwtProvider>();
 			services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -89,6 +86,12 @@ namespace TelegramAntispamBot
 
 			services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseNpgsql(connectionString, options => options.MigrationsAssembly("DataAccessLayer")));
+		}
+
+		private void ConfigureAuthorization(IServiceCollection services)
+		{
+			AddAppAuthentication(services, Configuration.GetSection("JwtOptions").Get<JwtOptions>());
+			ApdAppAuthorization(services);
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -130,7 +133,7 @@ namespace TelegramAntispamBot
 					var testController = new BotController(new HandleMessageService
 						(new DeleteMessageService()
 						, new ProfanityCheckerService(new ProfanityCheckerRepository())
-						, new UserInfoService(new UsersTelegramRepository(dbContext)))
+						, new TelegramUserService(new TelegramUserRepository(dbContext)))
 						, _telegram);
 					testController.RunLocalTest();
 				}
@@ -150,7 +153,7 @@ namespace TelegramAntispamBot
 				var wh = await _telegram.TelegramClient.GetWebhookInfoAsync();
 				if (wh.IpAddress is null)
 				{
-					var urlSite = Configuration?["AppOptions:Domain"];
+					var urlSite = Configuration?[$"{nameof(AppOptions)}:Domain"];
 					var webhookUrl = $"{urlSite}/bot";
 					await _telegram.TelegramClient.SetWebhookAsync(webhookUrl);
 				}

@@ -22,7 +22,7 @@ namespace DataAccessLayer
 			modelBuilder.ApplyConfiguration(new RolePermissionConfiguration(_authorizationOptions));
 		}
 
-		public DbSet<UserBannedEntity> BanedUsers { get; set; } = null!;
+		public DbSet<TelegramBannedUsersEntity> BanedUsers { get; set; } = null!;
 
 		public DbSet<UserEntity> Users { get; set; }
 

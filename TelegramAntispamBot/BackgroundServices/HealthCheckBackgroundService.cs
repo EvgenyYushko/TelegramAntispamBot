@@ -43,7 +43,7 @@ namespace TelegramAntispamBot.BackgroundServices
 					Console.WriteLine($"Error in health check: {ex.Message}");
 				}
 
-				await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+				await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
 			}
 		}
 

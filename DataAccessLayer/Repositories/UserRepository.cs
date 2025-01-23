@@ -10,11 +10,11 @@ using ServiceLayer.Models;
 
 namespace DataAccessLayer.Repositories
 {
-	public class UsersAccountRepository : IUsersAccountRepository
+	public class UserRepository : IUserRepository
 	{
 		private readonly ApplicationDbContext _context;
 
-		public UsersAccountRepository(ApplicationDbContext dbContext)
+		public UserRepository(ApplicationDbContext dbContext)
 		{
 			_context = dbContext;
 		}

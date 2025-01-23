@@ -17,7 +17,7 @@ namespace TelegramAntispamBot.Tests
 		private Mock<IDeleteMessageService> _deleteMessageService;
 		private Mock<TelegramInject> _botClient;
 		private Mock<IProfanityCheckerService> _profanityCheckerService;
-		private Mock<IUserInfoService> _userInfoService;
+		private Mock<ITelegramUserService> _userInfoService;
 
 		private CancellationToken _cancellationToken;
 		private IHandleMessageService _service;

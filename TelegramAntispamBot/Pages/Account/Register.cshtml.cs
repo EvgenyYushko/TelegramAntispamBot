@@ -4,18 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using ServiceLayer.Services;
-using ServiceLayer.Services.Telegram;
+using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Base;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-    public class RegisterModel : PageModelBase
-    {
-		private readonly IUsersService _userService;
+	public class RegisterModel : PageModelBase
+	{
+		private readonly IUserService _userService;
 
-		public RegisterModel(IUsersService userService)
+		public RegisterModel(IUserService userService)
 		{
 			_userService = userService;
 		}
@@ -49,12 +47,12 @@ namespace TelegramAntispamBot.Pages.Account
 					return RedirectToPage("/Account/Login");
 				}
 			}
-			catch (Exception ex) 
+			catch (Exception ex)
 			{
 				ErrorMessage = ex.Message;
 			}
 
 			return RedirectToPage("/Account/Register");
 		}
-    }
+	}
 }
