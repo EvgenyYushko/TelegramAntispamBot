@@ -50,7 +50,7 @@ namespace TelegramAntispamBot.DataAccessLayer.Repositories
 
 		public async Task AddUserToBanList(UserInfo user)
 		{
-			var userEntity = new UserEntity()
+			var userEntity = new UserBannedEntity()
 			{
 				Id = user.User.Id,
 				UserName = user.User.Username,
@@ -60,7 +60,7 @@ namespace TelegramAntispamBot.DataAccessLayer.Repositories
 			await _context.SaveChangesAsync();
 		}
 
-		public List<UserEntity> GetAllBanedUsers()
+		public List<UserBannedEntity> GetAllBanedUsers()
 		{
 			var s = _context.BanedUsers.ToList();
 			return s;

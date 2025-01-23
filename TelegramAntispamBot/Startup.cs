@@ -1,21 +1,32 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Telegram.Bot;
+using TelegramAntispamBot.Authentication.Handlers;
 using TelegramAntispamBot.BackgroundServices;
 using TelegramAntispamBot.BuisinessLogic.Services;
+using TelegramAntispamBot.BuisinessLogic.Services.Auth;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.DataAccessLayer;
 using TelegramAntispamBot.DataAccessLayer.Repositories;
 using TelegramAntispamBot.DomainLayer.Models;
+using TelegramAntispamBot.DomainLayer.Models.Auth;
 using TelegramAntispamBot.DomainLayer.Repositories;
+using TelegramAntispamBot.Enumerations;
 using TelegramAntispamBot.InjectSettings;
+using TelegramAntispamBot.ServiceLayer.Authorization;
 using TelegramAntispamBot.ServiceLayer.Services;
+using AuthorizationOptions = TelegramAntispamBot.DomainLayer.Models.Auth.AuthorizationOptions;
+
 
 namespace TelegramAntispamBot
 {
@@ -31,10 +42,19 @@ namespace TelegramAntispamBot
 
 		public IConfiguration Configuration { get; }
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
+		public void ConfigureSettings(IServiceCollection services)
 		{
 			services.Configure<AppOptions>(Configuration.GetSection(nameof(AppOptions)));
+			services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
+			services.Configure<AuthorizationOptions>(Configuration.GetSection(nameof(AuthorizationOptions)));
+		}
+
+		public void ConfigureServices(IServiceCollection services)
+		{
+			ConfigureSettings(services);
+
+			AddAppAuthentication(services, Configuration.GetSection("JwtOptions").Get<JwtOptions>());
+			ApdAppAuthorization(services);
 
 			services.AddRazorPages();
 			services.AddControllers().AddNewtonsoftJson();
@@ -45,6 +65,13 @@ namespace TelegramAntispamBot
 			services.AddScoped<UsersRepository>();
 			services.AddSingleton<IUserInfoService, UserInfoService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
+
+			services.AddScoped<IUsersAccountRepository, UsersAccountRepository>();
+			services.AddScoped<IUsersService, UserService>();
+			services.AddScoped<IPermissionService, PermissionService>();
+			services.AddScoped<IJwtProvider, JwtProvider>();
+			services.AddScoped<IPasswordHasher, PasswordHasher>();
+			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
 			_telegram = new TelegramInject
@@ -85,11 +112,9 @@ namespace TelegramAntispamBot
 
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
-
 			app.UseRouting();
-
+			app.UseAuthentication();
 			app.UseAuthorization();
-
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
@@ -130,6 +155,41 @@ namespace TelegramAntispamBot
 					await _telegram.TelegramClient.SetWebhookAsync(webhookUrl);
 				}
 			}
+		}
+
+		private static void AddAppAuthentication(IServiceCollection services, JwtOptions jwtOptions)
+		{
+			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+				{
+					options.TokenValidationParameters = new()
+					{
+						ValidateIssuer = false,
+						ValidateAudience = false,
+						ValidateLifetime = true,
+						ValidateIssuerSigningKey = true,
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+					};
+
+					options.Events = new JwtBearerEvents
+					{
+						OnMessageReceived = context =>
+						{
+							context.Token = context.Request.Cookies["token"];
+							return Task.CompletedTask;
+						}
+					};
+				});
+		}
+
+		private static void ApdAppAuthorization(IServiceCollection service)
+		{
+			service.AddAuthorization(options =>
+			{
+				options.AddPolicy("Admin", policy => policy.AddRequirements(new PermissionRequirement(Permission.Delete)));
+				options.AddPolicy("User", policy => policy.AddRequirements(new PermissionRequirement(Permission.Read)));
+				options.AddPolicy("Tutor", policy => policy.AddRequirements(new PermissionRequirement(Permission.Update)));
+			});
 		}
 	}
 }

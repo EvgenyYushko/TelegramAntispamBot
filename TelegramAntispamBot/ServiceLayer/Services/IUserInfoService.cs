@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TelegramAntispamBot.DataAccessLayer;
 using TelegramAntispamBot.DomainLayer.Models;
 
-namespace TelegramAntispamBot.BuisinessLogic.Services
+namespace TelegramAntispamBot.ServiceLayer.Services
 {
 	public interface IUserInfoService
 	{
@@ -15,7 +14,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 
 		public Task AddUserToBan(UserInfo userInfo);
 
-		public List<UserEntity> GetAllBanedUsers();
+		public List<UserBannedEntity> GetAllBanedUsers();
 
 	}
 }

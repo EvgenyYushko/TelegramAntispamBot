@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TelegramAntispamBot.DataAccessLayer;
 using TelegramAntispamBot.DataAccessLayer.Repositories;
 using TelegramAntispamBot.DomainLayer.Models;
+using TelegramAntispamBot.ServiceLayer.Services;
 
 namespace TelegramAntispamBot.BuisinessLogic.Services
 {
@@ -42,7 +43,7 @@ namespace TelegramAntispamBot.BuisinessLogic.Services
 			await _usersRepository.AddUserToBanList(userInfo);
 		}
 
-		public List<UserEntity> GetAllBanedUsers()
+		public List<UserBannedEntity> GetAllBanedUsers()
 		{
 			return _usersRepository.GetAllBanedUsers();
 		}
