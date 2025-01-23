@@ -25,6 +25,7 @@ using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using TelegramAntispamBot.BackgroundServices;
 using TelegramAntispamBot.Controllers;
+using TelegramAntispamBot.Filters;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 using static Infrastructure.Constants.TelegramConstatns;
 
@@ -68,6 +69,7 @@ namespace TelegramAntispamBot
 			services.AddScoped<IPermissionService, PermissionService>();
 			services.AddScoped<IJwtProvider, JwtProvider>();
 			services.AddScoped<IPasswordHasher, PasswordHasher>();
+			services.AddScoped<ILogRepository, LogRepository>();
 			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
@@ -78,6 +80,8 @@ namespace TelegramAntispamBot
 
 			services.AddSingleton(_telegram);
 
+			AddFilters(services);
+
 			var connectionString = Environment.GetEnvironmentVariable("DB_URL_POSTGRESQL");
 			if (string.IsNullOrEmpty(connectionString))
 			{
@@ -86,6 +90,11 @@ namespace TelegramAntispamBot
 
 			services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseNpgsql(connectionString, options => options.MigrationsAssembly("DataAccessLayer")));
+		}
+
+		private static void AddFilters(IServiceCollection services)
+		{
+			services.AddScoped<LogPageFilter>();
 		}
 
 		private void ConfigureAuthorization(IServiceCollection services)

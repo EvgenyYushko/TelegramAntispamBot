@@ -31,5 +31,7 @@ namespace DataAccessLayer
 		public DbSet<PermissionEntity> Permissions { get; set; }
 
 		public DbSet<UserRoleEntity> UserRoleEntity { get; set; }
+
+		public DbSet<LogEntity> Logs { get; set; }
 	}
 }

@@ -7,7 +7,7 @@ using TelegramAntispamBot.Pages.Base;
 
 namespace TelegramAntispamBot.Pages.User
 {
-	[Authorize(Policy = "User")]
+	[Authorize]
 	public class ProfileModel : PageModelBase
 	{
 		private readonly IUserService _usersService;

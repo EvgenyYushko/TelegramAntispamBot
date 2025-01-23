@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using TelegramAntispamBot.Filters;
 
 namespace TelegramAntispamBot.Pages
 {
+	[ServiceFilter(typeof(LogPageFilter))]
 	public class IndexModel : PageModel
 	{
 		private readonly ILogger<IndexModel> _logger;

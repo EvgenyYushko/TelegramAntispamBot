@@ -69,6 +69,7 @@
 
         .button-container {
             text-align: center;
+            margin-top: 20px;
         }
 
             .button-container button {
@@ -94,6 +95,32 @@
                     background-color: #004494;
                     transform: translateY(0);
                 }
+
+        .admin-button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+            .admin-button:hover {
+                background-color: #218838;
+                transform: translateY(-2px);
+            }
+
+            .admin-button:active {
+                background-color: #196f3d;
+                transform: translateY(0);
+            }
     </style>
 </head>
 <body>
@@ -118,15 +145,19 @@
             </div>
         </div>
 
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="button-container">
+                <a href="/Admin/Analytics" class="admin-button">Статистика сайта</a>
+            </div>
+        }
+
         <div class="button-container">
             <button onclick="location.href='@Url.Page("/Account/Logout")'">Выйти</button>
-
-            @*<form method="post" asp-page="/Account/Logout">
-                <button type="submit">Logoff</button>
-            </form>*@
         </div>
     </div>
 </body>
 </html>
+
 
 
