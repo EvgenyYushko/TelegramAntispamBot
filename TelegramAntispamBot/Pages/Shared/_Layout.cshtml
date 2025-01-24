@@ -3,6 +3,8 @@
 }
 
 @using System.Threading
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Loc
 
 <!DOCTYPE html>
 <html lang="en">
@@ -58,20 +60,20 @@
         <header>
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#">Антиспам бот</a>
+                    <a class="navbar-brand" href="#">@Loc["BotName"]</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <ul class="navbar-nav">
                             <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/">Главная</a>
+                                <a class="nav-link active" aria-current="page" href="/">@Loc["Main"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/privacy">Политики конфиденциальности</a>
+                                <a class="nav-link" href="/privacy">@Loc["Privacy_Policy"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/Account/Login">Аккаунт</a>
+                                <a class="nav-link" href="/Account/Login">@Loc["Account"]</a>
                             </li>
                         </ul>
                     </div>
@@ -86,12 +88,12 @@
         <footer class="border-top footer text-muted">
             <div class="container d-flex justify-content-center align-items-center gap-3">
                 <span>
-                    &copy; 2024 - Антиспам бот - <a asp-area="" asp-page="/Privacy">Политики конфиденциальности</a>
+                    &copy; 2025 - @Loc["BotName"] - <a asp-area="" asp-page="/Privacy">@Loc["Privacy_Policy"]</a>
                 </span>
                 <form method="post" asp-page="/SetLanguageModel" class="d-inline">
                     <select name="language" onchange="this.form.submit()" class="form-select form-select-sm d-inline-block w-auto">
-                        <option value="ru" selected="@(currentCulture == "ru")">Русский</option>
-                        <option value="en" selected="@(currentCulture == "en")">English</option>
+                        <option value="ru" selected="@(currentCulture == "ru")">🏳 Русский</option>
+                        <option value="en" selected="@(currentCulture == "en")">🏳‍🌈 English</option>
                     </select>
                 </form>
             </div>

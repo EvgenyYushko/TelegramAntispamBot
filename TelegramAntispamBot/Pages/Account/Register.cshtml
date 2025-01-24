@@ -3,7 +3,8 @@
 @{
     ViewData["Title"] = "Register";
 }
-
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Loc
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,20 +25,20 @@
                         </div>
                     }
                     <div class="card-header text-center bg-primary text-white">
-                        <h4>Create Account</h4>
+                        <h4>@Loc["Create"]</h4>
                     </div>
                     <div class="card-body">
                         <form method="post">
                             <div class="mb-3">
-                                <label for="Username" class="form-label">Username</label>
-                                <input type="text" id="Username" name="Username" class="form-control" placeholder="Enter your username" required>
+                                <label for="Username" class="form-label">@Loc["Username"]</label>
+                                <input type="text" id="Username" name="Username" class="form-control" placeholder=@Loc["Enter_username"] required>
                             </div>
                             <div class="mb-3">
-                                <label for="Email" class="form-label">Email</label>
-                                <input type="email" id="Email" name="Email" class="form-control" placeholder="Input your email" required>
+                                <label for="Email" class="form-label">@Loc["Email"]</label>
+                                <input type="email" id="Email" name="Email" class="form-control" placeholder=@Loc["Input_Email"] required>
                             </div>
                             <div class="mb-3">
-                                <label for="Role" class="form-label">Select Role</label>
+                                <label for="Role" class="form-label">@Loc["Select_Role"]</label>
                                 <select id="Role" name="SelectedRole" class="form-select" required>
                                     @foreach (var role in Model.Roles)
                                     {
@@ -46,14 +47,14 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="Password" class="form-label">Password</label>
-                                <input type="password" id="Password" name="Password" class="form-control" placeholder="Create a password" required>
+                                <label for="Password" class="form-label">@Loc["Password"]</label>
+                                <input type="password" id="Password" name="Password" class="form-control" placeholder=@Loc["Create_password"] required>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Register</button>
+                            <button type="submit" class="btn btn-primary w-100">@Loc["Register"]</button>
                         </form>
                     </div>
                     <div class="card-footer text-center">
-                        <p>Already have an account? <a href="/Account/Login" class="text-decoration-none">Login here</a></p>
+                        <p>@Loc["Already_Account"]<a href="/Account/Login" class="text-decoration-none">@Loc["Login_here"]</a></p>
                     </div>
                 </div>
             </div>

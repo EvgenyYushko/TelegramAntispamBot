@@ -2,6 +2,8 @@
 @model TelegramAntispamBot.Pages.Admin.AnalyticsModel
 @{
 }
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Loc
 
 <!DOCTYPE html>
 <html lang="en">
@@ -78,49 +80,52 @@
             margin: 20px 0;
         }
 
-        .button-container button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: white;
-            background-color: #28a745;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+            .button-container button {
+                margin: 5px;
+                padding: 10px 20px;
+                font-size: 1rem;
+                color: white;
+                background-color: #28a745;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
 
-        .button-container button:hover {
-            background-color: #218838;
+                .button-container button:hover {
+                    background-color: #218838;
+                }
+        table td:nth-child(3) {
+            word-break: break-all;
         }
-             
     </style>
 </head>
 <body>
-    <h1>Analytics Dashboard</h1>
+    <h1>@Loc["Analytics_Dashboard"]</h1>
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>Date/Time</th>
-                    <th>Type</th>
-                    <th>Message</th>
+                    <th>@Loc["Date_Time"]</th>
+                    <th>@Loc["Type"]</th>
+                    <th>@Loc["Message"]</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var log in Model.Logs)
                 {
-    <tr>
-        <td>@log.DateTime</td>
-        <td>@log.Type</td>
-        <td>@log.Message</td>
-    </tr>            }
+                    <tr>
+                        <td>@log.DateTime</td>
+                        <td>@log.Type</td>
+                        <td>@log.Message</td>
+                    </tr>
+   }
             </tbody>
         </table>
     </div>
     <div class="button-container">
-        <button onclick="window.location.href='/export-logs'">Export Logs</button>
-        <button onclick="window.location.href='/clear-logs'">Clear Logs</button>
+        <button onclick="window.location.href='/export-logs'">@Loc["Export_Log"]</button>
+        <button onclick="window.location.href='/clear-logs'">@Loc["Clear Log"]</button>
     </div>
 </body>
 </html>

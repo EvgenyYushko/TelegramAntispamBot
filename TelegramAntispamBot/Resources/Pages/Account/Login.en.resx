@@ -117,79 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Delete" xml:space="preserve">
-    <value>&lt;strong&gt;Удалять&lt;/strong&gt; сообщения и посты с нецензурными выражениями</value>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
   </data>
-  <data name="Delete_Text" xml:space="preserve">
-    <value>&lt;strong&gt;Удалять&lt;/strong&gt; комментарии с ссылками</value>
+  <data name="Enter_Password" xml:space="preserve">
+    <value>Enter your password</value>
   </data>
-  <data name="Delete_Text2" xml:space="preserve">
-    <value>комментарии с ссылками</value>
+  <data name="Enter_username" xml:space="preserve">
+    <value>Enter your username</value>
   </data>
-  <data name="Description" xml:space="preserve">
-    <value>Описание</value>
+  <data name="have't_account" xml:space="preserve">
+    <value>Don't have an account?</value>
   </data>
-  <data name="Description_Text" xml:space="preserve">
-    <value>Этот бот-администратор создан для защиты вашего Telegram-канала от спама. Он автоматически управляет комментариями и контролирует ссылки в сообщениях, чтобы сохранить порядок и защитить участников от нежелательной активности.</value>
+  <data name="Input_Email" xml:space="preserve">
+    <value>Input your email</value>
   </data>
-  <data name="Disables" xml:space="preserve">
-    <value>&lt;strong&gt;Отключает&lt;/strong&gt; возможность комментирования для отдельных постов</value>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
   </data>
-  <data name="Header" xml:space="preserve">
-    <value>Антиспам бот</value>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
   </data>
-  <data name="Header1" xml:space="preserve">
-    <value>Умный помощник в вашем чате</value>
+  <data name="Register_here" xml:space="preserve">
+    <value>Register here</value>
   </data>
-  <data name="Possibilities" xml:space="preserve">
-    <value>Возможности</value>
-  </data>
-  <data name="White" xml:space="preserve">
-    <value>Не удаляет комментарии со ссылками от пользователей из &lt;strong&gt;белого&lt;/strong&gt; списка</value>
-  </data>
-  <data name="White_Text" xml:space="preserve">
-    <value>Исключает из удаления ссылки от каналов из &lt;strong&gt;белого списка&lt;/strong&gt;</value>
-  </data>
-  <data name="White_Text2" xml:space="preserve">
-    <value>Исключает из удаления ссылки от каналов из</value>
-  </data>
-  <data name="Hellow_Text" xml:space="preserve">
-    <value>Приветствует новых пользователей в канале обясняя им правила чата</value>
-  </data>
-  <data name="Quick_start" xml:space="preserve">
-    <value>Быстрый старт</value>
-  </data>
-  <data name="Instructions" xml:space="preserve">
-    <value>Чтобы начать использовать бота, выполните следующие шаги:</value>
-  </data>
-  <data name="Instructions_1" xml:space="preserve">
-    <value>Найдите бота в Telegram по имени:  Перейдите бота в Telegram: </value>
-  </data>
-  <data name="Instructions_2" xml:space="preserve">
-    <value>Нажмите &lt;strong&gt;Start&lt;/strong&gt;, чтобы активировать бота</value>
-  </data>
-  <data name="Instructions_3" xml:space="preserve">
-    <value>Используйте команды или отправьте сообщение для взаимодействия</value>
-  </data>
-  <data name="Instructions_4" xml:space="preserve">
-    <value>Добавте бота в администраторы дискуссионного чата вашего ТГ-канала</value>
-  </data>
-  <data name="Instructions_5" xml:space="preserve">
-    <value>Дайте боту права на удаление сообщений и сдлеать его администратором</value>
-  </data>
-  <data name="Settings" xml:space="preserve">
-    <value>Настройки</value>
-  </data>
-  <data name="Settings_1" xml:space="preserve">
-    <value>Добавте бота в администраторы дискуссионного чата вашего ТГ-канала</value>
-  </data>
-  <data name="Settings_2" xml:space="preserve">
-    <value>Дайте боту права на удаление сообщений</value>
-  </data>
-  <data name="Settings_3" xml:space="preserve">
-    <value>Для добалвения пользователей в &lt;strong&gt;белый&lt;/strong&gt; напишите &lt;a href="https://t.me/EvgenyYushko" target="_blank"&gt;содателю бота&lt;/a&gt;</value>
-  </data>
-  <data name="Useful_links" xml:space="preserve">
-    <value>Полезные ссылки</value>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welcome Back!</value>
   </data>
 </root>

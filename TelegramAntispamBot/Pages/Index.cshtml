@@ -2,59 +2,54 @@
 @model IndexModel
 @{
 
-    var botName = @Localizer["Header"];
+    var botName = Loc["Header"];
     var botLink = "https://t.me/YN_AntispamBot";
     var botOwner = "https://t.me/EvgenyYushko";
 
     ViewData["Title"] = botName;
 }
 @using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
+@inject IViewLocalizer Loc
 
 <div class="container my-5">
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white text-center py-4">
             <h1 class="display-5">🤖 @botName</h1>
-            <p class="mb-0">@Localizer["Header1"]</p>
+            <p class="mb-0">@Loc["Header1"]</p>
         </div>
         <div class="card-body">
-            <h3 class="text-center mb-4">📚 Описание</h3>
-            <p>
-                Этот бот-администратор создан для защиты вашего Telegram-канала от спама. Он автоматически управляет комментариями и контролирует ссылки в сообщениях, чтобы сохранить порядок и защитить участников от нежелательной активности.
-            </p>
+            <h3 class="text-center mb-4">📚 @Loc["Description"]</h3>
+            <p>@Loc["Description_Text"]</p>
             <hr />
-            <h3 class="text-center mb-4">✨ Возможности</h3>
+            <h3 class="text-center mb-4">✨ @Loc["Possibilities"]</h3>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">🚫 <strong>Удалять</strong> сообщения и посты с нецензурными выражениями</li>
-                <li class="list-group-item">🚫 <strong>Удалять</strong> комментарии с ссылками</li>
-                <li class="list-group-item">✅ Не удаляет комментарии со ссылками от пользователей из <strong>белого</strong> списка</li>
-                <li class="list-group-item">📋 Исключает из удаления ссылки от каналов из <strong>белого</strong> списка</li>
-                <li class="list-group-item">🔒 <strong>Отключает</strong> возможность комментирования для отдельных постов</li>
-                <li class="list-group-item">✅ Приветствует новых пользователей в канале обясняя им правила чата</li>
+                <li class="list-group-item">🚫 @Loc["Delete"]</li>
+                <li class="list-group-item">🚫 @Loc["Delete_Text"]</li>
+                <li class="list-group-item">✅ @Loc["White"]</li>
+                <li class="list-group-item">📋 @Loc["White_Text"]</li>
+                <li class="list-group-item">🔒 @Loc["Disables"]</li>
+                <li class="list-group-item">✅ @Loc["Hellow_Text"]</li>
             </ul>
             <hr />
-            <h3 class="text-center mb-4">🚀 Быстрый старт</h3>
-            <p>
-                Чтобы начать использовать бота, выполните следующие шаги:
-            </p>
+            <h3 class="text-center mb-4">🚀 @Loc["Quick_start"]</h3>
+            <p>@Loc["Instructions"]</p>
             <ol class="list-group list-group-numbered">
                 <li class="list-group-item">
-                    Найдите бота в Telegram по имени:  Перейдите бота в Telegram:
-                    <a href="@botLink" target="_blank">@botName</a>
+                    @Loc["Instructions_1"]<a href="@botLink" target="_blank">@botName</a>
                 </li>
-                <li class="list-group-item">Нажмите <strong>Start</strong>, чтобы активировать бота</li>
-                <li class="list-group-item">Используйте команды или отправьте сообщение для взаимодействия</li>
-                <li class="list-group-item">Добавте бота в администраторы дискуссионного чата вашего ТГ-канала</li>
-                <li class="list-group-item">Дайте боту права на удаление сообщений и сдлеать его администратором</li>
+                <li class="list-group-item">@Loc["Instructions_2"]</li>
+                <li class="list-group-item">@Loc["Instructions_3"]</li>
+                <li class="list-group-item">@Loc["Instructions_4"]</li>
+                <li class="list-group-item">@Loc["Instructions_5"]</li>
             </ol>
             <hr />
-            <h3 class="text-center mb-4">🔒 Настройки</h3>
+            <h3 class="text-center mb-4">🔒 @Loc["Settings"]</h3>
             <ol class="list-group list-group-numbered">
-                <li class="list-group-item">Добавте бота в администраторы дискуссионного чата вашего ТГ-канала</li>
-                <li class="list-group-item">Дайте боту права на удаление сообщений</li>
-                <li class="list-group-item">Для добалвения пользователей в <strong>белый</strong> напишите <a href="@botOwner" target="_blank">содателю бота</a></li>
+                <li class="list-group-item">@Loc["Settings_1"]</li>
+                <li class="list-group-item">@Loc["Settings_2"]</li>
+                <li class="list-group-item">@Loc["Settings_3"]</li>
             </ol>
-            <h3 class="text-center mb-4">🔗 Полезные ссылки</h3>
+            <h3 class="text-center mb-4">🔗 @Loc["Useful_links"]</h3>
             <div class="d-flex justify-content-center gap-4">
                 <a class="btn btn-primary" href="https://core.telegram.org/bots/api" target="_blank">Telegram API</a>
                 <a class="btn btn-secondary" href="https://docs.microsoft.com/aspnet/core" target="_blank">ASP.NET Core Docs</a>

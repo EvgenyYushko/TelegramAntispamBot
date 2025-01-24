@@ -117,10 +117,79 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Delete" xml:space="preserve">
+    <value>&lt;strong&gt;Delete&lt;/strong&gt; messages and posts with obscene language</value>
+  </data>
+  <data name="Delete_Text" xml:space="preserve">
+    <value>&lt;strong&gt;Delete&lt;/strong&gt; comments with links</value>
+  </data>
+  <data name="Delete_Text2" xml:space="preserve">
+    <value>comments with links</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Description_Text" xml:space="preserve">
+    <value>This admin bot is designed to protect your Telegram channel from spam. It automatically manages comments and controls links in posts to maintain order and protect members from unwanted activity.</value>
+  </data>
+  <data name="Disables" xml:space="preserve">
+    <value>&lt;strong&gt;Disables &lt;/strong&gt; commenting for individual posts</value>
+  </data>
   <data name="Header" xml:space="preserve">
     <value>Antispam bot</value>
   </data>
   <data name="Header1" xml:space="preserve">
     <value>Smart assistant in your chat</value>
+  </data>
+  <data name="Possibilities" xml:space="preserve">
+    <value>Possibilities</value>
+  </data>
+  <data name="White" xml:space="preserve">
+    <value>Does not delete comments with links from users on the &lt;strong&gt;whitelist&lt;/strong&gt;</value>
+  </data>
+  <data name="White_Text" xml:space="preserve">
+    <value>Does not delete comments with links from users from</value>
+  </data>
+  <data name="White_Text2" xml:space="preserve">
+    <value>Excludes links from channels from being removed from</value>
+  </data>
+  <data name="Hellow_Text" xml:space="preserve">
+    <value>Welcomes new users to the channel by explaining the chat rules to them</value>
+  </data>
+  <data name="Quick_start" xml:space="preserve">
+    <value>Quick start</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>To start using the bot, follow these steps:</value>
+  </data>
+  <data name="Instructions_1" xml:space="preserve">
+    <value>Find a bot in Telegram by name: Go to the bot in Telegram: </value>
+  </data>
+  <data name="Instructions_2" xml:space="preserve">
+    <value>Click &lt;strong&gt;Start&lt;/strong&gt; to activate the bot</value>
+  </data>
+  <data name="Instructions_3" xml:space="preserve">
+    <value>Use commands or send a message to interact</value>
+  </data>
+  <data name="Instructions_4" xml:space="preserve">
+    <value>Add the bot to the discussion chat administrators of your TG channel</value>
+  </data>
+  <data name="Instructions_5" xml:space="preserve">
+    <value>Give the bot rights to delete messages and make it an administrator</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Settings_1" xml:space="preserve">
+    <value>Add the bot to the discussion chat administrators of your TG channel</value>
+  </data>
+  <data name="Settings_2" xml:space="preserve">
+    <value>Give the bot rights to delete messages</value>
+  </data>
+  <data name="Settings_3" xml:space="preserve">
+    <value>To add users to &lt;strong&gt;white&lt;/strong&gt; write &lt;a href="https://t.me/EvgenyYushko" target="_blank"&gt;bot creator&lt;/a&gt;</value>
+  </data>
+  <data name="Useful_links" xml:space="preserve">
+    <value>Useful links</value>
   </data>
 </root>

@@ -2,6 +2,9 @@
 @model TelegramAntispamBot.Pages.Account.LoginModel
 @{
 }
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Loc
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,23 +25,23 @@
                         </div>
                     }
                     <div class="card-header text-center bg-primary text-white">
-                        <h4>Welcome Back!</h4>
+                        <h4>@Loc["Welcome"]</h4>
                     </div>
                     <div class="card-body">
                         <form method="post">
                             <div class="mb-3">
-                                <label for="Email" class="form-label">Email</label>
-                                <input type="email" id="Email" name="Email" class="form-control" placeholder="Input your Email" required>
+                                <label for="Email" class="form-label">@Loc["Email"]</label>
+                                <input type="email" id="Email" name="Email" class="form-control" placeholder=@Loc["Input_Email"] required>
                             </div>
                             <div class="mb-3">
-                                <label for="Password" class="form-label">Password</label>
-                                <input type="password" id="Password" name="Password" class="form-control" placeholder="Enter your password" required>
+                                <label for="Password" class="form-label">@Loc["Password"]</label>
+                                <input type="password" id="Password" name="Password" class="form-control" placeholder=@Loc["Enter_Password"] required>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                            <button type="submit" class="btn btn-primary w-100">@Loc["Login"]</button>
                         </form>
                     </div>
                     <div class="card-footer text-center">
-                        <p>Don't have an account? <a href="/Account/Register" class="text-decoration-none">Register here</a></p>
+                        <p>@Loc["have't_account"] <a href="/Account/Register" class="text-decoration-none">@Loc["Register_here"]</a></p>
                     </div>
                 </div>
             </div>

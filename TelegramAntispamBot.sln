@@ -7,15 +7,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramAntispamBot", "Tele
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramAntispamBot.Tests", "TelegramAntispamBot.Tests\TelegramAntispamBot.Tests.csproj", "{9BFF7638-1D21-4247-A3DE-DF82E734694D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLayer", "DataAccessLayer\DataAccessLayer.csproj", "{9B2216D9-C357-4079-9790-0E09963B8349}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLayer", "DataAccessLayer\DataAccessLayer.csproj", "{9B2216D9-C357-4079-9790-0E09963B8349}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainLayer", "DomainLayer\DomainLayer.csproj", "{B5624842-1611-4830-88C6-3B6012851764}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DomainLayer", "DomainLayer\DomainLayer.csproj", "{B5624842-1611-4830-88C6-3B6012851764}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceLayer", "ServiceLayer\ServiceLayer.csproj", "{A27F0A8D-68C9-4DE3-B60F-6962EB30EE5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceLayer", "ServiceLayer\ServiceLayer.csproj", "{A27F0A8D-68C9-4DE3-B60F-6962EB30EE5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuisinessLogic", "BuisinessLogic\BuisinessLogic.csproj", "{CF57DC92-4690-43CF-85E1-9FD86A1345CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuisinessLogic", "BuisinessLogic\BuisinessLogic.csproj", "{CF57DC92-4690-43CF-85E1-9FD86A1345CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{AF74F484-C95D-4FAE-9175-179902451FCC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{AF74F484-C95D-4FAE-9175-179902451FCC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +56,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		RESX_PrefixTranslations = True
 		SolutionGuid = {5ED0B53F-EC65-4E5A-B247-39C188F8D8F9}
 	EndGlobalSection
 EndGlobal

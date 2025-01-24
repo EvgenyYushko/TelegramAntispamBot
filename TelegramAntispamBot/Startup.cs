@@ -171,8 +171,7 @@ namespace TelegramAntispamBot
 
 			Console.WriteLine($"Bot {Task.Run(async () => await _telegram.TelegramClient.GetMeAsync()).Result.Username} is running...");
 		}
-
-
+		
 		public async Task ConfigureWebhookAsync(bool local)
 		{
 			if (local)
@@ -190,7 +189,7 @@ namespace TelegramAntispamBot
 				}
 			}
 		}
-
+		 
 		private static void AddAppAuthentication(IServiceCollection services, JwtOptions jwtOptions)
 		{
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

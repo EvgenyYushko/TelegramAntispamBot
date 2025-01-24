@@ -1,45 +1,39 @@
 ﻿@page
 @model PrivacyModel
 @{
-    var msg = "Политика конфиденциальности";
+    var msg = @Loc["Privacy_Policy"];
     ViewData["Title"] = msg;
     var botOwner = "https://t.me/EvgenyYushko";
 }
+
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Loc
 
 <div class="container my-5">
     <div class="card shadow-lg">
         <div class="card-header bg-secondary text-white text-center py-4">
             <h1 class="display-5">🔒 @msg</h1>
-            <p class="mb-0">Ваши данные в безопасности</p>
+            <p class="mb-0">@Loc["Data_Safe"]</p>
         </div>
         <div class="card-body">
-            <h3 class="text-center mb-4">📜 Основные положения</h3>
-            <p>
-                Мы уважаем вашу конфиденциальность и обязуемся защищать личные данные, которые вы предоставляете при использовании нашего бота.
-            </p>
+            <h3 class="text-center mb-4">📜 @Loc["Provisions"]</h3>
+            <p>@Loc["We_Respect"]</p>
             <hr />
-            <h3 class="text-center mb-4">📂 Какие данные мы собираем</h3>
+            <h3 class="text-center mb-4">📂 @Loc["Collect"]</h3>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">🧾 Имя пользователя и ID в Telegram</li>
-                <li class="list-group-item">💬 Содержание сообщений для выполнения запросов</li>
-                <li class="list-group-item">🌐 Метаданные (например, время отправки сообщений)</li>
+                <li class="list-group-item">🧾 @Loc["Username"]</li>
+                <li class="list-group-item">💬 @Loc["Contents"]</li>
+                <li class="list-group-item">🌐 @Loc["Metadata"]</li>
             </ul>
             <hr />
-            <h3 class="text-center mb-4">🛡️ Как мы защищаем данные</h3>
-            <p>
-                Все данные обрабатываются в зашифрованном виде и хранятся только в течение времени, необходимого для выполнения задач.
-                Мы принимаем меры для предотвращения несанкционированного доступа, изменения или раскрытия данных.
-            </p>
+            <h3 class="text-center mb-4">🛡️ @Loc["How_Protect"]</h3>
+            <p>@Loc["All_Data"]</p>
             <hr />
-            <h3 class="text-center mb-4">📤 Передача данных третьим сторонам</h3>
-            <p>
-                Ваши данные не передаются третьим сторонам, за исключением случаев, предусмотренных законодательством.
-            </p>
+            <h3 class="text-center mb-4">📤 @Loc["Transfer"]</h3>
+            <p>@Loc["Your_Data"]</p>
             <hr />
-            <h3 class="text-center mb-4">📞 Контакты</h3>
-            <p>
-                Если у вас есть вопросы по поводу нашей политики конфиденциальности, свяжитесь с <a href="@botOwner" target="_blank">нами</a>:
-            </p>
+            <h3 class="text-center mb-4">📞 @Loc["Contacts"]</h3>
+            <p>@Loc["Questions"]</p>
         </div>
     </div>
 </div>
