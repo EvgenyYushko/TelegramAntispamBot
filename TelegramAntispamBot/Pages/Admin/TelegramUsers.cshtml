@@ -101,6 +101,21 @@
             word-break: break-all;
         }
     </style>
+    <script>
+    async function toggleSendLinks(userId, checkbox) {
+        const sendLinks = checkbox.checked;
+
+        const response = await fetch(`TelegramUsers?handler=SetRightLiks&userId=${userId}&sendLinks=${sendLinks}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) {
+            alert('Ошибка выполнения toggleSendLinks');
+            checkbox.checked = !sendLinks;
+        }
+    }
+    </script>
 </head>
 <body>
     <h1>@Loc["PageName"]</h1>
@@ -132,18 +147,3 @@
     </div>
 </body>
 </html>
-<script>
-    async function toggleSendLinks(userId, checkbox) {
-        const sendLinks = checkbox.checked;
-
-        const response = await fetch(`TelegramUsers?handler=SetRightLiks&userId=${userId}&sendLinks=${sendLinks}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (!response.ok) {
-            alert(`${@Loc["Errore"]}`);
-            checkbox.checked = !sendLinks;
-        }
-    }
-</script>

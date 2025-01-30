@@ -129,6 +129,9 @@
   <data name="Site_Statistics" xml:space="preserve">
     <value>Статистика сайта</value>
   </data>
+  <data name="TgUsers" xml:space="preserve">
+    <value>Пользователи чат бота</value>
+  </data>
   <data name="Username" xml:space="preserve">
     <value>Имя пользователя:</value>
   </data>

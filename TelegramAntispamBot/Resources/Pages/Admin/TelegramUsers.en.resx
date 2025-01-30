@@ -117,28 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Email" xml:space="preserve">
-    <value>Email:</value>
+  <data name="CreateDate" xml:space="preserve">
+    <value>CreateDate</value>
   </data>
-  <data name="Log_Out" xml:space="preserve">
-    <value>Log out</value>
+  <data name="Errore" xml:space="preserve">
+    <value>Error updating data</value>
   </data>
-  <data name="Roles" xml:space="preserve">
-    <value>Roles:</value>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
   </data>
-  <data name="Site_Statistics" xml:space="preserve">
-    <value>Site statistics</value>
-  </data>
-  <data name="TgUsers" xml:space="preserve">
+  <data name="PageName" xml:space="preserve">
     <value>Chat bot users</value>
   </data>
-  <data name="Username" xml:space="preserve">
-    <value>Username:</value>
+  <data name="SendLinks" xml:space="preserve">
+    <value>SendLinks</value>
   </data>
-  <data name="Welcome" xml:space="preserve">
-    <value>Welcome,</value>
-  </data>
-  <data name="Your_Profile" xml:space="preserve">
-    <value>Here you can view your profile details and manage your account.</value>
+  <data name="UserId" xml:space="preserve">
+    <value>UserId</value>
   </data>
 </root>
