@@ -54,7 +54,7 @@ namespace BuisinessLogic.Handlers
 			{
 				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
 					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken, BotSettings.InfoMessageProfanityChecker);
-					if (!await CheckReputation(update.Message))
+					if (!await _telegramUserService.CheckReputation(update.Message))
 					{
 						await SendPull(botClient, update, update.Message.From);
 					}
@@ -66,7 +66,7 @@ namespace BuisinessLogic.Handlers
 				case UpdateType.Message when update.Message.ContainsUrls() &&
 											 !update.Message.From.IsBot &&
 											 !update.Message.From.IsChannel() &&
-											 !await InWhitelist(update.Message):
+											 !await _telegramUserService.InWhitelist(update.Message.From.Id):
 				// Delete new community-comment if user not in white-list
 				case UpdateType.Message when update.Message.From.IsBot &&
 											 !update.Message.SenderChat.InChannelsWhitelist():
@@ -94,7 +94,7 @@ namespace BuisinessLogic.Handlers
 				case UpdateType.EditedMessage when update.EditedMessage.ContainsUrls() &&
 												   !update.EditedMessage.From.IsBot &&
 												   !update.EditedMessage.From.IsChannel() &&
-												   !await InWhitelist(update.Message):
+												   !await _telegramUserService.InWhitelist(update.Message.From.Id):
 				// Delete edited community-comment if user not in white-list
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsBot &&
 												   !update.EditedMessage.SenderChat.InChannelsWhitelist():
@@ -103,34 +103,6 @@ namespace BuisinessLogic.Handlers
 				default:
 					return; 
 			}
-		}
-
-		private async Task<bool> InWhitelist(Message message)
-		{
-			var user = _telegramUserService.Get(message.From.Id);
-			return user.Permissions.SendLinks;
-		}
-
-		private async Task<bool> CheckReputation(Message message)
-		{
-			var user = _telegramUserService.Get(message.From.Id);
-			if (user == null)
-			{
-				user = new()
-				{
-					User = message.From
-				};
-				await _telegramUserService.TryAdd(user);
-			}
-
-			user.PullModel.CountFoul++;
-
-			if (user.PullModel.CountFoul >= 3)
-			{
-				return false;
-			}
-
-			return true;
 		}
 
 		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)

@@ -3,12 +3,15 @@
 @{
 }
 
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Loc
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics for Admin</title>
+    <title>---</title>
     <style>
         /* Общие стили */
         body {
@@ -100,32 +103,33 @@
     </style>
 </head>
 <body>
-<h1>Test</h1>
-<div class="table-container">
-    <table>
-        <thead>
-        <tr>
-            <th>UserId</th>
-            <th>Name</th>
-            <th>CreateDate</th>
-            <th>SendLinks</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var user in Model.TelegramUsers)
-        {
-            <tr>
-                <td>@user.UserId</td>
-                <td>@user.Name</td>
-                <td>@user.CreateDate</td>
-                <td>
-                    <input type="checkbox" @(user.Permissions.SendLinks ? "checked" : "")
-                           onchange="toggleSendLinks(@user.UserId, this)">
-                </td>
-            </tr>}
-        </tbody>
-    </table>
-</div>
+    <h1>@Loc["PageName"]</h1>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>@Loc["UserId"]</th>
+                    <th>@Loc["Name"]</th>
+                    <th>@Loc["CreateDate"]</th>
+                    <th>@Loc["SendLinks"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.TelegramUsers)
+                {
+                    <tr>
+                        <td>@user.UserId</td>
+                        <td>@user.Name</td>
+                        <td>@user.CreateDate</td>
+                        <td>
+                            <input type="checkbox" @(user.Permissions.SendLinks ? "checked" : "")
+                                   onchange="toggleSendLinks(@user.UserId, this)">
+                        </td>
+                    </tr>
+}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
 <script>
@@ -138,7 +142,7 @@
         });
 
         if (!response.ok) {
-            alert('Ошибка при обновлении данных');
+            alert(`${@Loc["Errore"]}`);
             checkbox.checked = !sendLinks;
         }
     }

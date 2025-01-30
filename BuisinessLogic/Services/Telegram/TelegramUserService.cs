@@ -6,6 +6,7 @@ using DomainLayer.Repositories;
 using Infrastructure.Models;
 using ServiceLayer.Models;
 using ServiceLayer.Services.Telegram;
+using Telegram.Bot.Types;
 
 namespace BuisinessLogic.Services.Telegram
 {
@@ -77,6 +78,34 @@ namespace BuisinessLogic.Services.Telegram
 		public Task UpdateLocalStorage()
 		{
 			return _usersRepository.UpdateLocalStorage();
+		}
+
+		public async Task<bool> InWhitelist(long id)
+		{
+			var user = _usersRepository.Get(id);
+			return user.Permissions.SendLinks;
+		}
+
+		public async Task<bool> CheckReputation(Message message)
+		{
+			var user = _usersRepository.Get(message.From.Id);
+			if (user == null)
+			{
+				user = new()
+				{
+					User = message.From
+				};
+				await _usersRepository.TryAdd(user);
+			}
+
+			user.PullModel.CountFoul++;
+
+			if (user.PullModel.CountFoul >= 3)
+			{
+				return false;
+			}
+
+			return true;
 		}
 	}
 }

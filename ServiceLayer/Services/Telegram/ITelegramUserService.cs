@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Infrastructure.Models;
 using ServiceLayer.Models;
+using Telegram.Bot.Types;
 
 namespace ServiceLayer.Services.Telegram
 {
@@ -22,5 +23,9 @@ namespace ServiceLayer.Services.Telegram
 		public Task UpdateTelegramUser(TelegramUser user);
 
 		public Task UpdateLocalStorage();
+
+		public Task<bool> InWhitelist(long id);
+
+		public Task<bool> CheckReputation(Message message);
 	}
 }
