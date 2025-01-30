@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DomainLayer.Repositories;
 using Infrastructure.Models;
@@ -22,12 +23,12 @@ namespace BuisinessLogic.Services.Telegram
 			return _usersRepository.Get(id);
 		}
 
-		public bool TryAdd(TelegramUser userInfo)
+		public async Task<bool> TryAdd(TelegramUser userInfo)
 		{
-			var res = _usersRepository.TryAdd(userInfo);
+			var res = await _usersRepository.TryAdd(userInfo);
 			if (res)
 			{
-				Console.WriteLine("User already exist to DB");
+				Console.WriteLine("User already exist");
 			}
 
 			return res;
@@ -46,6 +47,36 @@ namespace BuisinessLogic.Services.Telegram
 		public List<TelegramBannedUsersEntity> GetAllBanedUsers()
 		{
 			return _usersRepository.GetAllBanedUsers();
+		}
+
+		public List<TelegramUser> GetAllTelegramUsers()
+		{
+			var tgUsers = _usersRepository.GetAllTelegramUsers();
+			return tgUsers
+				.Select(u => new TelegramUser
+				{
+					UserId = u.UserId,
+					Name = u.Name,
+					CreateDate = u.CreateDate,
+					Permissions = new TelegramPermissions
+					{
+						Id = u.Permissions.Id,
+						UserId = u.Permissions.UserId,
+						SendLinks = u.Permissions.SendLinks
+					}
+				} )
+				.ToList();
+		}
+
+		public Task UpdateTelegramUser(TelegramUser user)
+		{
+			return _usersRepository.UpdateTelegramUser(user);
+		}
+
+		/// <inheritdoc />
+		public Task UpdateLocalStorage()
+		{
+			return _usersRepository.UpdateLocalStorage();
 		}
 	}
 }

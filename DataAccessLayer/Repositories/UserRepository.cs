@@ -87,7 +87,7 @@ namespace DataAccessLayer.Repositories
 			var userEntity = await _context.Users
 				.Include(u => u.Roles)
 				.AsNoTracking()
-				.FirstOrDefaultAsync(u => u.Id == id) ?? throw new Exception();
+				.FirstOrDefaultAsync(u => u.Id == id) ?? throw new Exception("По данному id не найден пользователь в БД");
 
 			var user = new UserAccount(userEntity.Id,
 				userEntity.UserName,

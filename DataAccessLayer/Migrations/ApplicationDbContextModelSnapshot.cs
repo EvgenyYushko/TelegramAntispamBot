@@ -190,6 +190,44 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Logs");
                 });
 
+            modelBuilder.Entity("DomainLayer.Models.TelegramPermissionsEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("SendLinks")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("TelegramPermissions");
+                });
+
+            modelBuilder.Entity("DomainLayer.Models.TelegramUserEntity", b =>
+                {
+                    b.Property<long>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("TelegramUsers");
+                });
+
             modelBuilder.Entity("ServiceLayer.Models.TelegramBannedUsersEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -236,6 +274,22 @@ namespace DataAccessLayer.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DomainLayer.Models.TelegramPermissionsEntity", b =>
+                {
+                    b.HasOne("DomainLayer.Models.TelegramUserEntity", "User")
+                        .WithOne("Permissions")
+                        .HasForeignKey("DomainLayer.Models.TelegramPermissionsEntity", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DomainLayer.Models.TelegramUserEntity", b =>
+                {
+                    b.Navigation("Permissions");
                 });
 #pragma warning restore 612, 618
         }

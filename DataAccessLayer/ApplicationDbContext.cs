@@ -33,5 +33,9 @@ namespace DataAccessLayer
 		public DbSet<UserRoleEntity> UserRoleEntity { get; set; }
 
 		public DbSet<LogEntity> Logs { get; set; }
+
+		public DbSet<TelegramUserEntity> TelegramUsers { get; set; }
+
+		public DbSet<TelegramPermissionsEntity> TelegramPermissions { get; set; }
 	}
 }

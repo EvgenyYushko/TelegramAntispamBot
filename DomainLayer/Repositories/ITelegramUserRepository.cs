@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using DomainLayer.Models;
 using Infrastructure.Models;
 using ServiceLayer.Models;
 
@@ -9,12 +10,19 @@ namespace DomainLayer.Repositories
 	{
 		public TelegramUser Get(long id);
 
-		public bool TryAdd(TelegramUser userInfo);
+		public Task<bool> TryAdd(TelegramUser userInfo);
 
 		public TelegramUser FindByPullId(string pullId);
 
 		public Task AddUserToBanList(TelegramUser user);
 
 		public List<TelegramBannedUsersEntity> GetAllBanedUsers();
+
+		public List<TelegramUserEntity> GetAllTelegramUsers();
+
+		public Task UpdateTelegramUser(TelegramUser user);
+
+		public Task UpdateLocalStorage();
+
 	}
 }

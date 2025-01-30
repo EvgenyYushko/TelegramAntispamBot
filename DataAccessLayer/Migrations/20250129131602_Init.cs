@@ -23,6 +23,20 @@ namespace DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Logs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    DateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Message = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Logs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
                 {
@@ -46,6 +60,20 @@ namespace DataAccessLayer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TelegramUsers",
+                columns: table => new
+                {
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TelegramUsers", x => x.UserId);
                 });
 
             migrationBuilder.CreateTable(
@@ -83,6 +111,25 @@ namespace DataAccessLayer.Migrations
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TelegramPermissions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    SendLinks = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TelegramPermissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TelegramPermissions_TelegramUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "TelegramUsers",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -150,6 +197,12 @@ namespace DataAccessLayer.Migrations
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TelegramPermissions_UserId",
+                table: "TelegramPermissions",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoleEntity_UserId",
                 table: "UserRoleEntity",
                 column: "UserId");
@@ -161,13 +214,22 @@ namespace DataAccessLayer.Migrations
                 name: "BanedUsers");
 
             migrationBuilder.DropTable(
+                name: "Logs");
+
+            migrationBuilder.DropTable(
                 name: "RolePermissionEntity");
+
+            migrationBuilder.DropTable(
+                name: "TelegramPermissions");
 
             migrationBuilder.DropTable(
                 name: "UserRoleEntity");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
+
+            migrationBuilder.DropTable(
+                name: "TelegramUsers");
 
             migrationBuilder.DropTable(
                 name: "Roles");

@@ -9,7 +9,7 @@ namespace ServiceLayer.Services.Telegram
 	{
 		public TelegramUser Get(long id);
 
-		public bool TryAdd(TelegramUser userInfo);
+		public Task<bool> TryAdd(TelegramUser userInfo);
 
 		public TelegramUser FindByPullId(string pullId);
 
@@ -17,5 +17,10 @@ namespace ServiceLayer.Services.Telegram
 
 		public List<TelegramBannedUsersEntity> GetAllBanedUsers();
 
+		public List<TelegramUser> GetAllTelegramUsers();
+
+		public Task UpdateTelegramUser(TelegramUser user);
+
+		public Task UpdateLocalStorage();
 	}
 }
