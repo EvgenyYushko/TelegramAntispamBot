@@ -12,7 +12,7 @@ namespace Infrastructure.Models
 
 		public DateTime CreateDate { get; set; }
 
-		public TelegramPermissions Permissions { get; set; }
+		public TelegramPermissions Permissions { get; set; } = new ();
 
 		public User User { get; set; }
 

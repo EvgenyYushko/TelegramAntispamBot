@@ -15,11 +15,11 @@ namespace Infrastructure.Extentions
 					&& message.CaptionEntities.Select(e => e.Type).Contains(MessageEntityType.Url);
 		}
 
-		public static bool InWhitelist(this User user)
-		{
-			return user is { Username: { } } &&
-					BotSettings.WhiteList.Any(w => user.Username.ToLower().Contains(w.ToLower()));
-		}
+		//public static bool InWhitelist(this User user)
+		//{
+		//	return user is { Username: { } } &&
+		//			BotSettings.WhiteList.Any(w => user.Id.ToLower().Contains(w.ToLower()));
+		//}
 
 		public static bool InChannelsWhitelist(this Chat chat)
 		{

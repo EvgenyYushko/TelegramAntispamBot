@@ -80,7 +80,7 @@ namespace TelegramAntispamBot
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
-			services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
+			services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
 			services.AddSingleton<ITelegramUserService, TelegramUserService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 

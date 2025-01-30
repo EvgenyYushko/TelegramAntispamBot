@@ -66,7 +66,7 @@ namespace BuisinessLogic.Handlers
 				case UpdateType.Message when update.Message.ContainsUrls() &&
 											 !update.Message.From.IsBot &&
 											 !update.Message.From.IsChannel() &&
-											 !update.Message.From.InWhitelist():
+											 !await InWhitelist(update.Message):
 				// Delete new community-comment if user not in white-list
 				case UpdateType.Message when update.Message.From.IsBot &&
 											 !update.Message.SenderChat.InChannelsWhitelist():
@@ -94,7 +94,7 @@ namespace BuisinessLogic.Handlers
 				case UpdateType.EditedMessage when update.EditedMessage.ContainsUrls() &&
 												   !update.EditedMessage.From.IsBot &&
 												   !update.EditedMessage.From.IsChannel() &&
-												   !update.EditedMessage.From.InWhitelist():
+												   !await InWhitelist(update.Message):
 				// Delete edited community-comment if user not in white-list
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsBot &&
 												   !update.EditedMessage.SenderChat.InChannelsWhitelist():
@@ -103,6 +103,12 @@ namespace BuisinessLogic.Handlers
 				default:
 					return; 
 			}
+		}
+
+		private async Task<bool> InWhitelist(Message message)
+		{
+			var user = _telegramUserService.Get(message.From.Id);
+			return user.Permissions.SendLinks;
 		}
 
 		private async Task<bool> CheckReputation(Message message)

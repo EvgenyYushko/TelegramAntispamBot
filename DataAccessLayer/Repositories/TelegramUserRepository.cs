@@ -30,20 +30,23 @@ namespace DataAccessLayer.Repositories
 
 		public async Task<bool> TryAdd(TelegramUser userInfo)
 		{
-			if (LocalUserStorage.Contains(userInfo))
+			if (LocalUserStorage.Exists(u => u.UserId == userInfo.UserId))
 			{
-				Console.WriteLine("Данный пользователь уже существует в локльном хранилище");
+				Console.WriteLine("Пользователь уже существует в локльном хранилище");
 				return false;
 			}
-
+			
+			Console.WriteLine("Пользователь Не существует в локльном хранилище");
 			LocalUserStorage.Add(userInfo);
 
 			if (_context.TelegramUsers.Any(u => u.UserId.Equals(userInfo.User.Id)))
 			{
 				Console.WriteLine("Данный пользователь уже существует в БД");
+				await UpdateLocalStorage();
 				return false;
 			}
 
+			Console.WriteLine("Пользователь Не существует в БД");
 			await _context.TelegramUsers.AddAsync(new TelegramUserEntity
 			{
 				UserId = userInfo.User.Id,

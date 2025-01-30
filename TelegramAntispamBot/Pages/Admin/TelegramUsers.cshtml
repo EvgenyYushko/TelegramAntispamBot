@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics for Admin</title>
     <style>
+        /* Общие стили */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -25,6 +26,7 @@
             color: #343a40;
         }
 
+        /* Таблица */
         .table-container {
             max-width: 1200px;
             margin: 20px auto;
@@ -32,7 +34,7 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
+            overflow-x: auto; /* Для горизонтальной прокрутки на маленьких экранах */
         }
 
         table {
@@ -67,7 +69,33 @@
         }
 
         td {
-            word-wrap: break-word;
+            word-wrap: break-word; /* Перенос слов */
+        }
+
+        /* Кнопки */
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+            .button-container button {
+                margin: 5px;
+                padding: 10px 20px;
+                font-size: 1rem;
+                color: white;
+                background-color: #28a745;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+                .button-container button:hover {
+                    background-color: #218838;
+                }
+
+        table td:nth-child(4) {
+            word-break: break-all;
         }
     </style>
 </head>
