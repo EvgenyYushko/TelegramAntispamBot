@@ -12,6 +12,8 @@ using DomainLayer.Repositories;
 using Infrastructure.Enumerations;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models;
+using MailSenderService.BuisinessLogic.Services;
+using MailSenderService.ServiceLayer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -47,6 +49,7 @@ namespace TelegramAntispamBot
 		public void ConfigureSettings(IServiceCollection services)
 		{
 			services.Configure<AppOptions>(Configuration.GetSection(nameof(AppOptions)));
+			services.Configure<MailOptions>(Configuration.GetSection(nameof(MailOptions)));
 			services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
 			services.Configure<AuthorizationOptions>(Configuration.GetSection(nameof(AuthorizationOptions)));
 
@@ -82,8 +85,10 @@ namespace TelegramAntispamBot
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
 			services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
 			services.AddSingleton<ITelegramUserService, TelegramUserService>();
+			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
-
+			services.AddHostedService<SendMailBackgroundService>();
+			
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IPermissionService, PermissionService>();
@@ -99,6 +104,11 @@ namespace TelegramAntispamBot
 			};
 
 			services.AddSingleton(_telegram);
+
+			var mailOption = Configuration.GetSection("MailOptions").Get<MailOptions>();
+			mailOption.SenderPassword = Configuration.GetValue<string>(SENDER_PASSWORD) ?? Environment.GetEnvironmentVariable(SENDER_PASSWORD);
+
+			services.AddSingleton(mailOption);
 
 			AddFilters(services);
 
