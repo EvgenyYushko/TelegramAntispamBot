@@ -25,7 +25,7 @@ namespace DataAccessLayer.Repositories
 
 		public TelegramUser Get(long id)
 		{
-			return LocalUserStorage.FirstOrDefault(user => user.User.Id == id);
+			return LocalUserStorage.FirstOrDefault(user => user.UserId == id);
 		}
 
 		public async Task<bool> TryAdd(TelegramUser userInfo)
@@ -39,7 +39,7 @@ namespace DataAccessLayer.Repositories
 			Console.WriteLine("Пользователь Не существует в локльном хранилище");
 			LocalUserStorage.Add(userInfo);
 
-			if (_context.TelegramUsers.Any(u => u.UserId.Equals(userInfo.User.Id)))
+			if (_context.TelegramUsers.Any(u => u.UserId.Equals(userInfo.UserId)))
 			{
 				Console.WriteLine("Данный пользователь уже существует в БД");
 				await UpdateLocalStorage();
