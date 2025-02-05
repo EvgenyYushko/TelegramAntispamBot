@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,6 +11,10 @@ namespace TelegramAntispamBot.Pages
 	public class ErrorModel : PageModel
 	{
 		public string RequestId { get; set; }
+
+		public bool IsDevelopment => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+		public string EnvironmentLoc => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
 		public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 

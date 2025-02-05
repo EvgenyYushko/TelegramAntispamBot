@@ -1,26 +1,117 @@
 ﻿@page
 @model ErrorModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Oops! Something went wrong";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --error-color: #ef4444;
+        }
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+        .error-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-in;
+        }
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to the <strong>Development</strong> environment displays detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+        .error-icon {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 2rem;
+            color: var(--error-color);
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .technical-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            font-family: monospace;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+            .dark-mode .technical-details {
+                background-color: #2d2d2d;
+            }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="error-container text-center">
+        <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+
+        <h1 class="display-4 text-danger mb-3">@ViewData["Title"]</h1>
+        <p class="lead mb-4">We're sorry, but something went wrong while processing your request.</p>
+
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary btn-lg px-5">
+                <i class="bi bi-house-door me-2"></i>Go to Homepage
+            </a>
+            <a href="mailto:support@yourdomain.com" class="btn btn-outline-secondary btn-lg px-5">
+                <i class="bi bi-envelope me-2"></i>Contact Support
+            </a>
+        </div>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="technical-details mt-5 text-start">
+                <h5 class="mb-3">Technical Details</h5>
+                <div class="mb-2">
+                    <strong>Request ID:</strong>
+                    <code>@Model.RequestId</code>
+                </div>
+
+                @if (Model.IsDevelopment)
+                {
+                    <div class="mt-3">
+                        <h6>Development Mode</h6>
+                        <p class="text-muted mb-0">Environment: @Model.EnvironmentLoc</p>
+                        <p class="text-muted">Error details are shown because you're running in Development mode.</p>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mt-3">Enable development mode for additional error details.</p>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Optional: Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</body>
+</html>

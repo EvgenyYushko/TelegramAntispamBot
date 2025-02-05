@@ -155,8 +155,7 @@ namespace TelegramAntispamBot
 			else
 			{
 				local = false;
-				app.UseDeveloperExceptionPage();
-				//app.UseExceptionHandler("/Error");
+				app.UseExceptionHandler("/Error");
 				app.UseHsts();
 				var dbContext = app.ApplicationServices.GetRequiredService<ApplicationDbContext>();
 				dbContext.Database.Migrate();
@@ -201,10 +200,6 @@ namespace TelegramAntispamBot
 			}
 
 			Console.WriteLine($"Bot {Task.Run(async () => await _telegram.TelegramClient.GetMeAsync()).Result.Username} is running...");
-			var a = Configuration.GetValue<string>(GOOGLE_CLIENT_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_ID);
-			var b = Configuration.GetValue<string>(GOOGLE_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_SECRET);
-			Console.WriteLine("GOOGLE_CLIENT_ID="+a);
-			Console.WriteLine("GOOGLE_CLIENT_SECRET="+b);
 		}
 
 		public async Task ConfigureWebhookAsync(bool local)
@@ -227,9 +222,6 @@ namespace TelegramAntispamBot
 
 		private void AddAppAuthentication(IServiceCollection services, JwtOptions jwtOptions)
 		{
-			Console.WriteLine("GOOGLE_CLIENT_ID="+Configuration.GetValue<string>(GOOGLE_CLIENT_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_ID));
-			Console.WriteLine("GOOGLE_CLIENT_SECRET="+Configuration.GetValue<string>(GOOGLE_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_SECRET));
-
 			services.AddAuthentication(options =>
 				{
 					// —хема по умолчанию дл€ аутентификации из cookies

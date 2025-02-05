@@ -32,13 +32,6 @@ namespace TelegramAntispamBot.Pages.User
 				return Page();
 			}
 
-			if (User.Identity.IsAuthenticated)
-			{
-				string email = User.FindFirst(ClaimTypes.Email)?.Value;
-				string name = User.FindFirst(ClaimTypes.Name)?.Value;
-				// Используйте данные пользователя
-			}
-
 			return RedirectToPage("/Account/Register");
 		}
 	}
