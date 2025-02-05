@@ -14,10 +14,13 @@ using Infrastructure.InjectSettings;
 using Infrastructure.Models;
 using MailSenderService.BuisinessLogic.Services;
 using MailSenderService.ServiceLayer.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -69,6 +72,13 @@ namespace TelegramAntispamBot
 				options.SupportedCultures = supportedCultures;
 				options.SupportedUICultures = supportedCultures;
 			});
+
+			services.Configure<CookiePolicyOptions>(options =>
+			{
+				options.MinimumSameSitePolicy = SameSiteMode.None;
+				options.Secure = CookieSecurePolicy.Always;
+			});
+
 		}
 
 		public void ConfigureServices(IServiceCollection services)
@@ -88,7 +98,7 @@ namespace TelegramAntispamBot
 			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 			services.AddHostedService<SendMailBackgroundService>();
-			
+
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IPermissionService, PermissionService>();
@@ -155,6 +165,7 @@ namespace TelegramAntispamBot
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
 			app.UseRequestLocalization();
+			app.UseCookiePolicy();
 			app.UseRouting();
 			app.UseAuthentication();
 			app.UseAuthorization();
@@ -180,8 +191,12 @@ namespace TelegramAntispamBot
 			}
 
 			Console.WriteLine($"Bot {Task.Run(async () => await _telegram.TelegramClient.GetMeAsync()).Result.Username} is running...");
+			var a = Configuration.GetValue<string>(GOOGLE_CLIENT_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_ID);
+			var b = Configuration.GetValue<string>(GOOGLE_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_SECRET);
+			Console.WriteLine("GOOGLE_CLIENT_ID="+a);
+			Console.WriteLine("GOOGLE_CLIENT_SECRET="+b);
 		}
-		
+
 		public async Task ConfigureWebhookAsync(bool local)
 		{
 			if (local)
@@ -199,13 +214,33 @@ namespace TelegramAntispamBot
 				}
 			}
 		}
-		 
-		private static void AddAppAuthentication(IServiceCollection services, JwtOptions jwtOptions)
+
+		private void AddAppAuthentication(IServiceCollection services, JwtOptions jwtOptions)
 		{
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			Console.WriteLine("GOOGLE_CLIENT_ID="+Configuration.GetValue<string>(GOOGLE_CLIENT_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_ID));
+			Console.WriteLine("GOOGLE_CLIENT_SECRET="+Configuration.GetValue<string>(GOOGLE_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_SECRET));
+
+			services.AddAuthentication(options =>
+				{
+					// Схема по умолчанию для аутентификации из cookies
+					options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+					// Схема для вызова аутентификации (challenge) – Google
+					options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+				})
+				.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+				{
+					options.Cookie.SameSite = SameSiteMode.None;
+					options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+				}) // Регистрация cookie-аутентификации
+				.AddGoogle(options =>
+				{
+					options.ClientId = Configuration.GetValue<string>(GOOGLE_CLIENT_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_ID);
+					options.ClientSecret = Configuration.GetValue<string>(GOOGLE_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_SECRET);
+					options.CallbackPath = new PathString("/signin-google");
+				})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
-					options.TokenValidationParameters = new()
+					options.TokenValidationParameters = new TokenValidationParameters
 					{
 						ValidateIssuer = false,
 						ValidateAudience = false,

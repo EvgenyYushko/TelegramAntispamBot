@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.Enumerations;
 using MailSenderService.ServiceLayer.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Base;
@@ -55,7 +56,7 @@ namespace TelegramAntispamBot.Pages.Account
 		//	}
 		//}
 
-		public async Task<IActionResult> OnPostAsync()
+		public async Task<IActionResult> OnPostRegisterAsync()
 		{
 			try
 			{
@@ -82,6 +83,13 @@ namespace TelegramAntispamBot.Pages.Account
 			}
 
 			return RedirectToPage("/Account/Register");
+		}
+
+		public IActionResult OnPostExternalLogin(string provider)
+		{
+			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback", values: new {needRegister = true});
+			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+			return Challenge(properties, provider);
 		}
 	}
 }

@@ -22,7 +22,7 @@ namespace TelegramAntispamBot.BackgroundServices
 			{
 				try
 				{
-					await _mailService.Send("jeka-krut@mail.ru", "test", "testTheme", isBodyHtml:true, copyAddress: new List<string>() { "yushkoevgeny@gmail.com" });
+					//await _mailService.Send("jeka-krut@mail.ru", "test", "testTheme", isBodyHtml:true, copyAddress: new List<string>() { "yushkoevgeny@gmail.com" });
 				}
 				catch (Exception ex)
 				{

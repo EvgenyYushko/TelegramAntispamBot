@@ -138,7 +138,7 @@
     </div>
     @if (User.Identity.IsAuthenticated)
     {
-        <div class="button-container">
+        <div policy="Admin" class="button-container">
             <a href="/Admin/Analytics" class="admin-button">@Loc["Site_Statistics"]</a>
             <a href="/Admin/TelegramUsers" class="admin-button">@Loc["TgUsers"]</a>
         </div>

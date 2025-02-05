@@ -11,5 +11,7 @@ namespace ServiceLayer.Services.Authorization
 		Task<string> Login(string email, string password);
 
 		Task<UserAccount> GetUserById(Guid id);
+
+		Task<UserAccount> GetUserByName(string userName);
 	}
 }

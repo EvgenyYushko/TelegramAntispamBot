@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,13 @@ namespace TelegramAntispamBot.Pages.User
 			{
 				CurrentUser = await _usersService.GetUserById(UserId);
 				return Page();
+			}
+
+			if (User.Identity.IsAuthenticated)
+			{
+				string email = User.FindFirst(ClaimTypes.Email)?.Value;
+				string name = User.FindFirst(ClaimTypes.Name)?.Value;
+				// Используйте данные пользователя
 			}
 
 			return RedirectToPage("/Account/Register");

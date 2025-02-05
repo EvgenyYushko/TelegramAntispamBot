@@ -1,9 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using ServiceLayer.Services;
 using ServiceLayer.Services.Authorization;
-using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Filters;
 using TelegramAntispamBot.Pages.Base;
 
@@ -35,7 +34,7 @@ namespace TelegramAntispamBot.Pages.Account
 			return Page();
 		}
 
-		public async Task<IActionResult> OnPost()
+		public async Task<IActionResult> OnPostLogin()
 		{
 			try
 			{
@@ -50,6 +49,13 @@ namespace TelegramAntispamBot.Pages.Account
 				ErrorMessage = ex.Message;
 				return RedirectToPage("/Account/Login");
 			}
+		}
+
+		public IActionResult OnPostExternalLogin(string provider)
+		{
+			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback", values: new { needRegister = false });
+			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+			return Challenge(properties, provider);
 		}
 	}
 }

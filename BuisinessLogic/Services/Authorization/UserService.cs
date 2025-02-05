@@ -69,5 +69,10 @@ namespace BuisinessLogic.Services.Authorization
 			var user = await _usersRepository.GetById(id);
 			return user;
 		}
+
+		public async Task<UserAccount> GetUserByName(string userName)
+		{
+			return await _usersRepository.GetByUserName(userName);
+		}
 	}
 }
