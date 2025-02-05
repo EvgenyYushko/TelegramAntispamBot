@@ -24,7 +24,7 @@ namespace TelegramAntispamBot.Pages.Account
         {
         }
 
-		public async Task<IActionResult> OnGetCallbackAsync(bool needRegister)
+		public async Task<IActionResult> OnGetCallbackAsync()
 		{
 			var result = await HttpContext.AuthenticateAsync();
 			if (result.Succeeded)
@@ -43,13 +43,10 @@ namespace TelegramAntispamBot.Pages.Account
 				var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
 				var gMail = claims.FirstOrDefault(c=>c.Type == ClaimTypes.Email).Value;
 
-				if (needRegister)
+				var user = await _userService.GetUserByName(name);
+				if (user is null)
 				{
-					var user = await _userService.GetUserByName(name);
-					if (user is null)
-					{
-						await _userService.Register(name, gMail, googleId, Role.User.ToString());
-					}
+					await _userService.Register(name, gMail, googleId, Role.User.ToString());
 				}
 
 				var token = await _userService.Login(gMail, googleId);

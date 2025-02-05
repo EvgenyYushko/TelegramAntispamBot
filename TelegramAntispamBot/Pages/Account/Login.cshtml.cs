@@ -53,7 +53,7 @@ namespace TelegramAntispamBot.Pages.Account
 
 		public IActionResult OnPostExternalLogin(string provider)
 		{
-			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback", values: new { needRegister = false });
+			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback");
 			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
 			return Challenge(properties, provider);
 		}

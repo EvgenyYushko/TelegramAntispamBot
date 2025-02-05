@@ -155,7 +155,8 @@ namespace TelegramAntispamBot
 			else
 			{
 				local = false;
-				app.UseExceptionHandler("/Error");
+				app.UseDeveloperExceptionPage();
+				//app.UseExceptionHandler("/Error");
 				app.UseHsts();
 				var dbContext = app.ApplicationServices.GetRequiredService<ApplicationDbContext>();
 				dbContext.Database.Migrate();
