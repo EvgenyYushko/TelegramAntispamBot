@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using DomainLayer.Models.Authorization;
 using DomainLayer.Repositories;
 using Infrastructure.Enumerations;
+using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
-using ServiceLayer.Models;
 
 namespace DataAccessLayer.Repositories
 {
@@ -25,7 +25,7 @@ namespace DataAccessLayer.Repositories
 
 			var roleEntity = await _context.Roles
 				.SingleOrDefaultAsync(r => r.Id == roleId);
-			
+
 
 			var userEntity = new UserEntity()
 			{
@@ -33,7 +33,7 @@ namespace DataAccessLayer.Repositories
 				UserName = user.UserName,
 				PasswordHash = user.PasswordHash,
 				Email = user.Email,
-				Roles = new List<RoleEntity>(){ roleEntity}
+				Roles = new List<RoleEntity>() { roleEntity }
 			};
 
 			await _context.Users.AddAsync(userEntity);

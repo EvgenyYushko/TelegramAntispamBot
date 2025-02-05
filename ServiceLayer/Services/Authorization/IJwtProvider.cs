@@ -1,4 +1,4 @@
-﻿using ServiceLayer.Models;
+﻿using Infrastructure.Models;
 
 namespace ServiceLayer.Services.Authorization
 {

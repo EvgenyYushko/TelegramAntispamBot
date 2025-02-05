@@ -227,7 +227,7 @@ namespace TelegramAntispamBot
 					// —хема по умолчанию дл€ аутентификации из cookies
 					options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 					// —хема дл€ вызова аутентификации (challenge) Ц Google
-					options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+					//options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 				})
 				.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 				{

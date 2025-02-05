@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Infrastructure.Enumerations;
-using ServiceLayer.Models;
+using Infrastructure.Models;
 
 namespace DomainLayer.Repositories
 {

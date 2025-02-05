@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DomainLayer.Repositories;
-using ServiceLayer.Models;
+using Infrastructure.Models;
 using ServiceLayer.Services.Authorization;
-using ServiceLayer.Services.Telegram;
 
 namespace BuisinessLogic.Services.Authorization
 {
@@ -52,7 +51,7 @@ namespace BuisinessLogic.Services.Authorization
 				throw new ArgumentException("Пользователь с данным email не зарегистрирован.");
 			}
 
-			var result = _passwordHasher.Verify(password, user.PasswordHash);   
+			var result = _passwordHasher.Verify(password, user.PasswordHash);
 
 			if (result == false)
 			{
@@ -73,6 +72,11 @@ namespace BuisinessLogic.Services.Authorization
 		public async Task<UserAccount> GetUserByName(string userName)
 		{
 			return await _usersRepository.GetByUserName(userName);
+		}
+
+		public async Task<UserAccount> GetByEmail(string eMail)
+		{
+			return await _usersRepository.GetByEmail(eMail);
 		}
 	}
 }

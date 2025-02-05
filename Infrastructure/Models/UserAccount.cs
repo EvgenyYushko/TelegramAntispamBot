@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Infrastructure.Enumerations;
 
-namespace ServiceLayer.Models
+namespace Infrastructure.Models
 {
 	public class UserAccount
 	{
@@ -25,7 +25,7 @@ namespace ServiceLayer.Models
 		public static UserAccount Create(string userName, string passwordHash, string email, string role)
 		{
 			var roleEnumValue = Enum.GetValues<Role>().Where(r => role == r.ToString()).FirstOrDefault();
-			return new UserAccount(Guid.NewGuid(), userName, passwordHash, email, new List<Role>(){roleEnumValue});
+			return new UserAccount(Guid.NewGuid(), userName, passwordHash, email, new List<Role>() { roleEnumValue });
 		}
 	}
 }

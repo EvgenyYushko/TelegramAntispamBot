@@ -3,11 +3,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using DomainLayer.Models.Authorization;
-using Infrastructure.Constants;
+using Infrastructure.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using ServiceLayer.Models;
 using ServiceLayer.Services.Authorization;
+using static Infrastructure.Helpers.AuthorizeHelper;
 
 namespace BuisinessLogic.Services.Authorization
 {
@@ -22,7 +22,7 @@ namespace BuisinessLogic.Services.Authorization
 
 		public string GenerateToken(UserAccount user)
 		{
-			Claim[] claims = new Claim[] { new Claim(CustomClaims.UserId, user.Id.ToString()) };
+			Claim[] claims = GetClaims(user);
 
 			var signingCredentials = new SigningCredentials(
 				new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey)),

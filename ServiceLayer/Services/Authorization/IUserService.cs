@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ServiceLayer.Models;
+using Infrastructure.Models;
 
 namespace ServiceLayer.Services.Authorization
 {
@@ -13,5 +13,7 @@ namespace ServiceLayer.Services.Authorization
 		Task<UserAccount> GetUserById(Guid id);
 
 		Task<UserAccount> GetUserByName(string userName);
+
+		Task<UserAccount> GetByEmail(string eMail);
 	}
 }

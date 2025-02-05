@@ -1,8 +1,7 @@
-using System.Security.Claims;
 using System.Threading.Tasks;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ServiceLayer.Models;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Pages.Base;

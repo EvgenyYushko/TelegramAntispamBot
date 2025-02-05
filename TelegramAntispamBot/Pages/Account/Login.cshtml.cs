@@ -1,10 +1,14 @@
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Filters;
 using TelegramAntispamBot.Pages.Base;
+using static Infrastructure.Helpers.AuthorizeHelper;
 
 namespace TelegramAntispamBot.Pages.Account
 {
@@ -39,8 +43,11 @@ namespace TelegramAntispamBot.Pages.Account
 			try
 			{
 				var token = await _userService.Login(Email, Password);
-
 				HttpContext.Response.Cookies.Append("token", token);
+
+				var user = await _userService.GetByEmail(Email);
+				var claimsIdentity = new ClaimsIdentity(GetClaims(user), CookieAuthenticationDefaults.AuthenticationScheme);
+				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
 				return RedirectToPage("/User/Profile");
 			}
@@ -55,7 +62,7 @@ namespace TelegramAntispamBot.Pages.Account
 		{
 			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback");
 			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-			return Challenge(properties, provider);
+			return Challenge(properties, GoogleDefaults.AuthenticationScheme);
 		}
 	}
 }
