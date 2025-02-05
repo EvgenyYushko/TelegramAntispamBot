@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -167,6 +168,14 @@ namespace TelegramAntispamBot
 			app.UseRequestLocalization();
 			app.UseCookiePolicy();
 			app.UseRouting();
+
+			// Важно: включаем логику распознавания X-Forwarded-Proto
+			app.UseForwardedHeaders(new ForwardedHeadersOptions
+			{
+				ForwardedHeaders = 
+					ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+			});
+
 			app.UseAuthentication();
 			app.UseAuthorization();
 			app.UseEndpoints(endpoints =>
