@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BuisinessLogic.Handlers;
 using BuisinessLogic.Services.Authorization;
+using BuisinessLogic.Services.Parsers;
 using BuisinessLogic.Services.Telegram;
 using DataAccessLayer;
 using DataAccessLayer.Repositories;
@@ -15,7 +16,6 @@ using Infrastructure.Models;
 using MailSenderService.BuisinessLogic.Services;
 using MailSenderService.ServiceLayer.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -99,6 +99,7 @@ namespace TelegramAntispamBot
 			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 			services.AddHostedService<SendMailBackgroundService>();
+			services.AddHostedService<CurrencyBackgroundService>();
 
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IUserService, UserService>();
@@ -106,6 +107,7 @@ namespace TelegramAntispamBot
 			services.AddScoped<IJwtProvider, JwtProvider>();
 			services.AddScoped<IPasswordHasher, PasswordHasher>();
 			services.AddScoped<ILogRepository, LogRepository>();
+			services.AddSingleton<NbrbCurrencyParser>();
 			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
@@ -172,7 +174,7 @@ namespace TelegramAntispamBot
 			// Важно: включаем логику распознавания X-Forwarded-Proto
 			app.UseForwardedHeaders(new ForwardedHeadersOptions
 			{
-				ForwardedHeaders = 
+				ForwardedHeaders =
 					ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 			});
 
