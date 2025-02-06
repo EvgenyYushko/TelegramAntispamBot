@@ -100,6 +100,7 @@ namespace TelegramAntispamBot
 			services.AddHostedService<HealthCheckBackgroundService>();
 			services.AddHostedService<SendMailBackgroundService>();
 			services.AddHostedService<CurrencyBackgroundService>();
+			services.AddHostedService<HabrBackgroundService>();
 
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IUserService, UserService>();
@@ -108,6 +109,7 @@ namespace TelegramAntispamBot
 			services.AddScoped<IPasswordHasher, PasswordHasher>();
 			services.AddScoped<ILogRepository, LogRepository>();
 			services.AddSingleton<NbrbCurrencyParser>();
+			services.AddSingleton<HabrParser>();
 			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
@@ -174,8 +176,7 @@ namespace TelegramAntispamBot
 			// Важно: включаем логику распознавания X-Forwarded-Proto
 			app.UseForwardedHeaders(new ForwardedHeadersOptions
 			{
-				ForwardedHeaders =
-					ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+				ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 			});
 
 			app.UseAuthentication();
