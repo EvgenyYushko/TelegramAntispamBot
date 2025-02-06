@@ -79,7 +79,6 @@ namespace TelegramAntispamBot
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 				options.Secure = CookieSecurePolicy.Always;
 			});
-
 		}
 
 		public void ConfigureServices(IServiceCollection services)
@@ -101,6 +100,7 @@ namespace TelegramAntispamBot
 			services.AddHostedService<SendMailBackgroundService>();
 			services.AddHostedService<CurrencyBackgroundService>();
 			services.AddHostedService<HabrBackgroundService>();
+			services.AddHostedService<OnlinerBackgroundService>();
 
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IUserService, UserService>();
@@ -110,6 +110,7 @@ namespace TelegramAntispamBot
 			services.AddScoped<ILogRepository, LogRepository>();
 			services.AddSingleton<NbrbCurrencyParser>();
 			services.AddSingleton<HabrParser>();
+			services.AddSingleton<OnlinerParser>();
 			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
