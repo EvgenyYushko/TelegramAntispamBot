@@ -5,25 +5,24 @@ BACKUP_FILE="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 RENDER_SERVICE_ID="dpg-cu365mt2ng1s73c6t8b0-a"
 
-ENV_VARS_A=$(curl --request GET \
-     --url https://api.render.com/v1/postgres/dpg-cu365mt2ng1s73c6t8b0-a/connection-info \
+ENV_VARS=$(curl --request GET \
+     --url https://api.render.com/v1/postgres/$WEB_SERVICE_ID/connection-info \
      --header 'accept: application/json' \
-     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ')
-
-echo $ENV_VARS_A
+     --header 'authorization: Bearer $RENDER_API_KEY')
 
 # Получение переменных окружения веб-сервиса
-ENV_VARS=$(curl -s -X GET "https://api.render.com/v1/postgres/$WEB_SERVICE_ID/env-vars" \
+ENV_VARS=$(curl -s -X GET https://api.render.com/v1/postgres/$WEB_SERVICE_ID/connection-info \
   -H "accept: application/json" \
   -H "authorization: Bearer $RENDER_API_KEY")
 
 echo $ENV_VARS
+DB_PASSWORD=$(echo "$ENV_VARS" | jq -r '.password')
 
 # Извлечение DATABASE_URL
-DATABASE_URL=$(echo "$ENV_VARS" | jq -r '.[] | select(.key == "DATABASE_URL") | .value')
+#DATABASE_URL=$(echo "$ENV_VARS" | jq -r '.[] | select(.key == "DATABASE_URL") | .value')
 
 # Парсинг DATABASE_URL для получения пароля
-DB_PASSWORD=$(echo "$DATABASE_URL" | awk -F':' '{print $3}' | awk -F'@' '{print $1}')
+#DB_PASSWORD=$(echo "$DATABASE_URL" | awk -F':' '{print $3}' | awk -F'@' '{print $1}')
 
 echo "Пароль БД: $DB_PASSWORD"
 
