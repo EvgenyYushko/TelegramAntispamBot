@@ -6,39 +6,33 @@ BACKUP_FILE="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 RENDER_SERVICE_ID="dpg-cu365mt2ng1s73c6t8b0-a"
 
-# Шаг 1: Получение данных текущей БД
-RAW_JSON=$(curl -s -X GET "https://api.render.com/v1/services/$RENDER_SERVICE_ID/env-vars" \
-  -H "Authorization: Bearer $RENDER_API_KEY")
+ Шаг 1: Получение данных текущей БД
+echo "🔄 Получение данных БД..."
+DB_INFO=$(curl -s -X GET "https://api.render.com/v1/postgres/$RENDER_SERVICE_ID" \
+  -H "accept: application/json" \
+  -H "authorization: Bearer $RENDER_API_KEY")
 
-# Выводим сырой JSON для отладки
-echo "DEBUG: $RAW_JSON"
-
-# Попытка извлечь DATABASE_URL. Первый вариант — если JSON содержит ключ "envVars".
-DB_INFO=$(echo "$RAW_JSON" | jq -r '.envVars[] | select(.key=="DATABASE_URL") | .value')
-
-# Если DB_INFO всё ещё пустое, попробуйте предположить, что JSON возвращается как массив
+# Проверка успешности запроса
 if [ -z "$DB_INFO" ]; then
-    DB_INFO=$(echo "$RAW_JSON" | jq -r '.[] | select(.key=="DATABASE_URL") | .value')
+  echo "❌ Ошибка: Не удалось получить данные БД."
+  exit 1
 fi
 
-echo "DB_INFO: $DB_INFO"
+# Извлечение параметров подключения
+DB_HOST=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.host')
+DB_PORT=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.port')
+DB_USER=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.user')
+DB_PASSWORD=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.password')
+DB_NAME=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.database')
 
-# Если DB_INFO не получен, завершаем выполнение
-if [ -z "$DB_INFO" ]; then
-    echo "❌ Не удалось получить строку подключения из Render API."
-    exit 1
+# Проверка наличия всех данных
+if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
+  echo "❌ Ошибка: Не удалось извлечь все параметры подключения."
+  exit 1
 fi
-
-# Извлечение параметров подключения из строки вида:
-# postgres://username:password@host:port/database
-DB_HOST=$(echo "$DB_INFO" | awk -F'@' '{print $2}' | cut -d':' -f1)
-DB_PORT=$(echo "$DB_INFO" | awk -F':' '{print $4}' | cut -d'/' -f1)
-DB_USER=$(echo "$DB_INFO" | awk -F':' '{print $2}' | cut -d'/' -f3)
-DB_PASSWORD=$(echo "$DB_INFO" | awk -F':' '{print $3}' | cut -d'@' -f1)
-DB_NAME=$(echo "$DB_INFO" | awk -F'/' '{print $4}')
 
 echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD"
 
 # Шаг 2: Создание бэкапа
-echo "🔄 Creating backup..."
-PGPASSWORD=$DB_PASSWORD pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
+#echo "🔄 Creating backup..."
+#PGPASSWORD=$DB_PASSWORD pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
