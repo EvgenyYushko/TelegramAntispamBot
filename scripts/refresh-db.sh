@@ -24,6 +24,8 @@ DB_NAME=$(echo "$CONNECTION_INFO" | jq -r '.externalConnectionString' | awk -F'/
 DB_USER=$(echo "$CONNECTION_INFO" | jq -r '.psqlCommand' | awk '{print $4}' | awk -F'-U' '{print $2}' | awk '{print $1}')
 DB_PASSWORD=$(echo "$CONNECTION_INFO" | jq -r '.password')
 
+echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD"
+
 # Проверка наличия всех данных
 if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
   echo "❌ Ошибка: Не удалось извлечь все параметры подключения."
