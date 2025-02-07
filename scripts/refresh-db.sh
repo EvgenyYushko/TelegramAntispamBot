@@ -12,11 +12,7 @@ DB_INFO=$(curl -s -X GET "https://api.render.com/v1/postgres/$RENDER_SERVICE_ID"
   -H "accept: application/json" \
   -H "authorization: Bearer $RENDER_API_KEY")
 
-# Проверка успешности запроса
-if [ -z "$DB_INFO" ]; then
-  echo "❌ Ошибка: Не удалось получить данные БД."
-  exit 1
-fi
+echo $DB_INFO
 
 # Извлечение параметров подключения
 DB_HOST=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.host')
