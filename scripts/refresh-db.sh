@@ -51,7 +51,8 @@ echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_PAS
 # Шаг 7: Создание бекапа
 echo "🔄 Создание бекапа..."
 PGPASSWORD=$DB_PASSWORD 
-pg_dump -h dpg-cu365mt2ng1s73c6t8b0-a.oregon-postgres.render.com -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
+#pg_dump -h dpg-cu365mt2ng1s73c6t8b0-a.oregon-postgres.render.com -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
+pg_dump -h dpg-cu365mt2ng1s73c6t8b0-a.oregon-postgres.render.com -p 5432 -U telergamdb_user -d telergamdb -Fc -f backup.dump
 
 if [ $? -eq 0 ]; then
   echo "✅ Бекап успешно создан: $BACKUP_FILE"
