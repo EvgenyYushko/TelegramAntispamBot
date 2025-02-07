@@ -50,8 +50,8 @@ echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_PAS
 
 # Шаг 7: Создание бекапа
 echo "🔄 Создание бекапа..."
-#export PGPASSWORD=$DB_PASSWORD
-#pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
+export PGPASSWORD=$DB_PASSWORD
+pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
 
 pwd
 ls -lh backup.dump
