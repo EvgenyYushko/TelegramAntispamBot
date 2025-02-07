@@ -33,11 +33,8 @@ fi
 DB_NAME=$(echo "$DB_INFO" | jq -r '.databaseName')
 DB_PORT=5432  # Порт PostgreSQL по умолчанию
 DB_USER=$(echo "$DB_INFO" | jq -r '.databaseUser')
-DB_HOST=$(echo "$CONNECTION_INFO" | jq -r '.externalConnectionString' | awk -F':' '{print $1}')
+DB_HOST="$RENDER_SERVICE_ID.oregon-postgres.render.com"
 DB_PASSWORD=$(echo "$CONNECTION_INFO" | jq -r '.password')
-
-echo "CONNECTION_INFO: $CONNECTION_INFO"
-echo "$CONNECTION_INFO" | jq -r '.externalConnectionString'
 
 # Шаг 6: Проверка наличия всех данных
 if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
