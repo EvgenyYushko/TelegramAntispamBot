@@ -78,9 +78,16 @@ else
   echo "❌ Ошибка: Не удалось создать бекап."
 fi
 
-#echo "Try suspend"
+echo "Try suspend DB"
 curl --request POST \
      --url https://api.render.com/v1/postgres/$DB_ID/suspend \
+     --header 'accept: application/json' \
+     --header "authorization: Bearer $RENDER_API_KEY"
+sleep 10
+
+echo "Try resume DB"
+curl --request POST \
+     --url https://api.render.com/v1/postgres/$DB_ID/resume \
      --header 'accept: application/json' \
      --header "authorization: Bearer $RENDER_API_KEY"
 
