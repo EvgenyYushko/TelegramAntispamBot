@@ -5,6 +5,13 @@ BACKUP_FILE="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 RENDER_SERVICE_ID="dpg-cu365mt2ng1s73c6t8b0-a"
 
+ENV_VARS_A=$(curl --request GET \
+     --url https://api.render.com/v1/postgres/dpg-cu365mt2ng1s73c6t8b0-a/connection-info \
+     --header 'accept: application/json' \
+     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ')
+
+echo $ENV_VARS_A
+
 # Получение переменных окружения веб-сервиса
 ENV_VARS=$(curl -s -X GET "https://api.render.com/v1/postgres/$WEB_SERVICE_ID/env-vars" \
   -H "accept: application/json" \
