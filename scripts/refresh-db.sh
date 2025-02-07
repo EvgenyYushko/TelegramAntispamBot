@@ -18,11 +18,10 @@ echo $DB_INFO
 DB_HOST=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.host')
 DB_PORT=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.port')
 DB_USER=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.user')
-DB_PASSWORD=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.password')
 DB_NAME=$(echo "$DB_INFO" | jq -r '.serviceDetails.connectionDetails.database')
 
 # Проверка наличия всех данных
-if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
+if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_NAME" ]; then
   echo "❌ Ошибка: Не удалось извлечь все параметры подключения."
   exit 1
 fi
