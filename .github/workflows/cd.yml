@@ -9,6 +9,24 @@ on:
     types:
       - closed
 jobs:
+  refresh-db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq postgresql-client
+
+      - name: Run script
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_WEB_SERVICE_ID: ${{ secrets.RENDER_WEB_SERVICE_ID }}
+        run: |
+          chmod +x scripts/refresh-db.sh
+          ./scripts/refresh-db.sh
   deploy:
     runs-on: windows-latest
 
