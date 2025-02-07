@@ -78,10 +78,11 @@ else
   echo "❌ Ошибка: Не удалось создать бекап."
 fi
 
-echo "Try suspend"
-curl -s -X GET "https://api.render.com/v1/postgres/$DB_ID"/suspend \
-  -H "accept: application/json" \
-  -H "authorization: Bearer $RENDER_API_KEY"
+#echo "Try suspend"
+curl --request POST \
+     --url https://api.render.com/v1/postgres/$DB_ID/suspend \
+     --H 'accept: application/json' \
+     --H "authorization: Bearer $RENDER_API_KEY"
 
 echo "🚀 Starting web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
