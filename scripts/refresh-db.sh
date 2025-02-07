@@ -55,6 +55,8 @@ pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
 
 pwd
 ls -lh backup.dump
+rm -i backup.dump
+ls -lh backup.dump
 
 if [ $? -eq 0 ]; then
   echo "✅ Бекап успешно создан: $BACKUP_FILE"
