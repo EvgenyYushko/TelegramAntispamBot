@@ -3,8 +3,8 @@
 # Конфигурация
 BACKUP_FILE="backup.dump"
 # Используйте переменные окружения в CI/CD, не хардкодите их
-# RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-# RENDER_SERVICE_ID="dpg-cu365mt2ng1s73c6t8b0-a"
+RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
+RENDER_SERVICE_ID="dpg-cu365mt2ng1s73c6t8b0-a"
 
 # Шаг 1: Получение данных текущей БД
 RAW_JSON=$(curl -s -X GET "https://api.render.com/v1/services/$RENDER_SERVICE_ID/env-vars" \
