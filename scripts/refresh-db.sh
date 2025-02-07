@@ -5,6 +5,21 @@ BACKUP_FILE="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 RENDER_SERVICE_ID="dpg-cu365mt2ng1s73c6t8b0-a"
 
+# Получение переменных окружения веб-сервиса
+ENV_VARS=$(curl -s -X GET "https://api.render.com/v1/postgres/$WEB_SERVICE_ID/env-vars" \
+  -H "accept: application/json" \
+  -H "authorization: Bearer $RENDER_API_KEY")
+
+echo $ENV_VARS
+
+# Извлечение DATABASE_URL
+DATABASE_URL=$(echo "$ENV_VARS" | jq -r '.[] | select(.key == "DATABASE_URL") | .value')
+
+# Парсинг DATABASE_URL для получения пароля
+DB_PASSWORD=$(echo "$DATABASE_URL" | awk -F':' '{print $3}' | awk -F'@' '{print $1}')
+
+echo "Пароль БД: $DB_PASSWORD"
+
 # Шаг 1: Получение данных текущей БД
 echo "🔄 Получение данных БД..."
 DB_INFO=$(curl -s -X GET "https://api.render.com/v1/postgres/$RENDER_SERVICE_ID" \
