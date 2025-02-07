@@ -36,6 +36,8 @@ DB_USER=$(echo "$DB_INFO" | jq -r '.databaseUser')
 DB_HOST=$(echo "$CONNECTION_INFO" | jq -r '.externalConnectionString' | awk -F':' '{print $1}')
 DB_PASSWORD=$(echo "$CONNECTION_INFO" | jq -r '.password')
 
+echo "CONNECTION_INFO: $CONNECTION_INFO"
+
 # Шаг 6: Проверка наличия всех данных
 if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
   echo "❌ Ошибка: Не удалось извлечь все параметры подключения."
