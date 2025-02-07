@@ -68,10 +68,6 @@ echo "🔄 Создание бекапа..."
 export PGPASSWORD=$DB_PASSWORD
 pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE_NAME
 
-curl -s -X GET "https://api.render.com/v1/postgres/$DB_ID"/suspend \
-  -H "accept: application/json" \
-  -H "authorization: Bearer $RENDER_API_KEY"
-
 #pwd
 #ls -lh backup.dump
 #rm -i backup.dump
@@ -81,6 +77,11 @@ if [ $? -eq 0 ]; then
 else
   echo "❌ Ошибка: Не удалось создать бекап."
 fi
+
+echo "suspend"
+curl -s -X GET "https://api.render.com/v1/postgres/$DB_ID"/suspend \
+  -H "accept: application/json" \
+  -H "authorization: Bearer $RENDER_API_KEY"
 
 echo "🚀 Starting web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
