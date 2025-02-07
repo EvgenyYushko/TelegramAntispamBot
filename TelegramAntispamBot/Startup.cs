@@ -268,7 +268,7 @@ namespace TelegramAntispamBot
 
 		private static void ApdAppAuthorization(IServiceCollection service)
 		{
-			service.AddAuthorization(options =>
+			service.AddAuthorization(options => 
 			{
 				options.AddPolicy("Admin", policy => policy.AddRequirements(new PermissionRequirement(Permission.Delete)));
 				options.AddPolicy("User", policy => policy.AddRequirements(new PermissionRequirement(Permission.Read)));
