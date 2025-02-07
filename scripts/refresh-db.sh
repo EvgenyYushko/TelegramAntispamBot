@@ -83,13 +83,57 @@ curl --request POST \
      --url https://api.render.com/v1/postgres/$DB_ID/suspend \
      --header 'accept: application/json' \
      --header "authorization: Bearer $RENDER_API_KEY"
-sleep 10
+echo "Sleep 20 sec"
+sleep 20
 
-echo "Try resume DB"
-curl --request POST \
-     --url https://api.render.com/v1/postgres/$DB_ID/resume \
+#echo "Try resume DB"
+#curl --request POST \
+#     --url https://api.render.com/v1/postgres/$DB_ID/resume \
+#     --header 'accept: application/json' \
+#     --header "authorization: Bearer $RENDER_API_KEY"
+
+echo "Try Delete DB"
+curl --request DELETE \
+     --url https://api.render.com/v1/postgres/dpg-cu365mt2ng1s73c6t8b0-a \
      --header 'accept: application/json' \
-     --header "authorization: Bearer $RENDER_API_KEY"
+     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ'
+echo "Sleep 20 sec"
+sleep 20
+
+echo "Try Create DB"
+Response=$(curl --request POST \
+     --url https://api.render.com/v1/postgres \
+     --header 'accept: application/json' \
+     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ' \
+     --header 'content-type: application/json' \
+     --data '
+{
+  "databaseName": "telergamdb",
+  "databaseUser": "telergamdb_user",
+  "enableHighAvailability": false,
+  "plan": "free",
+  "version": "16",
+  "name": "TelergamDB",
+  "ownerId": "tea-ct84bie8ii6s73ccgf1g"
+}
+')
+echo "Sleep 7 min"
+sleep 720
+
+echo "Ответ API:"
+echo "$Response"
+
+NEW_DB_ID=$(echo "$Response" | jq -r '.id')
+
+echo "NEW_DB_ID:" $NEW_DB_ID
+
+if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
+  echo "❌ Ошибка: Не удалось создать БД!"
+  echo "Ответ API: $Response"
+  exit 1
+fi
+
+pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U telergamdb_user -d telergamdb backup.dump
 
 echo "🚀 Starting web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
