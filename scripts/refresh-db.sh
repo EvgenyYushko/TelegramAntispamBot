@@ -29,13 +29,6 @@ fi
 
 echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER
 
-curl --request POST \
-     --url https://api.render.com/v1/postgres/dpg-cu365mt2ng1s73c6t8b0-a/backup \
-     --header 'accept: application/json' \
-     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ'
-
 # Шаг 2: Создание бэкапа
 #echo "🔄 Creating backup..."
 #PGPASSWORD=$DB_PASSWORD pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE
-
-
