@@ -6,9 +6,19 @@ RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 DB_ID="dpg-cu365mt2ng1s73c6t8b0-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
+# Функция для гарантированного запуска сервиса при ошибке
+trap 'handle_error' ERR
+handle_error() {
+  echo "❌ Script failed! Attempting to start the web service..."
+  curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
+    -H "Authorization: Bearer $RENDER_API_KEY"
+  exit 1
+}
+
 echo "🛑 Stopping web service..."
 curl -s -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/suspend" \
   -H "Authorization: Bearer $RENDER_API_KEY"
+#sleep 60
 
 # Шаг 1: Получение данных текущей БД
 echo "🔄 Получение данных БД..."
@@ -57,6 +67,10 @@ echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_PAS
 echo "🔄 Создание бекапа..."
 export PGPASSWORD=$DB_PASSWORD
 pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -Fc -f $BACKUP_FILE_NAME
+
+curl -s -X GET "https://api.render.com/v1/postgres/$DB_ID"/suspend \
+  -H "accept: application/json" \
+  -H "authorization: Bearer $RENDER_API_KEY"
 
 #pwd
 #ls -lh backup.dump
