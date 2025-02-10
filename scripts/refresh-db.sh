@@ -3,8 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cukqfian91rc73au6efg-a"
+DB_ID="dpg-cukqhni3esus73autlog-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
+
+NEW_DB_NAME="telergamdb7"
+NEW_DB_USER="telergamdb_user7"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -109,8 +112,8 @@ Response=$(curl --request POST \
      --header 'content-type: application/json' \
      --data '
 {
-  "databaseName": "telergamdb6",
-  "databaseUser": "telergamdb_user6",
+  "databaseName": "$NEW_DB_NAME",
+  "databaseUser": "$NEW_DB_USER",
   "enableHighAvailability": false,
   "plan": "free",
   "version": "16",
@@ -152,9 +155,6 @@ for i in $(seq 1 $MAX_RETRIES); do
 done
 
 
-echo "Ответ API:"
-echo "$Response"
-
 NEW_DB_ID=$(echo "$Response" | jq -r '.id')
 
 echo "NEW_DB_ID:" $NEW_DB_ID
@@ -165,7 +165,9 @@ if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
   exit 1
 fi
 
-pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U telergamdb_user6 -d telergamdb6 backup.dump
+sleep 10
+ 
+pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
 
 echo "🚀 Starting web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
