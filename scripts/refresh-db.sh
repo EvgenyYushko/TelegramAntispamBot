@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cul0io2n91rc73b124r0-a"
+DB_ID="dpg-cul0n2qn91rc73b14te0-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb19"
-NEW_DB_USER="telergamdb_user19"
+NEW_DB_NAME="telergamdb20"
+NEW_DB_USER="telergamdb_user20"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -182,6 +182,12 @@ export PGPASSWORD=$NEW_DB_PASSWORD
 #pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
 pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME --no-owner backup.dump
 
+
+echo "🚀 Resume web service..."
+curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
+    -H "Authorization: Bearer $RENDER_API_KEY"
+
+echo "🚀 Deploy web service..."
 curl --request POST \
      --url https://api.render.com/v1/services/srv-ctaoq5hu0jms73f1l3q0/deploys \
      --header 'accept: application/json' \
@@ -192,10 +198,6 @@ curl --request POST \
   "clearCache": "do_not_clear"
 }
 '
-
-#echo "🚀 Starting web service..."
-#curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
-#    -H "Authorization: Bearer $RENDER_API_KEY"
 
 # Проверка доступности
 echo "🔍 Checking site availability..."
