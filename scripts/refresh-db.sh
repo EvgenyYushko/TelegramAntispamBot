@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cuktq6q3esus73b0904g-a"
+DB_ID="dpg-cuktvai3esus73b0bm00-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb15"
-NEW_DB_USER="telergamdb_user15"
+NEW_DB_NAME="telergamdb16"
+NEW_DB_USER="telergamdb_user16"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -161,6 +161,8 @@ if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
   echo "Ответ API: $Response"
   exit 1
 fi
+
+echo "NEW_DB_ID=$NEW_DB_ID" > new_db_id.txt  # Записываем в файл
 
 sleep 10
 
