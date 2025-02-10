@@ -3,7 +3,7 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cukq6nin91rc73au3aag-a"
+DB_ID="dpg-cukqbslumphs73bgjv7g-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
 # Функция для гарантированного запуска сервиса при ошибке
@@ -109,8 +109,8 @@ Response=$(curl --request POST \
      --header 'content-type: application/json' \
      --data '
 {
-  "databaseName": "telergamdb4",
-  "databaseUser": "telergamdb_user4",
+  "databaseName": "telergamdb5",
+  "databaseUser": "telergamdb_user5",
   "enableHighAvailability": false,
   "plan": "free",
   "version": "16",
@@ -125,16 +125,22 @@ Response=$(curl --request POST \
 }
 ')
 echo "Sleep 1 min"
-sleep 60
+sleep 30
 
 echo "⏳ Ожидание готовности БД..."
 MAX_RETRIES=30
 RETRY_INTERVAL=10
 
 for i in $(seq 1 $MAX_RETRIES); do
-    STATUS=$(curl -s "https://api.render.com/v1/postgres/$NEW_DB_ID" \
-              -H "authorization: Bearer $RENDER_API_KEY" | jq -r '.status // empty')
+    RESPONSE=$(curl --request GET \
+             --url https://api.render.com/v1/postgres/$NEW_DB_ID \
+             --header 'accept: application/json' \
+             --header "authorization: Bearer $RENDER_API_KEY")
     
+    echo "📝 Ответ API: $RESPONSE"  # Вывод ответа API для отладки
+
+    STATUS=$(echo "$RESPONSE" | jq -r '.status')
+
     if [ "$STATUS" == "available" ]; then
         echo "✅ БД готова!"
         break
