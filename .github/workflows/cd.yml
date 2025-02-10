@@ -26,7 +26,16 @@ jobs:
         run: |
           chmod +x scripts/refresh-db.sh
           ./scripts/refresh-db.sh
+      - name: Check new_db_id.txt content
+        run: |
+            if [ -f new_db_id.txt ]; then
+              echo "Файл new_db_id.txt найден. Содержимое:"
+              cat new_db_id.txt
+            else
+              echo "Файл new_db_id.txt не найден!"
+              exit 1
+            fi
       - name: Extract NEW_DB_ID
         run: echo "NEW_DB_ID=$(cat new_db_id.txt)" >> $GITHUB_ENV
-              echo $GITHUB_ENV
+              echo $GITHUB_ENV 
   
