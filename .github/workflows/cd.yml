@@ -26,4 +26,7 @@ jobs:
         run: |
           chmod +x scripts/refresh-db.sh
           ./scripts/refresh-db.sh
+      - name: Extract NEW_DB_ID
+        run: echo "NEW_DB_ID=$(cat new_db_id.txt)" >> $GITHUB_ENV
+              echo $GITHUB_ENV
   

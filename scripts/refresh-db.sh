@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cuktvai3esus73b0bm00-a"
+DB_ID="dpg-cul06gi3esus73b1hbt0-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb16"
-NEW_DB_USER="telergamdb_user16"
+NEW_DB_NAME="telergamdb17"
+NEW_DB_USER="telergamdb_user17"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR

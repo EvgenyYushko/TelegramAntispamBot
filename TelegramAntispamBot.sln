@@ -17,7 +17,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuisinessLogic", "Buisiness
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{AF74F484-C95D-4FAE-9175-179902451FCC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailSenderService", "MailSenderService\MailSenderService.csproj", "{2AFFF4D0-42F8-4D49-94BC-DCBB9C8A0EF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MailSenderService", "MailSenderService\MailSenderService.csproj", "{2AFFF4D0-42F8-4D49-94BC-DCBB9C8A0EF9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F34A3D4F-292D-4EF8-9D6B-A01347A88943}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\refresh-db.sh = scripts\refresh-db.sh
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,7 +67,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_PrefixTranslations = True
 		SolutionGuid = {5ED0B53F-EC65-4E5A-B247-39C188F8D8F9}
+		RESX_PrefixTranslations = True
 	EndGlobalSection
 EndGlobal
