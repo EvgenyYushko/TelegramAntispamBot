@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cukqhni3esus73autlog-a"
+DB_ID="dpg-cukqollumphs73bgocng-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb7"
-NEW_DB_USER="telergamdb_user7"
+NEW_DB_NAME="telergamdb10"
+NEW_DB_USER="telergamdb_user10"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -107,26 +107,24 @@ sleep 20
 echo "Try Create DB"
 Response=$(curl --request POST \
      --url https://api.render.com/v1/postgres \
-     --header 'accept: application/json' \
+     --header "accept: application/json" \
      --header "authorization: Bearer $RENDER_API_KEY" \
-     --header 'content-type: application/json' \
-     --data '
-{
-  "databaseName": "$NEW_DB_NAME",
-  "databaseUser": "$NEW_DB_USER",
-  "enableHighAvailability": false,
-  "plan": "free",
-  "version": "16",
-  "name": "TelergamDB",
-  "ownerId": "tea-ct84bie8ii6s73ccgf1g",
-  "ipAllowList": [
+     --header "content-type: application/json" \
+     --data "{
+  \"databaseName\": \"$NEW_DB_NAME\",
+  \"databaseUser\": \"$NEW_DB_USER\",
+  \"enableHighAvailability\": false,
+  \"plan\": \"free\",
+  \"version\": \"16\",
+  \"name\": \"TelergamDB\",
+  \"ownerId\": \"tea-ct84bie8ii6s73ccgf1g\",
+  \"ipAllowList\": [
     {
-      "cidrBlock": "0.0.0.0/0",
-      "description": "everywhere"
+      \"cidrBlock\": \"0.0.0.0/0\",
+      \"description\": \"everywhere\"
     }
   ]
-}
-')
+}")
 echo "Sleep 1 min"
 sleep 30
 
@@ -154,7 +152,6 @@ for i in $(seq 1 $MAX_RETRIES); do
     sleep $RETRY_INTERVAL
 done
 
-
 NEW_DB_ID=$(echo "$Response" | jq -r '.id')
 
 echo "NEW_DB_ID:" $NEW_DB_ID
@@ -167,7 +164,8 @@ fi
 
 sleep 10
  
-pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
+#pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
+pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER --create -d $NEW_DB_NAME backup.dump
 
 echo "🚀 Starting web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
