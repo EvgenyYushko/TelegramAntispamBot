@@ -3,7 +3,7 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cu365mt2ng1s73c6t8b0-a"
+DB_ID="dpg-cuj0ejd6l47c73alb9hg-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
 # Функция для гарантированного запуска сервиса при ошибке
@@ -94,9 +94,10 @@ sleep 20
 
 echo "Try Delete DB"
 curl --request DELETE \
-     --url https://api.render.com/v1/postgres/dpg-cu365mt2ng1s73c6t8b0-a \
+     --url https://api.render.com/v1/postgres/$DB_ID \
      --header 'accept: application/json' \
-     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ'
+     --header "authorization: Bearer $RENDER_API_KEY"
+     
 echo "Sleep 20 sec"
 sleep 20
 
@@ -104,21 +105,41 @@ echo "Try Create DB"
 Response=$(curl --request POST \
      --url https://api.render.com/v1/postgres \
      --header 'accept: application/json' \
-     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ' \
+     --header "authorization: Bearer $RENDER_API_KEY" \
      --header 'content-type: application/json' \
      --data '
 {
-  "databaseName": "telergamdb",
-  "databaseUser": "telergamdb_user",
+  "databaseName": "telergamdb3",
+  "databaseUser": "telergamdb_user3",
   "enableHighAvailability": false,
   "plan": "free",
   "version": "16",
   "name": "TelergamDB",
-  "ownerId": "tea-ct84bie8ii6s73ccgf1g"
+  "ownerId": "tea-ct84bie8ii6s73ccgf1g",
+  "ipAllowList": [
+    {
+      "cidrBlock": "0.0.0.0/0",
+      "description": "everywhere"
+    }
+  ]
 }
 ')
-echo "Sleep 7 min"
-sleep 720
+echo "Sleep 1 min"
+sleep 60
+
+echo "⏳ Ожидание готовности БД..."
+MAX_RETRIES=30
+RETRY_INTERVAL=10
+for i in $(seq 1 $MAX_RETRIES); do
+    STATUS=$(curl -s "https://api.render.com/v1/postgres/$NEW_DB_ID" \
+              -H "authorization: Bearer $RENDER_API_KEY" | jq -r '.status')
+    if [ "$STATUS" == "ready" ]; then
+        echo "✅ БД готова!"
+        break
+    fi
+    echo "Sleep " $RETRY_INTERVAL
+    sleep $RETRY_INTERVAL
+done
 
 echo "Ответ API:"
 echo "$Response"
@@ -133,7 +154,7 @@ if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
   exit 1
 fi
 
-pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U telergamdb_user -d telergamdb backup.dump
+pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U telergamdb_user3 -d telergamdb3 backup.dump
 
 echo "🚀 Starting web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
