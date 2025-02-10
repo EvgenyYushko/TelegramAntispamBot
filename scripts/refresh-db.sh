@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cukskq2n91rc73av0emg-a"
+DB_ID="dpg-cuktq6q3esus73b0904g-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb14"
-NEW_DB_USER="telergamdb_user14"
+NEW_DB_NAME="telergamdb15"
+NEW_DB_USER="telergamdb_user15"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -176,14 +176,9 @@ fi
 
 NEW_DB_PASSWORD=$(echo "$CONNECTION_NEW_DB_INFO" | jq -r '.password')
 
-psql -h "$NEW_DB_ID.oregon-postgres.render.com" \
-     -p 5432 -U "$NEW_DB_USER" \
-     -d "$NEW_DB_NAME" \
-     -c "CREATE ROLE $NEW_DB_USER WITH LOGIN PASSWORD '$NEW_DB_PASSWORD';"
-
 export PGPASSWORD=$NEW_DB_PASSWORD
 #pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
-pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER --create -d $NEW_DB_NAME --no-owner backup.dump
+pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME --no-owner backup.dump
 
 echo "🚀 Starting web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
