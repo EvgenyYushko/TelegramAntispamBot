@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cukqollumphs73bgocng-a"
+DB_ID="dpg-cukqsjogph6c738ca9vg-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb10"
-NEW_DB_USER="telergamdb_user10"
+NEW_DB_NAME="telergamdb11"
+NEW_DB_USER="telergamdb_user11"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -163,7 +163,20 @@ if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
 fi
 
 sleep 10
- 
+
+echo "🔄 Получение данных подключения к новой БД..."
+CONNECTION_NEW_DB_INFO=$(curl -s -X GET "https://api.render.com/v1/postgres/$NEW_DB_ID/connection-info" \
+  -H "accept: application/json" \
+  -H "authorization: Bearer $RENDER_API_KEY")
+
+if [ -z "$CONNECTION_NEW_DB_INFO" ]; then
+  echo "❌ Ошибка: Не удалось получить данные подключения к новой БД."
+  exit 1
+fi
+
+NEW_DB_PASSWORD=$(echo "$CONNECTION_NEW_DB_INFO" | jq -r '.password')
+
+export PGPASSWORD=$NEW_DB_PASSWORD
 #pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
 pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER --create -d $NEW_DB_NAME backup.dump
 
