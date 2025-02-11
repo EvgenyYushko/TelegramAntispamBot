@@ -22,29 +22,37 @@ jobs:
 
       - name: Configure rclone
         env:
-          RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}  # Используем base64-секрет
+          RCLONE_CONFIG: |
+            [gdrive]
+            type = drive
+            scope = drive.file
+            service_account_file = /home/runner/service_account.json
         run: |
           mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONFIG_BASE64" | base64 --decode > ~/.config/rclone/rclone.conf
+          echo "$RCLONE_CONFIG" > ~/.config/rclone/rclone.conf
 
-      - name: Debug rclone config
+      - name: Create service account file
+        env:
+          GCP_SA_JSON: ${{ secrets.GCP_SA_JSON }}
         run: |
-          echo "Contents of rclone.conf:"
+          echo "$GCP_SA_JSON" > /home/runner/service_account.json
+
+      - name: Validate files
+        run: |
+          echo "rclone.conf:"
           cat ~/.config/rclone/rclone.conf
+          echo "service_account.json:"
+          cat /home/runner/service_account.json
 
       - name: Create test backup file
         run: |
           echo "This is a test backup file." > backup.dump
-          echo "File size: $(du -h backup.dump)"
-          echo "File content:"
-          cat backup.dump
 
       - name: Upload to Google Drive
         env:
-          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}  # ID папки
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
         run: |
           rclone copy backup.dump gdrive:backups/ --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
-          echo "File uploaded successfully!"
 
       #- name: Run script
       #  env:
