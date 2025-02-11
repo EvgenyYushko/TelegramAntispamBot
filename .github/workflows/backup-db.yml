@@ -22,14 +22,10 @@ jobs:
 
       - name: Configure rclone
         env:
-          RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}  # Используем секрет с конфигурацией
+          RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}  # Используем base64-секрет
         run: |
           mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONFIG" > ~/.config/rclone/rclone.conf
-
-      #- name: Create database dump
-      #  run: |
-      #    pg_dump -Fc -U ${{ secrets.DB_USER }} ${{ secrets.DB_NAME }} > backup.dump
+          echo "$RCLONE_CONFIG_BASE64" | base64 --decode > ~/.config/rclone/rclone.conf
 
       - name: Debug rclone config
         run: |
@@ -42,11 +38,13 @@ jobs:
           echo "File size: $(du -h backup.dump)"
           echo "File content:"
           cat backup.dump
+
       - name: Upload to Google Drive
         env:
           GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}  # ID папки
         run: |
           rclone copy backup.dump gdrive:backups/ --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
+          echo "File uploaded successfully!"
 
       #- name: Run script
       #  env:
