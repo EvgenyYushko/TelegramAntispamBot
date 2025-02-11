@@ -2,9 +2,9 @@
 
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
-RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
+#RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 #DB_ID="dpg-culfvgdds78s73br3pdg-a"
-WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
+#WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
 NEW_DB_NAME="telergamdb"
 NEW_DB_USER="telergamdb_user"

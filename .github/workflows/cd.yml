@@ -20,8 +20,8 @@ jobs:
           sudo apt-get install -y jq postgresql-client
       - name: Run script
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_ANTISPAM_BOT_KEY }}
-          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}        
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          WEB_SERVICE_ID: ${{ secrets.WEB_SERVICE_ID }}        
         run: |
           chmod +x scripts/refresh-db.sh
           ./scripts/refresh-db.sh
