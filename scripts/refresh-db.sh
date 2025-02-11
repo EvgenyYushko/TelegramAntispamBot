@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cul0n2qn91rc73b14te0-a"
+DB_ID="dpg-cul0oud6l47c73ef7btg-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb20"
-NEW_DB_USER="telergamdb_user20"
+NEW_DB_NAME="telergamdb21"
+NEW_DB_USER="telergamdb_user21"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -182,6 +182,15 @@ export PGPASSWORD=$NEW_DB_PASSWORD
 #pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
 pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME --no-owner backup.dump
 
+CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;Password=$NEW_DB_PASSWORD;Port=5432;SSL Mode=Require;Trust Server Certificate=true"
+echo "CONNECTION_STRING=" $CONNECTION_STRING
+
+curl --request PUT \
+     --url https://api.render.com/v1/services/$WEB_SERVICE_ID/env-vars/DB_URL_POSTGRESQL \
+     --header 'accept: application/json' \
+     --header "Authorization: Bearer $RENDER_API_KEY" \
+     --header 'content-type: application/json' \
+     --data "{\"value\":\"$CONNECTION_STRING\"}"
 
 echo "🚀 Resume web service..."
 curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
@@ -211,6 +220,7 @@ for i in $(seq 1 $MAX_RETRIES); do
     echo "✅ Site is up!"
     exit 0
   fi
+  echo "⏳ Статус: $HTTP_STATUS. Повтор через $RETRY_INTERVAL секунд..."
   sleep $RETRY_INTERVAL
 done
 
