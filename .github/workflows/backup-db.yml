@@ -2,8 +2,8 @@ name: Backup Database
 
 on:
   schedule:
-    - cron: '* */3 * * *'  
-  workflow_dispatch:         
+    - cron: '* */3 * * *'  # Каждые 3 часа
+  workflow_dispatch:         # Ручной запуск
 
 jobs:
   refresh-db:
@@ -14,11 +14,29 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq postgresql-client      
-      - name: Run script
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          sudo apt-get install -y jq postgresql-client
+
+      - name: Install gdrive
         run: |
-          chmod +x scripts/refresh-db.sh
-          ./scripts/refresh-db.sh
+          wget https://github.com/prasmussen/gdrive/releases/download/2.1.1/gdrive_2.1.1_linux_386.tar.gz
+          tar -xzf gdrive_2.1.1_linux_386.tar.gz
+          sudo mv gdrive /usr/local/bin/
+
+      - name: Authenticate gdrive
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}  # Исправлено: отступ для env
+        run: |
+          echo "$GCP_SA_KEY" > service_account.json  # Исправлено: используем переменную окружения
+          gdrive account import service_account.json
+
+      - name: Upload to Google Drive
+        run: |
+          gdrive upload --parent ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }} backup.dump
+
+      #- name: Run script
+      #  env:
+      #    RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      #    RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      #  run: |
+      #    chmod +x scripts/refresh-db.sh
+      #    ./scripts/refresh-db.sh

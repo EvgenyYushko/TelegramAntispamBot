@@ -21,6 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MailSenderService", "MailSe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F34A3D4F-292D-4EF8-9D6B-A01347A88943}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\backup-db.yml = .github\workflows\backup-db.yml
+		.github\workflows\cd.yml = .github\workflows\cd.yml
+		.github\workflows\ci.yml = .github\workflows\ci.yml
 		scripts\refresh-db.sh = scripts\refresh-db.sh
 	EndProjectSection
 EndProject
@@ -67,7 +70,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {5ED0B53F-EC65-4E5A-B247-39C188F8D8F9}
 		RESX_PrefixTranslations = True
+		SolutionGuid = {5ED0B53F-EC65-4E5A-B247-39C188F8D8F9}
 	EndGlobalSection
 EndGlobal
