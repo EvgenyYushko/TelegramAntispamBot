@@ -14,27 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq postgresql-client
-      - name: Setup gdrive
-        run: |
-            # Ñêà÷èâàåì áèíàðíûé ôàéë gdrive (óêàæèòå àêòóàëüíóþ âåðñèþ, çäåñü èñïîëüçóåòñÿ 2.1.0)
-            wget -qO gdrive https://github.com/prasmussen/gdrive/releases/download/2.1.0/gdrive-linux-x64
-            # Äåëàåì åãî èñïîëíÿåìûì
-            chmod +x gdrive
-            # Ïåðåìåùàåì â äèðåêòîðèþ, êîòîðàÿ âõîäèò â PATH (íàïðèìåð, ñîçäàäèì ïàïêó $HOME/bin)
-            mkdir -p $HOME/bin
-            mv gdrive $HOME/bin/
-            export PATH="$HOME/bin:$PATH"
-
-            # Ñîçäà¸ì äèðåêòîðèþ äëÿ êîíôèãóðàöèîííûõ ôàéëîâ gdrive
-            mkdir -p ~/.gdrive
-            # Çàïèñûâàåì ðàíåå ñîõðàí¸ííûé òîêåí â ôàéë êîíôèãóðàöèè
-            echo "GCP_SA_KEY" > ~/.gdrive/token_v2.json
-
-            # Ïðîâåðÿåì ðàáîòîñïîñîáíîñòü gdrive
-            gdrive about
-        env:
-            GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          sudo apt-get install -y jq postgresql-client      
       - name: Run script
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}

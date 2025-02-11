@@ -91,11 +91,6 @@ else
   echo "❌ Ошибка: Не удалось создать бекап."
 fi
 
-# Загрузка бекапа на Google Drive с помощью gdrive
-echo "🚀 Загрузка бекапа на Google Drive..."
-
-gdrive upload --parent 1D1bANIgP9vDs6xnjU9BXpqR0kUk-k1fO "$BACKUP_FILE_NAME"
-
 if [ $? -ne 0 ]; then
   echo "❌ Ошибка при загрузке бекапа на Google Drive."
   exit 1
