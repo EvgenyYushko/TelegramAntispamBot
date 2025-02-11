@@ -30,7 +30,12 @@ jobs:
       #- name: Create database dump
       #  run: |
       #    pg_dump -Fc -U ${{ secrets.DB_USER }} ${{ secrets.DB_NAME }} > backup.dump
-
+      - name: Create test backup file
+        run: |
+          echo "This is a test backup file." > backup.dump
+          echo "File size: $(du -h backup.dump)"
+          echo "File content:"
+          cat backup.dump
       - name: Upload to Google Drive
         env:
           GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}  # ID папки
