@@ -6,8 +6,8 @@ RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 #DB_ID="dpg-culfvgdds78s73br3pdg-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb26"
-NEW_DB_USER="telergamdb_user26"
+NEW_DB_NAME="telergamdb"
+NEW_DB_USER="telergamdb_user"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
