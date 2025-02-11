@@ -18,7 +18,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y jq postgresql-client
-
+      - name: Test
+        run: echo "NEW_DB_ID=" env.NEW_DB_ID
       - name: Run script
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_ANTISPAM_BOT_KEY }}
@@ -37,5 +38,11 @@ jobs:
             fi
       - name: Extract NEW_DB_ID
         run: echo "NEW_DB_ID=$(cat new_db_id.txt)" >> $GITHUB_ENV
-              echo $GITHUB_ENV 
+              echo $GITHUB_ENV
+      - name: Update repository variable
+        run: |
+          curl -X PATCH "https://api.github.com/repos/${{ github.repository }}/actions/variables/NEW_DB_ID" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"value\": \"${{ env.NEW_DB_ID }}\"}"        
   
