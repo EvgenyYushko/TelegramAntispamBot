@@ -16,22 +16,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq postgresql-client
 
-      - name: Install gdrive
+      - name: Install rclone
         run: |
-          wget https://github.com/prasmussen/gdrive/releases/download/2.1.1/gdrive_2.1.1_linux_386.tar.gz
-          tar -xzf gdrive_2.1.1_linux_386.tar.gz
-          sudo mv gdrive /usr/local/bin/
+          curl https://rclone.org/install.sh | sudo bash
 
-      - name: Authenticate gdrive
+      - name: Configure rclone
         env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}  # Исправлено: отступ для env
+          RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}  # Используем секрет с конфигурацией
         run: |
-          echo "$GCP_SA_KEY" > service_account.json  # Исправлено: используем переменную окружения
-          gdrive account import service_account.json
+          mkdir -p ~/.config/rclone
+          echo "$RCLONE_CONFIG" > ~/.config/rclone/rclone.conf
+
+      #- name: Create database dump
+      #  run: |
+      #    pg_dump -Fc -U ${{ secrets.DB_USER }} ${{ secrets.DB_NAME }} > backup.dump
 
       - name: Upload to Google Drive
+        env:
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}  # ID папки
         run: |
-          gdrive upload --parent ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }} backup.dump
+          rclone copy backup.dump gdrive:backups/ --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
 
       #- name: Run script
       #  env:
