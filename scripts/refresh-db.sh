@@ -2,10 +2,6 @@
 
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
-#RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-#DB_ID="dpg-culfvgdds78s73br3pdg-a"
-#WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
-
 NEW_DB_NAME="telergamdb"
 NEW_DB_USER="telergamdb_user"
 
@@ -13,7 +9,7 @@ NEW_DB_USER="telergamdb_user"
 trap 'handle_error' ERR
 handle_error() {
   echo "❌ Script failed! Attempting to start the web service..."
-  curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
+  curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/resume" \
     -H "Authorization: Bearer $RENDER_API_KEY"
   exit 1
 }
@@ -33,7 +29,7 @@ else
 fi
 
 echo "🛑 Stopping web service..."
-curl -s -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/suspend" \
+curl -s -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/suspend" \
   -H "Authorization: Bearer $RENDER_API_KEY"
 #sleep 60
 
@@ -200,21 +196,21 @@ CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;P
 echo "CONNECTION_STRING=" $CONNECTION_STRING
 
 curl --request PUT \
-     --url https://api.render.com/v1/services/$WEB_SERVICE_ID/env-vars/DB_URL_POSTGRESQL \
+     --url https://api.render.com/v1/services/$RENDER_SERVICE_ID/env-vars/DB_URL_POSTGRESQL \
      --header 'accept: application/json' \
      --header "Authorization: Bearer $RENDER_API_KEY" \
      --header 'content-type: application/json' \
      --data "{\"value\":\"$CONNECTION_STRING\"}"
 
 echo "🚀 Resume web service..."
-curl -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/resume" \
+curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/resume" \
     -H "Authorization: Bearer $RENDER_API_KEY"
 
 echo "🚀 Deploy web service..."
 curl --request POST \
-     --url https://api.render.com/v1/services/srv-ctaoq5hu0jms73f1l3q0/deploys \
+     --url https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys \
      --header 'accept: application/json' \
-     --header 'authorization: Bearer rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ' \
+     --header "Authorization: Bearer $RENDER_API_KEY" \
      --header 'content-type: application/json' \
      --data '
 {
