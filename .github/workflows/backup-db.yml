@@ -48,16 +48,11 @@ jobs:
         run: |
           echo "This is a test backup file." > backup.dump
 
-      - name: Upload to Google Drive
+      - name: Run script
         env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
           GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
         run: |
-          rclone copy backup.dump gdrive:backups/ --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
-
-      #- name: Run script
-      #  env:
-      #    RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-      #    RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-      #  run: |
-      #    chmod +x scripts/refresh-db.sh
-      #    ./scripts/refresh-db.sh
+          chmod +x scripts/refresh-db.sh
+          ./scripts/refresh-db.sh

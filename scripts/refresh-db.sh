@@ -91,8 +91,19 @@ else
   echo "❌ Ошибка: Не удалось создать бекап."
 fi
 
-if [ $? -ne 0 ]; then
-  echo "❌ Ошибка при загрузке бекапа на Google Drive."
+# Проверка наличия файла
+if [ ! -f "$1" ]; then
+  echo "File $1 not found!"
+  exit 1
+fi
+
+# Загрузка файла в Google Drive
+rclone copy "$1" gdrive:backups/ --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
+
+if [ $? -eq 0 ]; then
+  echo "File uploaded successfully!"
+else
+  echo "Upload failed!"
   exit 1
 fi
 
