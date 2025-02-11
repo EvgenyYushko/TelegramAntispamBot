@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-culfdj5svqrc73cd008g-a"
+#DB_ID="dpg-culfvgdds78s73br3pdg-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb23"
-NEW_DB_USER="telergamdb_user23"
+NEW_DB_NAME="telergamdb25"
+NEW_DB_USER="telergamdb_user25"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -17,6 +17,20 @@ handle_error() {
     -H "Authorization: Bearer $RENDER_API_KEY"
   exit 1
 }
+
+ALL_DB=$(curl -s --request GET \
+  --url 'https://api.render.com/v1/postgres?includeReplicas=true&limit=20' \
+  --header 'accept: application/json' \
+  --header "authorization: Bearer $RENDER_API_KEY")
+
+DB_ID=$(echo "$ALL_DB" | jq -r '.[] | select(.postgres.name=="TelergamDB") | .postgres.owner.id')
+
+if [ -n "$DB_ID" ] && [ "$DB_ID" != "null" ]; then
+    echo "Найден OWNER ID для базы TelergamDB: $DB_ID"
+else
+    echo "❌ Не удалось найти базу с именем TelergamDB или извлечь OWNER ID."
+    exit 1
+fi
 
 echo "🛑 Stopping web service..."
 curl -s -X POST "https://api.render.com/v1/services/$WEB_SERVICE_ID/suspend" \
@@ -162,7 +176,7 @@ if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
   exit 1
 fi
 
-echo "NEW_DB_ID=$NEW_DB_ID" > new_db_id.txt  # Записываем в файл
+#echo "NEW_DB_ID=$NEW_DB_ID" > new_db_id.txt  # Записываем в файл
 
 sleep 10
 
