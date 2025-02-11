@@ -92,7 +92,7 @@ else
 fi
 
 # Загрузка файла в Google Drive
-rclone copy backup.dump gdrive:backups/ --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
+rclone copy backup.dump "gdrive:backups/backup_$(date +'%Y-%m-%d_%H-%M-%S').dump" --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
 
 echo "Try suspend DB"
 curl --request POST \
