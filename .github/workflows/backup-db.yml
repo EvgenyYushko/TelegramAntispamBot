@@ -1,9 +1,9 @@
-name: Refresh Render Database
+name: Backup Database
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Запуск каждые 2 часа, в начале каждого 2-часового интервала UTC
-  workflow_dispatch:         # Позволяет запускать вручную через UI
+    - cron: '* */1 * * *'  
+  workflow_dispatch:         
 
 jobs:
   refresh-db:
