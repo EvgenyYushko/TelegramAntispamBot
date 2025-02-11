@@ -3,11 +3,11 @@
 # Конфигурация
 BACKUP_FILE_NAME="backup.dump"
 RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
-DB_ID="dpg-cul0oud6l47c73ef7btg-a"
+DB_ID="dpg-culf9gd6l47c73dnnm60-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb21"
-NEW_DB_USER="telergamdb_user21"
+NEW_DB_NAME="telergamdb22"
+NEW_DB_USER="telergamdb_user22"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -178,6 +178,7 @@ fi
 
 NEW_DB_PASSWORD=$(echo "$CONNECTION_NEW_DB_INFO" | jq -r '.password')
 
+sleep 10
 export PGPASSWORD=$NEW_DB_PASSWORD
 #pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
 pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME --no-owner backup.dump
