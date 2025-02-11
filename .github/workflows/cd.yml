@@ -4,24 +4,28 @@ on:
   push:
     branches:
       - main
-      
+
   pull_request:
     types:
       - closed
-jobs:
-  refresh-db: 
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq postgresql-client
-      - name: Run script
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}         
-        run: |
-          chmod +x scripts/refresh-db.sh
-          ./scripts/refresh-db.sh
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+    # Запуск билда на Render
+    - name: Trigger Render build     
+      env:
+        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}  # Секретный ключ API Render
+        RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}  # ID сервиса Render
+      shell: pwsh
+      run: |
+        $headers = @{
+            "Authorization" = "Bearer $env:RENDER_API_KEY"
+            "Content-Type"  = "application/json"
+        }
+        $body = "{}"
+        $url = "https://api.render.com/v1/services/$env:RENDER_SERVICE_ID/deploys"
+
+        Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $body
