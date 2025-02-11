@@ -30,6 +30,12 @@ jobs:
       #- name: Create database dump
       #  run: |
       #    pg_dump -Fc -U ${{ secrets.DB_USER }} ${{ secrets.DB_NAME }} > backup.dump
+
+      - name: Debug rclone config
+        run: |
+          echo "Contents of rclone.conf:"
+          cat ~/.config/rclone/rclone.conf
+
       - name: Create test backup file
         run: |
           echo "This is a test backup file." > backup.dump
