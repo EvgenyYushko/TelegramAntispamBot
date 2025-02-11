@@ -17,24 +17,24 @@ jobs:
           sudo apt-get install -y jq postgresql-client
       - name: Setup gdrive
         run: |
-            # Скачиваем бинарный файл gdrive (укажите актуальную версию, здесь используется 2.1.0)
+            # Г‘ГЄГ Г·ГЁГўГ ГҐГ¬ ГЎГЁГ­Г Г°Г­Г»Г© ГґГ Г©Г« gdrive (ГіГЄГ Г¦ГЁГІГҐ Г ГЄГІГіГ Г«ГјГ­ГіГѕ ГўГҐГ°Г±ГЁГѕ, Г§Г¤ГҐГ±Гј ГЁГ±ГЇГ®Г«ГјГ§ГіГҐГІГ±Гї 2.1.0)
             wget -qO gdrive https://github.com/prasmussen/gdrive/releases/download/2.1.0/gdrive-linux-x64
-            # Делаем его исполняемым
+            # Г„ГҐГ«Г ГҐГ¬ ГҐГЈГ® ГЁГ±ГЇГ®Г«Г­ГїГҐГ¬Г»Г¬
             chmod +x gdrive
-            # Перемещаем в директорию, которая входит в PATH (например, создадим папку $HOME/bin)
+            # ГЏГҐГ°ГҐГ¬ГҐГ№Г ГҐГ¬ Гў Г¤ГЁГ°ГҐГЄГІГ®Г°ГЁГѕ, ГЄГ®ГІГ®Г°Г Гї ГўГµГ®Г¤ГЁГІ Гў PATH (Г­Г ГЇГ°ГЁГ¬ГҐГ°, Г±Г®Г§Г¤Г Г¤ГЁГ¬ ГЇГ ГЇГЄГі $HOME/bin)
             mkdir -p $HOME/bin
             mv gdrive $HOME/bin/
             export PATH="$HOME/bin:$PATH"
 
-            # Создаём директорию для конфигурационных файлов gdrive
+            # Г‘Г®Г§Г¤Г ВёГ¬ Г¤ГЁГ°ГҐГЄГІГ®Г°ГЁГѕ Г¤Г«Гї ГЄГ®Г­ГґГЁГЈГіГ°Г Г¶ГЁГ®Г­Г­Г»Гµ ГґГ Г©Г«Г®Гў gdrive
             mkdir -p ~/.gdrive
-            # Записываем ранее сохранённый токен в файл конфигурации
+            # Г‡Г ГЇГЁГ±Г»ГўГ ГҐГ¬ Г°Г Г­ГҐГҐ Г±Г®ГµГ°Г Г­ВёГ­Г­Г»Г© ГІГ®ГЄГҐГ­ Гў ГґГ Г©Г« ГЄГ®Г­ГґГЁГЈГіГ°Г Г¶ГЁГЁ
             echo "GCP_SA_KEY" > ~/.gdrive/token_v2.json
 
-            # Проверяем работоспособность gdrive
+            # ГЏГ°Г®ГўГҐГ°ГїГҐГ¬ Г°Г ГЎГ®ГІГ®Г±ГЇГ®Г±Г®ГЎГ­Г®Г±ГІГј gdrive
             gdrive about
         env:
-            GDRIVE_TOKEN: ${{ secrets.GCP_SA_KEY }}
+            GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
       - name: Run script
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
