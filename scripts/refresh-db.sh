@@ -167,6 +167,8 @@ for i in $(seq 1 $MAX_RETRIES); do
 done
 
 NEW_DB_ID=$(echo "$Response" | jq -r '.id')
+NEW_DB_NAME=$(echo "$Response" | jq -r '.databaseName')
+NEW_DB_USER=$(echo "$Response" | jq -r '.databaseUser')
 
 echo "NEW_DB_ID:" $NEW_DB_ID
 
@@ -175,8 +177,6 @@ if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
   echo "Ответ API: $Response"
   exit 1
 fi
-
-#echo "NEW_DB_ID=$NEW_DB_ID" > new_db_id.txt  # Записываем в файл
 
 sleep 10
 
@@ -194,7 +194,6 @@ NEW_DB_PASSWORD=$(echo "$CONNECTION_NEW_DB_INFO" | jq -r '.password')
 
 sleep 10
 export PGPASSWORD=$NEW_DB_PASSWORD
-#pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME backup.dump
 pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME --no-owner backup.dump
 
 CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;Password=$NEW_DB_PASSWORD;Port=5432;SSL Mode=Require;Trust Server Certificate=true"
