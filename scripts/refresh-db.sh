@@ -6,8 +6,8 @@ RENDER_API_KEY="rnd_sZLs5c8GIjjEmSc7EwblTKTvoTLZ"
 #DB_ID="dpg-culfvgdds78s73br3pdg-a"
 WEB_SERVICE_ID="srv-ctaoq5hu0jms73f1l3q0"
 
-NEW_DB_NAME="telergamdb25"
-NEW_DB_USER="telergamdb_user25"
+NEW_DB_NAME="telergamdb26"
+NEW_DB_USER="telergamdb_user26"
 
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
@@ -23,7 +23,7 @@ ALL_DB=$(curl -s --request GET \
   --header 'accept: application/json' \
   --header "authorization: Bearer $RENDER_API_KEY")
 
-DB_ID=$(echo "$ALL_DB" | jq -r '.[] | select(.postgres.name=="TelergamDB") | .postgres.owner.id')
+DB_ID=$(echo "$ALL_DB" | jq -r '.[] | select(.postgres.name=="TelergamDB") | .postgres.id')
 
 if [ -n "$DB_ID" ] && [ "$DB_ID" != "null" ]; then
     echo "Найден OWNER ID для базы TelergamDB: $DB_ID"
