@@ -1,9 +1,10 @@
 name: Refresh Render Database
 
-on: 
-  pull_request:
-    branches:
-      - main
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # Запуск каждые 2 часа, в начале каждого 2-часового интервала UTC
+  workflow_dispatch:         # Позволяет запускать вручную через UI
+
 jobs:
   refresh-db:
     runs-on: ubuntu-latest
@@ -19,7 +20,6 @@ jobs:
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-          RENDER_WEB_SERVICE_ID: ${{ secrets.RENDER_WEB_SERVICE_ID }}
         run: |
           chmod +x scripts/refresh-db.sh
           ./scripts/refresh-db.sh

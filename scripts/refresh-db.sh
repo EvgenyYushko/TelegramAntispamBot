@@ -5,6 +5,8 @@ BACKUP_FILE_NAME="backup.dump"
 NEW_DB_NAME="telergamdb"
 NEW_DB_USER="telergamdb_user"
 
+echo "RENDER_SERVICE_ID="$RENDER_SERVICE_ID "RENDER_API_KEY=" $RENDER_API_KEY
+
 # Функция для гарантированного запуска сервиса при ошибке
 trap 'handle_error' ERR
 handle_error() {
