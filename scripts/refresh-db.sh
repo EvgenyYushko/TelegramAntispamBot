@@ -183,13 +183,13 @@ if ! wait_for_db_ready; then
     exit 1
 fi
 
-log_info "⏳ ЖДём 10 секунд..."
-sleep 10
-
 # Восстановление данных из бэкапа
 log_info "Восстановление данных из бэкапа $BACKUP_FILE_NAME..."
 NEW_DB_PASSWORD=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$NEW_DB_ID/connection-info" "" | jq -r '.password')
 export PGPASSWORD=$NEW_DB_PASSWORD
+
+log_info "⏳ ЖДём 10 секунд..."
+sleep 10
 
 #echo "NEW_DB_USER="$NEW_DB_USER "NEW_DB_NAME=" $NEW_DB_NAME "NEW_DB_PASSWORD="$NEW_DB_PASSWORD
 
