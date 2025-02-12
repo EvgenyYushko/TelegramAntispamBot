@@ -1,111 +1,74 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using static Infrastructure.Helpers.FunctionsHelper;
-using static Infrastructure.Common.TimeZoneHelper;
+using System.Text;
+using System.Text.Json;
 
 namespace BuisinessLogic.Services.Parsers
 {
 	public class NbrbCurrencyParser
 	{
 		private const string BASE_URL = "https://www.nbrb.by/Services/XmlExRates.aspx";
-
-		public static async Task<WebProxy> GetRandomProxyAsync()
-		{
-			string[] proxyList = new string[]
-			{
-				"http://51.16.179.113/",
-			};
-
-			foreach (var proxyUrl in proxyList)
-			{
-				try
-				{
-					var proxy = new WebProxy(proxyUrl);
-					var httpClientHandler = new HttpClientHandler { Proxy = proxy, UseProxy = true };
-					var httpClient = new HttpClient(httpClientHandler);
-        
-					Console.WriteLine($"🔄 Пробую прокси: {proxyUrl}");
-					var response = await httpClient.GetStringAsync("http://www.nbrb.by/Services/XmlExRates.aspx?ondate=2/12/2025");
-        
-					Console.WriteLine("✅ Успешный ответ через прокси!");
-					Console.WriteLine(response);
-					return proxy;
-					break;
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"❌ Ошибка с прокси {proxyUrl}: {ex.Message}");
-				}
-			}
-
-			return null;
-		}
+		// Классы для десериализации JSON
+		public record CurrencyRate(
+			int Cur_ID,
+			string Date,
+			string Cur_Abbreviation,
+			int Cur_Scale,
+			string Cur_Name,
+			decimal Cur_OfficialRate
+		);
 
 		public async Task<string> ParseCurrencyRates()
 		{
-			//ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
-
-			//var proxy = await GetRandomProxyAsync();
-			//if (proxy == null)
-			//{
-			//	Console.WriteLine("❌ Не удалось получить рабочий прокси.");
-			//}
-
-			//Console.WriteLine("Address="+proxy.Address);
-
-			//var handler = new HttpClientHandler
-			//{
-			//	UseProxy = false, // Отключаем прокси для продакшена
-			//	ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-			//};
-
+			// Основной код
 			using (var httpClient = new HttpClient())
 			{
 				try
 				{
-					var date = DateTimeNow;
-					string dateParam = date.ToString("M/d/yyyy");
-					string url = $"{BASE_URL}?ondate={dateParam}";
+					const string BASE_URL = "https://api.nbrb.by/exrates/rates";
+					var requestDate = DateTime.Now;
 
-					Console.WriteLine(url);
+					// Формируем URL запроса
+					var url = $"{BASE_URL}?periodicity=0";
+					Console.WriteLine($"Request URL: {url}");
 
-					httpClient.Timeout = new TimeSpan(0, 0, 1, 40);
-					httpClient.DefaultRequestHeaders.Add("Accept", "application/xml");
-					httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9");
-					httpClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
-
-					//https://api.nbrb.by/exrates/rates?periodicity=0
+					// Настройка HttpClient
+					httpClient.Timeout = TimeSpan.FromSeconds(10);
+					httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 					httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Render/1.0 (+https://render.com)");
-					var response = await httpClient.GetStringAsync("https://api.nbrb.by/exrates/rates?periodicity=0");
-					Console.WriteLine($"Ответ от сервера:\n{response}"); // 🔴 Добавляем вывод ответа в лог
-					var xdoc = XDocument.Parse(response);
-					var dateElement = xdoc.Root.Element("Date")?.Value;
+
+					// Выполнение запроса
+					var response = await httpClient.GetStringAsync(url);
+					Console.WriteLine("Raw response received");
+
+					// Десериализация JSON
+					var currencies = JsonSerializer.Deserialize<List<CurrencyRate>>(response);
+					if (currencies == null || !currencies.Any())
+						throw new Exception("Empty response from API");
+
+					// Получаем актуальную дату из первого элемента
+					var rateDate = DateTime.TryParse(currencies[0].Date, out var date)
+						? date.ToShortDateString()
+						: requestDate.ToShortDateString();
 
 					var sb = new StringBuilder();
-					// Добавляем смайлы и Markdown-разметку
-					sb.AppendLine($"💰 *Курсы валют НБ РБ на {dateElement ?? date.ToShortDateString()}*:\n");
+					sb.AppendLine($"💰 *Курсы валют НБ РБ на {rateDate}*:\n");
 
-					var currencies = xdoc.Root.Elements("Currency")
-						.Select(v => new
-						{
-							Code = v.Element("CharCode")?.Value,
-							Name = v.Element("Name")?.Value,
-							Rate = DecimalParse(v.Element("Rate")?.Value, out decimal rate) ? rate : 0m,
-							Scale = int.TryParse(v.Element("Scale")?.Value, out int scale) ? scale : 1
-						})
-						.Where(c => !string.IsNullOrEmpty(c.Code))
+					// Фильтр и сортировка валют
+					var selectedCurrencies = currencies
+						.Where(c => new[] { "EUR", "USD", "RUB", "CNY", "GBP" }.Contains(c.Cur_Abbreviation))
+						.OrderBy(c => c.Cur_Abbreviation)
 						.ToList();
 
-					// Стилизация для EUR и USD
-					foreach (var currency in currencies.Where(c => c.Code.Equals("EUR") || c.Code.Equals("USD")))
+					// Формирование сообщения
+					foreach (var currency in selectedCurrencies)
 					{
-						var emoji = currency.Code switch
+						var emoji = currency.Cur_Abbreviation switch
 						{
 							"EUR" => "🇪🇺",
 							"USD" => "🇺🇸",
@@ -115,11 +78,10 @@ namespace BuisinessLogic.Services.Parsers
 							_ => "💵"
 						};
 
-						sb.AppendLine($"{emoji} *{currency.Code}* ({currency.Name})");
-						sb.AppendLine($"`{currency.Scale} {currency.Code}` = *{currency.Rate} BYN*\n");
+						sb.AppendLine($"{emoji} *{currency.Cur_Abbreviation}* ({currency.Cur_Name})");
+						sb.AppendLine($"`{currency.Cur_Scale} {currency.Cur_Abbreviation}` = *{currency.Cur_OfficialRate:0.0000} BYN*\n");
 					}
 
-					// Добавляем разделитель и время обновления
 					sb.AppendLine("—————————————");
 					sb.AppendLine($"🕒 _Обновлено: {DateTime.Now:HH:mm}_");
 
@@ -127,7 +89,7 @@ namespace BuisinessLogic.Services.Parsers
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex);
+					Console.WriteLine($"Error: {ex}");
 					return $"❌ *Ошибка!* ❌\n`{ex.Message}`";
 				}
 			}
