@@ -66,7 +66,7 @@ trap 'handle_error' ERR
 
 # Функция ожидания готовности новой базы данных
 wait_for_db_ready() {
-    echo "⏳ Ожидание готовности новой базы данных (NEW_DB_ID: $NEW_DB_ID)..."
+    log_info "⏳ Ожидание готовности новой базы данных (NEW_DB_ID: $NEW_DB_ID)..."
 
     for i in $(seq 1 $MAX_RETRIES); do
         CHECK_DB_RESPONSE=$(curl -s --request GET \
@@ -104,7 +104,7 @@ upload_to_gdrive() {
 # =============================================
 
 # Получение информации о существующей БД
-log_info "Поиск существующей базы данных..."
+log_info "Поиск существующей базы данных TelergamDB..."
 DB_ID=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}?includeReplicas=true&limit=20" "" | \
          jq -r '.[] | select(.postgres.name=="TelergamDB") | .postgres.id')
 
@@ -116,11 +116,11 @@ else
 fi
 
 # Остановка веб-сервиса
-log_info "Остановка веб-сервиса..."
+log_info "Остановка веб-сервиса (RENDER_SERVICE_ID=$RENDER_SERVICE_ID)..."
 render_api_request "POST" "services/$RENDER_SERVICE_ID/suspend" "" > /dev/null
 
 # Создание бэкапа
-log_info "Создание бэкапа базы данных..."
+log_info "Создание бэкапа базы данных TelergamDB..."
 # Получаем JSON с данными подключения и сохраняем его в DB_INFO
 DB_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID" "")
 CONNECTION_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID/connection-info" "")
@@ -131,11 +131,11 @@ PGPASSWORD=$(jq -r '.password' <<< "$CONNECTION_INFO")
 DB_HOST="$DB_ID.oregon-postgres.render.com"
 DB_PORT=5432  # Порт PostgreSQL по умолчанию
 
-if [ -n "$DB_NAME" ] && [ "$DB_NAME" != "null" ] && [ -n "$DB_USER_FROM_INFO" ] && [ "$DB_USER_FROM_INFO" != "null" ] && [ -n "$PGPASSWORD" ] && [ "$PGPASSWORD" != "null" ]; then
-    log_success "Данные получены (DB_ID: $DB_ID)"
-else
-    log_error "Не хватает данных: $DB_INFO"
-    echo "DB_NAME="$DB_NAME "DB_USER_FROM_INFO="$DB_USER_FROM_INFO "PGPASSWORD="$PGPASSWORD
+if [ -z "$DB_NAME" ] || [ "$DB_NAME" == "null" ] || 
+   [ -z "$DB_USER_FROM_INFO" ] || [ "$DB_USER_FROM_INFO" == "null" ] || 
+   [ -z "$PGPASSWORD" ] || [ "$PGPASSWORD" == "null" ]; then
+    log_error "Не хватает данных для создания бекапа: $DB_INFO"
+    log_error "DB_NAME=$DB_NAME DB_USER_FROM_INFO=$DB_USER_FROM_INFO PGPASSWORD=$PGPASSWORD"
     exit 1
 fi
 
@@ -153,7 +153,7 @@ render_api_request "POST" "${RENDER_SERVICE_TYPE}/$DB_ID/suspend" ""
 render_api_request "DELETE" "${RENDER_SERVICE_TYPE}/$DB_ID" ""
 
 # Пересоздание базы данных
-log_info "Пересоздание базы данных..."
+log_info "Cоздание новой базы данных..."
 render_api_request "POST" "$RENDER_SERVICE_TYPE" "{
     \"databaseName\": \"$NEW_DB_NAME\",
     \"databaseUser\": \"$NEW_DB_USER\",
@@ -170,15 +170,12 @@ NEW_DB_NAME=$(jq -r '.databaseName' response.json)
 NEW_DB_USER=$(jq -r '.databaseUser' response.json)
 
 if [ -n "$NEW_DB_ID" ] && [ "$NEW_DB_ID" != "null" ]; then
-    log_success "Новая база данных создана (ID: $NEW_DB_ID)"
+    log_success "Новая база данных создана (NEW_DB_ID: $NEW_DB_ID)"
 else
     log_info "Ответ от Render API:"
     jq '.' response.json
     exit 1
 fi
-
-log_info "⏳ ЖДём 40 секунд..."
-sleep 40
 
 # Ожидание готовности новой базы данных
 if ! wait_for_db_ready; then
@@ -191,7 +188,8 @@ log_info "Восстановление данных из бэкапа..."
 NEW_DB_PASSWORD=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$NEW_DB_ID/connection-info" "" | jq -r '.password')
 export PGPASSWORD=$NEW_DB_PASSWORD
 
-echo "NEW_DB_USER="$NEW_DB_USER "NEW_DB_NAME=" $NEW_DB_NAME "NEW_DB_PASSWORD="$NEW_DB_PASSWORD
+#echo "NEW_DB_USER="$NEW_DB_USER "NEW_DB_NAME=" $NEW_DB_NAME "NEW_DB_PASSWORD="$NEW_DB_PASSWORD
+log_info "⏳ ЖДём 10 секунд..."
 sleep 10
 
 if ! pg_restore -h "${NEW_DB_ID}.oregon-postgres.render.com" -p 5432 -U "$NEW_DB_USER" -d "$NEW_DB_NAME" --no-owner "$BACKUP_FILE_NAME"; then
@@ -205,12 +203,12 @@ CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;P
 render_api_request "PUT" "services/$RENDER_SERVICE_ID/env-vars/DB_URL_POSTGRESQL" "{\"value\":\"$CONNECTION_STRING\"}" > /dev/null
 
 # Перезапуск веб-сервиса
-log_info "🔄 Перезапуск веб-сервиса..."
+log_info "🔄 Перезапуск веб-сервиса (RENDER_SERVICE_ID=$RENDER_SERVICE_ID)..."
 render_api_request "POST" "services/$RENDER_SERVICE_ID/resume" "" > /dev/null
 render_api_request "POST" "services/$RENDER_SERVICE_ID/deploys" "{\"clearCache\":\"do_not_clear\"}" > /dev/null
 
 # Проверка доступности веб-сервиса
-log_info "Проверка доступности сервиса..."
+log_info "Проверка доступности веб-сервиса (RENDER_SERVICE_ID=$RENDER_SERVICE_ID)..."
 for i in $(seq 1 $MAX_RETRIES); do
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL")
     if [ "$HTTP_STATUS" -eq 200 ]; then
