@@ -47,6 +47,8 @@ namespace BuisinessLogic.Services.Parsers
 
 		public async Task<string> ParseCurrencyRates()
 		{
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+
 			var proxy = await GetRandomProxyAsync();
 
 			if (proxy == null)
@@ -57,9 +59,9 @@ namespace BuisinessLogic.Services.Parsers
 			var handler = new HttpClientHandler
 			{
 				Proxy = proxy,
-				UseProxy = true
+				UseProxy = true,
+				ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
 			};
-
 
 			using (var httpClient = new HttpClient(handler))
 			{
@@ -71,6 +73,7 @@ namespace BuisinessLogic.Services.Parsers
 
 					Console.WriteLine(url);
 					httpClient.Timeout = new TimeSpan(0, 0, 3, 0);
+					httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0");
 					var response = await httpClient.GetStringAsync(url);
 					var xdoc = XDocument.Parse(response);
 					var dateElement = xdoc.Root.Element("Date")?.Value;
