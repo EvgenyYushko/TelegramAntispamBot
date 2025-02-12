@@ -27,19 +27,19 @@ RETRY_INTERVAL=15               # Интервал между проверкам
 
 # Логирование с цветами и иконками
 log_info() {
-    printf "\e[34mℹ %s\e[0m\n" "⏳ $1"
+    printf "\e[34mℹ %s\e[0m\n" "$1"
 }
 
 log_success() {
-    printf "\e[32m✔ %s\e[0m\n" "✅ $1"
+    printf "\e[32m✔ %s\e[0m\n" "$1"
 }
 
 log_warning() {
-    printf "\e[33m⚠ %s\e[0m\n" "🔄 $1"
+    printf "\e[33m⚠ %s\e[0m\n" "$1"
 }
 
 log_error() {
-    printf "\e[31m❌ %s\e[0m\n" "❌ $1" >&2
+    printf "\e[31m❌ %s\e[0m\n" "$1" >&2
 }
 
 # Вызов API Render.com
@@ -66,7 +66,7 @@ trap 'handle_error' ERR
 
 # Функция ожидания готовности новой базы данных
 wait_for_db_ready() {
-    echo "⏳ Ожидание готовности новой базы данных (ID: $NEW_DB_ID)..."
+    echo "⏳ Ожидание готовности новой базы данных (NEW_DB_ID: $NEW_DB_ID)..."
 
     for i in $(seq 1 $MAX_RETRIES); do
         CHECK_DB_RESPONSE=$(curl -s --request GET \
@@ -177,7 +177,7 @@ else
     exit 1
 fi
 
-log_info "ЖДём 40 секунд..."
+log_info "⏳ ЖДём 40 секунд..."
 sleep 40
 
 # Ожидание готовности новой базы данных
@@ -205,7 +205,7 @@ CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;P
 render_api_request "PUT" "services/$RENDER_SERVICE_ID/env-vars/DB_URL_POSTGRESQL" "{\"value\":\"$CONNECTION_STRING\"}" > /dev/null
 
 # Перезапуск веб-сервиса
-log_info "Перезапуск веб-сервиса..."
+log_info "🔄 Перезапуск веб-сервиса..."
 render_api_request "POST" "services/$RENDER_SERVICE_ID/resume" "" > /dev/null
 render_api_request "POST" "services/$RENDER_SERVICE_ID/deploys" "{\"clearCache\":\"do_not_clear\"}" > /dev/null
 
