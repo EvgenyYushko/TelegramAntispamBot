@@ -52,19 +52,17 @@ namespace BuisinessLogic.Services.Parsers
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 
 			var proxy = await GetRandomProxyAsync();
-
 			if (proxy == null)
 			{
-				return "❌ Не удалось получить рабочий прокси.";
+				Console.WriteLine("❌ Не удалось получить рабочий прокси.");
 			}
 
 			Console.WriteLine("Address="+proxy.Address);
 
 			var handler = new HttpClientHandler
 			{
-				Proxy = proxy,
-				UseProxy = true,
-				ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+				UseProxy = false, // Отключаем прокси для продакшена
+				ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
 			};
 
 			using (var httpClient = new HttpClient(handler))
@@ -76,8 +74,14 @@ namespace BuisinessLogic.Services.Parsers
 					string url = $"{BASE_URL}?ondate={dateParam}";
 
 					Console.WriteLine(url);
-					httpClient.Timeout = new TimeSpan(0, 0, 1, 40);
-					httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0");
+
+					httpClient.Timeout = new TimeSpan(0, 0, 1, 0);
+					httpClient.DefaultRequestHeaders.Add("Accept", "application/xml");
+					httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9");
+					httpClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
+
+					//https://api.nbrb.by/exrates/rates?periodicity=0
+					httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Render/1.0 (+https://render.com)");
 					var response = await httpClient.GetStringAsync(url);
 					Console.WriteLine($"Ответ от сервера:\n{response}"); // 🔴 Добавляем вывод ответа в лог
 					var xdoc = XDocument.Parse(response);
