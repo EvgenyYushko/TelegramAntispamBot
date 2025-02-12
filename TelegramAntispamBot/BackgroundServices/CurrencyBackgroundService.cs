@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BuisinessLogic.Services.Parsers;
 using Infrastructure.InjectSettings;
 using TelegramAntispamBot.BackgroundServices.Base;
-using static Infrastructure.Common.TimeZoneHelper;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
@@ -23,9 +23,9 @@ namespace TelegramAntispamBot.BackgroundServices
 		}
 
 		/// <inheritdoc />
-		protected override string Parse()
+		protected override Task<string> Parse()
 		{
-			return _nbrbCurrencyParser.ParseCurrencyRates(DateTimeNow).Result;
+			return _nbrbCurrencyParser.ParseCurrencyRates();
 		}
 	}
 }

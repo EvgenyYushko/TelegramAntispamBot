@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static Infrastructure.Helpers.FunctionsHelper;
+using static Infrastructure.Common.TimeZoneHelper;
 
 namespace BuisinessLogic.Services.Parsers
 {
@@ -12,16 +13,18 @@ namespace BuisinessLogic.Services.Parsers
 	{
 		private const string BASE_URL = "http://www.nbrb.by/Services/XmlExRates.aspx";
 
-		public async Task<string> ParseCurrencyRates(DateTime date)
+		public async Task<string> ParseCurrencyRates()
 		{
-			string dateParam = date.ToString("M/d/yyyy");
-			string url = $"{BASE_URL}?ondate={dateParam}";
-
 			using (var httpClient = new HttpClient())
 			{
 				try
 				{
+					var date = DateTimeNow;
+					string dateParam = date.ToString("M/d/yyyy");
+					string url = $"{BASE_URL}?ondate={dateParam}";
+
 					Console.WriteLine(url);
+					httpClient.Timeout = new TimeSpan(0, 0, 3, 0);
 					var response = await httpClient.GetStringAsync(url);
 					var xdoc = XDocument.Parse(response);
 					var dateElement = xdoc.Root.Element("Date")?.Value;

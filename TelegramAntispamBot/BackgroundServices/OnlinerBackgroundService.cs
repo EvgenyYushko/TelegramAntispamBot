@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BuisinessLogic.Services.Parsers;
 using Infrastructure.InjectSettings;
 using TelegramAntispamBot.BackgroundServices.Base;
@@ -22,9 +23,9 @@ namespace TelegramAntispamBot.BackgroundServices
 		}
 
 		/// <inheritdoc />
-		protected override string Parse()
+		protected override Task<string> Parse()
 		{
-			return _onlinerParser.ParseLatestPostAsync().Result;
+			return _onlinerParser.ParseLatestPostAsync();
 		}
 	}
 }
