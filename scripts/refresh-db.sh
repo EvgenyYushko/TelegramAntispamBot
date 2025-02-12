@@ -76,7 +76,6 @@ wait_for_db_ready() {
 
         log_warning "Ответ от Render API: $CHECK_DB_RESPONSE"  # Логирование полного ответа
 
-        # Корректно извлекаем статус (он в корневом объекте)
         STATUS=$(echo "$CHECK_DB_RESPONSE" | jq -r '.status // empty' 2>/dev/null)
 
         if [ "$STATUS" == "available" ]; then
@@ -123,10 +122,10 @@ render_api_request "POST" "services/$RENDER_SERVICE_ID/suspend" "" > /dev/null
 
 # Создание бэкапа
 log_info "Создание бэкапа базы данных TelergamDB..."
-# Получаем JSON с данными подключения и сохраняем его в DB_INFO
+
 DB_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID" "")
 CONNECTION_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID/connection-info" "")
-# Извлекаем пароль и имя пользователя из DB_INFO
+
 DB_NAME=$(jq -r '.databaseName' <<< "$DB_INFO")
 DB_USER_FROM_INFO=$(jq -r '.databaseUser' <<< "$DB_INFO")
 PGPASSWORD=$(jq -r '.password' <<< "$CONNECTION_INFO")
