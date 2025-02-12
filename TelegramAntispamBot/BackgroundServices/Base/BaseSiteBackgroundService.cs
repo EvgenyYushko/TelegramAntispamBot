@@ -28,7 +28,7 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 			var scheduledTimes = _setting.ScheduledTimes;
 
 			_timer = new Timer(Callback, null, GetNextDelay(), Timeout.InfiniteTimeSpan);
-
+			Callback(null);
 			return Task.CompletedTask;
 
 			// Функция для вычисления времени до следующего запуска
@@ -64,8 +64,8 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 				{
 					var channelsId = new List<long>
 					{
-						-1002227239224, // Тест бота
-						-1002360730808  // Женя тестирует бота
+						-1002227239224 // Тест бота
+						//,-1002360730808  // Женя тестирует бота
 					};
 
 					var tasks = channelsId

@@ -21,6 +21,7 @@ namespace BuisinessLogic.Services.Parsers
 			{
 				try
 				{
+					Console.WriteLine(url);
 					var response = await httpClient.GetStringAsync(url);
 					var xdoc = XDocument.Parse(response);
 					var dateElement = xdoc.Root.Element("Date")?.Value;
