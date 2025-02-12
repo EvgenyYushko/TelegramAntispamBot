@@ -1,240 +1,212 @@
 #!/bin/bash
+# Скрипт выполняет следующие шаги:
+# 1. Останавливает веб-сервис.
+# 2. Создаёт бэкап базы данных.
+# 3. Опционально загружает бэкап в Google Drive.
+# 4. Пересоздаёт базу данных.
+# 5. Ожидает готовность новой базы данных.
+# 6. Восстанавливает данные из бэкапа.
+# 7. Обновляет переменные окружения (например, DB_URL_POSTGRESQL) через API Render.
+# 8. Перезапускает веб-сервис и проверяет его доступность.
 
+# =============================================
 # Конфигурация
+# =============================================
+RENDER_API="https://api.render.com/v1"
 BACKUP_FILE_NAME="backup.dump"
 NEW_DB_NAME="telergamdb"
 NEW_DB_USER="telergamdb_user"
+SITE_URL="https://telegramantispambot.onrender.com/"
+RENDER_SERVICE_TYPE="postgres"  # Тип сервиса для API Render
+MAX_RETRIES=30                  # Максимальное количество попыток проверки доступности сайта
+RETRY_INTERVAL=15               # Интервал между проверками сайта (сек)
 
-# Функция для гарантированного запуска сервиса при ошибке
-trap 'handle_error' ERR
-handle_error() {
-  echo "❌ Script failed! Attempting to start the web service..."
-  curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/resume" \
-    -H "Authorization: Bearer $RENDER_API_KEY"
-  exit 1
+# =============================================
+# Вспомогательные функции
+# =============================================
+
+# Логирование с цветами и иконками
+log_info() {
+    printf "\e[34mℹ %s\e[0m\n" "$1"
 }
 
-ALL_DB=$(curl -s --request GET \
-  --url 'https://api.render.com/v1/postgres?includeReplicas=true&limit=20' \
-  --header 'accept: application/json' \
-  --header "authorization: Bearer $RENDER_API_KEY")
+log_success() {
+    printf "\e[32m✔ %s\e[0m\n" "$1"
+}
 
-DB_ID=$(echo "$ALL_DB" | jq -r '.[] | select(.postgres.name=="TelergamDB") | .postgres.id')
+log_warning() {
+    printf "\e[33m⚠ %s\e[0m\n" "$1"
+}
+
+log_error() {
+    printf "\e[31m❌ %s\e[0m\n" "$1" >&2
+}
+
+# Вызов API Render.com
+render_api_request() {
+    local method=$1
+    local endpoint=$2
+    local data=$3
+
+    curl -sSf -X "$method" \
+         -H "accept: application/json" \
+         -H "authorization: Bearer $RENDER_API_KEY" \
+         -H "content-type: application/json" \
+         --data "$data" \
+         "${RENDER_API}/${endpoint}"
+}
+
+# Обработка ошибок: вывод сообщения, попытка возобновления веб-сервиса и завершение работы
+handle_error() {
+    log_error "Script failed! Attempting to start the web service..."
+    render_api_request "POST" "services/$RENDER_SERVICE_ID/resume" "" || true
+    exit 1
+}
+trap 'handle_error' ERR
+
+# Функция ожидания готовности новой базы данных
+wait_for_db_ready() {
+    local retries=30
+    local interval=10
+    log_info "⏳ Ожидание готовности новой базы данных (ID: $NEW_DB_ID)..."
+    for i in $(seq 1 $retries); do
+        local CHECK_DB_RESPONSE
+        CHECK_DB_RESPONSE=$(curl -s --request GET \
+            --url "https://api.render.com/v1/postgres/$NEW_DB_ID" \
+            --header 'accept: application/json' \
+            --header "authorization: Bearer $RENDER_API_KEY")
+        
+        # Извлекаем статус из первого элемента массива (если API возвращает массив)
+        local STATUS
+        STATUS=$(echo "$CHECK_DB_RESPONSE" | jq -r '.[0].postgres.status // empty')
+    
+        if [ "$STATUS" == "available" ]; then
+            log_success "База данных готова! Статус: $STATUS."
+            return 0
+        fi
+        
+        log_info "Статус базы данных: $STATUS. Повтор через $interval секунд..."
+        sleep "$interval"
+    done
+    log_error "База данных не стала доступной в течение отведённого времени."
+    return 1
+}
+
+# Функция опциональной загрузки бэкапа в Google Drive с использованием rclone
+upload_to_gdrive() {
+    log_info "Загрузка бэкапа в Google Drive..."
+    if ! rclone copy "$BACKUP_FILE_NAME" "gdrive:backups/backup_$(date +'%Y-%m-%d_%H-%M-%S').dump" --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"; then
+        log_warning "Не удалось загрузить файл в Google Drive"
+    fi
+}
+
+# =============================================
+# Основной скрипт
+# =============================================
+
+# Получение информации о существующей БД
+log_info "Поиск существующей базы данных..."
+DB_ID=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}?includeReplicas=true&limit=20" "" | \
+         jq -r '.[] | select(.postgres.name=="TelergamDB") | .postgres.id')
 
 if [ -n "$DB_ID" ] && [ "$DB_ID" != "null" ]; then
-    echo "Найден OWNER ID для базы TelergamDB: $DB_ID"
+    log_success "Найдена база данных TelergamDB (ID: $DB_ID)"
 else
-    echo "❌ Не удалось найти базу с именем TelergamDB или извлечь OWNER ID."
+    log_error "База данных TelergamDB не найдена"
     exit 1
 fi
 
-echo "🛑 Stopping web service..."
-curl -s -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/suspend" \
-  -H "Authorization: Bearer $RENDER_API_KEY"
+# Остановка веб-сервиса
+log_info "Остановка веб-сервиса..."
+render_api_request "POST" "services/$RENDER_SERVICE_ID/suspend" "" > /dev/null
 
-# Шаг 1: Получение данных текущей БД
-echo "🔄 Получение данных БД..."
-DB_INFO=$(curl -s -X GET "https://api.render.com/v1/postgres/$DB_ID" \
-  -H "accept: application/json" \
-  -H "authorization: Bearer $RENDER_API_KEY")
-
-# Шаг 2: Проверка успешности запроса
-if [ -z "$DB_INFO" ]; then
-  echo "❌ Ошибка: Не удалось получить данные БД."
-  exit 1
-fi
-
-# Шаг 3: Получение конфиденциальных данных подключения к БД
-echo "🔄 Получение данных подключения к БД..."
-CONNECTION_INFO=$(curl -s -X GET "https://api.render.com/v1/postgres/$DB_ID/connection-info" \
-  -H "accept: application/json" \
-  -H "authorization: Bearer $RENDER_API_KEY")
-
-# Шаг 4: Проверка успешности запроса
-if [ -z "$CONNECTION_INFO" ]; then
-  echo "❌ Ошибка: Не удалось получить данные подключения."
-  exit 1
-fi
-
-# Шаг 5: Извлечение параметров подключения
-DB_NAME=$(echo "$DB_INFO" | jq -r '.databaseName')
-DB_PORT=5432  # Порт PostgreSQL по умолчанию
-DB_USER=$(echo "$DB_INFO" | jq -r '.databaseUser')
+# Создание бэкапа
+log_info "Создание бэкапа базы данных..."
+# Получаем JSON с данными подключения и сохраняем его в DB_INFO
+DB_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID/connection-info" "")
+# Извлекаем пароль и имя пользователя из DB_INFO
+DB_NAME=$(jq -r '.databaseName' <<< "$DB_INFO")
+DB_USER_FROM_INFO=$(jq -r '.databaseUser' <<< "$DB_INFO")
+PGPASSWORD=$(jq -r '.password' <<< "$DB_INFO")
 DB_HOST="$DB_ID.oregon-postgres.render.com"
-DB_PASSWORD=$(echo "$CONNECTION_INFO" | jq -r '.password')
+DB_PORT=5432  # Порт PostgreSQL по умолчанию
 
-# Шаг 6: Проверка наличия всех данных
-if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
-  echo "❌ Ошибка: Не удалось извлечь все параметры подключения."
-  echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD"
-  echo "CONNECTION_INFO: $CONNECTION_INFO"
-  echo "DB_INFO: $DB_INFO"
-  exit 1
-fi
-
-echo "✅ Данные подключения получены:"
-echo "DB_NAME=$DB_NAME DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD"
-
-# Шаг 7: Создание бекапа
-echo "🔄 Создание бекапа..."
-export PGPASSWORD=$DB_PASSWORD
-pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME --no-owner --no-acl -Fc -f $BACKUP_FILE_NAME
-
-#pwd
-#ls -lh backup.dump
-#rm -i backup.dump
-
-if [ $? -eq 0 ]; then
-  echo "✅ Бекап успешно создан: $BACKUP_FILE_NAME"
+if [ -n "$DB_NAME" ] && [ "$DB_NAME" != "null" ] && [ -n "$DB_USER_FROM_INFO" ] && [ "$DB_USER_FROM_INFO" != "null" ] && [ -n "$PGPASSWORD" ] && [ "$PGPASSWORD" != "null" ]; then
+    log_success "Данные получены (ID: $DB_ID)"
 else
-  echo "❌ Ошибка: Не удалось создать бекап."
+    log_error "Не хватает данных: $DB_INFO"
+    echo "$DB_NAME="$DB_NAME "DB_USER_FROM_INFO="$DB_USER_FROM_INFO "PGPASSWORD="$PGPASSWORD
+    exit 1
 fi
 
-# Загрузка файла в Google Drive
-rclone copy backup.dump "gdrive:backups/backup_$(date +'%Y-%m-%d_%H-%M-%S').dump" --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"
+export PGPASSWORD
+if ! pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER_FROM_INFO" -d "$DB_NAME" --no-owner --no-acl -Fc -f "$BACKUP_FILE_NAME"; then
+    log_error "Ошибка при создании бэкапа"
+    exit 1
+fi
+log_success "Бэкап успешно создан: $BACKUP_FILE_NAME"
 
-echo "Try suspend DB"
-curl --request POST \
-     --url https://api.render.com/v1/postgres/$DB_ID/suspend \
-     --header 'accept: application/json' \
-     --header "authorization: Bearer $RENDER_API_KEY"
-echo "Sleep 10 sec"
-sleep 10
+# Опциональная загрузка бэкапа в Google Drive
+upload_to_gdrive || true
 
-#echo "Try resume DB"
-#curl --request POST \
-#     --url https://api.render.com/v1/postgres/$DB_ID/resume \
-#     --header 'accept: application/json' \
-#     --header "authorization: Bearer $RENDER_API_KEY"
+# Пересоздание базы данных
+log_info "Пересоздание базы данных..."
+render_api_request "POST" "$RENDER_SERVICE_TYPE" "{
+    \"databaseName\": \"$NEW_DB_NAME\",
+    \"databaseUser\": \"$NEW_DB_USER\",
+    \"enableHighAvailability\": false,
+    \"plan\": \"free\",
+    \"version\": \"16\",
+    \"name\": \"TelergamDB\",
+    \"ownerId\": \"tea-ct84bie8ii6s73ccgf1g\",
+    \"ipAllowList\": [{\"cidrBlock\": \"0.0.0.0/0\", \"description\": \"everywhere\"}]
+}" | jq '.' > response.json
 
-echo "Try Delete DB"
-curl --request DELETE \
-     --url https://api.render.com/v1/postgres/$DB_ID \
-     --header 'accept: application/json' \
-     --header "authorization: Bearer $RENDER_API_KEY"
-     
-echo "Sleep 10 sec"
-sleep 10
+NEW_DB_ID=$(jq -r '.id' response.json)
+log_success "Новая база данных создана (ID: $NEW_DB_ID)"
 
-echo "Try Create DB"
-CREATE_DB_RESPONSE=$(curl --request POST \
-     --url https://api.render.com/v1/postgres \
-     --header "accept: application/json" \
-     --header "authorization: Bearer $RENDER_API_KEY" \
-     --header "content-type: application/json" \
-     --data "{
-  \"databaseName\": \"$NEW_DB_NAME\",
-  \"databaseUser\": \"$NEW_DB_USER\",
-  \"enableHighAvailability\": false,
-  \"plan\": \"free\",
-  \"version\": \"16\",
-  \"name\": \"TelergamDB\",
-  \"ownerId\": \"tea-ct84bie8ii6s73ccgf1g\",
-  \"ipAllowList\": [
-    {
-      \"cidrBlock\": \"0.0.0.0/0\",
-      \"description\": \"everywhere\"
-    }
-  ]
-}")
-echo "Sleep 1 min"
 sleep 30
 
-echo "⏳ Ожидание готовности БД..."
-MAX_RETRIES=30
-RETRY_INTERVAL=10
+# Ожидание готовности новой базы данных
+if ! wait_for_db_ready; then
+    log_error "База данных не стала доступной. Прерывание восстановления."
+    exit 1
+fi
 
+# Восстановление данных из бэкапа
+log_info "Восстановление данных из бэкапа..."
+NEW_DB_PASSWORD=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$NEW_DB_ID/connection-info" "" | jq -r '.password')
+export PGPASSWORD=$NEW_DB_PASSWORD
+
+if ! pg_restore -h "${NEW_DB_ID}.oregon-postgres.render.com" -p 5432 -U "$NEW_DB_USER" -d "$NEW_DB_NAME" --no-owner "$BACKUP_FILE_NAME"; then
+    log_error "Ошибка восстановления данных"
+    exit 1
+fi
+
+# Обновление переменных окружения (DB_URL_POSTGRESQL)
+log_info "Обновление переменных окружения..."
+CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;Password=$NEW_DB_PASSWORD;Port=5432;SSL Mode=Require;Trust Server Certificate=true"
+render_api_request "PUT" "services/$RENDER_SERVICE_ID/env-vars/DB_URL_POSTGRESQL" "{\"value\":\"$CONNECTION_STRING\"}" > /dev/null
+
+# Перезапуск веб-сервиса
+log_info "Перезапуск веб-сервиса..."
+render_api_request "POST" "services/$RENDER_SERVICE_ID/resume" "" > /dev/null
+render_api_request "POST" "services/$RENDER_SERVICE_ID/deploys" "{\"clearCache\":\"do_not_clear\"}" > /dev/null
+
+# Проверка доступности веб-сервиса
+log_info "Проверка доступности сервиса..."
 for i in $(seq 1 $MAX_RETRIES); do
-    CHECK_DB_RESPONSE=$(curl -s --request GET \
-             --url "https://api.render.com/v1/postgres/$NEW_DB_ID" \
-             --header 'accept: application/json' \
-             --header "authorization: Bearer $RENDER_API_KEY")
-    
-    #echo "📝 Ответ API: $CHECK_DB_RESPONSE"  
-
-    # Получаем статус, учитывая массив и объект postgres
-    STATUS=$(echo "$CHECK_DB_RESPONSE" | jq -r '.[0].postgres.status // empty')
-
-    if [ "$STATUS" == "available" ]; then
-        echo "✅ БД готова! Статус: $STATUS."
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL")
+    if [ "$HTTP_STATUS" -eq 200 ]; then
         break
     fi
-    
-    echo "⏳ Статус: $STATUS. Повтор через $RETRY_INTERVAL секунд..."
-    sleep $RETRY_INTERVAL
+    sleep "$RETRY_INTERVAL"
 done
 
-NEW_DB_ID=$(echo "$CREATE_DB_RESPONSE" | jq -r '.id')
-NEW_DB_NAME=$(echo "$CREATE_DB_RESPONSE" | jq -r '.databaseName')
-NEW_DB_USER=$(echo "$CREATE_DB_RESPONSE" | jq -r '.databaseUser')
-
-#echo "NEW_DB_ID:" $NEW_DB_ID
-
-if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
-  echo "❌ Ошибка: Не удалось создать БД!"
-  echo "Ответ API: $CREATE_DB_RESPONSE"
-  exit 1
+if [ "$HTTP_STATUS" -eq 200 ]; then
+    log_success "Сервис доступен!"
+else
+    log_error "Сервис недоступен"
 fi
 
-sleep 10
-
-echo "🔄 Получение данных подключения к новой БД..."
-CONNECTION_NEW_DB_INFO=$(curl -s -X GET "https://api.render.com/v1/postgres/$NEW_DB_ID/connection-info" \
-  -H "accept: application/json" \
-  -H "authorization: Bearer $RENDER_API_KEY")
-
-if [ -z "$CONNECTION_NEW_DB_INFO" ]; then
-  echo "❌ Ошибка: Не удалось получить данные подключения к новой БД."
-  exit 1
-fi
-
-NEW_DB_PASSWORD=$(echo "$CONNECTION_NEW_DB_INFO" | jq -r '.password')
-
-sleep 10
-export PGPASSWORD=$NEW_DB_PASSWORD
-pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME --no-owner backup.dump
-
-CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;Password=$NEW_DB_PASSWORD;Port=5432;SSL Mode=Require;Trust Server Certificate=true"
-echo "New CONNECTION_STRING=" $CONNECTION_STRING
-
-curl --request PUT \
-     --url https://api.render.com/v1/services/$RENDER_SERVICE_ID/env-vars/DB_URL_POSTGRESQL \
-     --header 'accept: application/json' \
-     --header "Authorization: Bearer $RENDER_API_KEY" \
-     --header 'content-type: application/json' \
-     --data "{\"value\":\"$CONNECTION_STRING\"}"
-
-echo "🚀 Resume web service..."
-curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/resume" \
-    -H "Authorization: Bearer $RENDER_API_KEY"
-
-echo "🚀 Deploy web service..."
-curl --request POST \
-     --url https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys \
-     --header 'accept: application/json' \
-     --header "Authorization: Bearer $RENDER_API_KEY" \
-     --header 'content-type: application/json' \
-     --data '
-{
-  "clearCache": "do_not_clear"
-}
-'
-
-# Проверка доступности
-echo "🔍 Checking site availability..."
-MAX_RETRIES=10
-RETRY_INTERVAL=30
-SITE_URL="https://telegramantispambot.onrender.com/"
-
-for i in $(seq 1 $MAX_RETRIES); do
-  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $SITE_URL)
-  if [ "$HTTP_STATUS" -eq 200 ]; then
-    echo "✅ Site is up!"
-    exit 0
-  fi
-  echo "⏳ Статус: $HTTP_STATUS. Повтор через $RETRY_INTERVAL секунд..."
-  sleep $RETRY_INTERVAL
-done
-
-echo "❌ Site failed to start after $MAX_RETRIES attempts."
-exit 1
+exit 0
