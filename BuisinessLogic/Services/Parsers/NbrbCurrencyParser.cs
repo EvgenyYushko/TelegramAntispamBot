@@ -7,22 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.Json;
+using static Infrastructure.Common.TimeZoneHelper;
 
 namespace BuisinessLogic.Services.Parsers
 {
 	public class NbrbCurrencyParser
 	{
-		private const string BASE_URL = "https://www.nbrb.by/Services/XmlExRates.aspx";
-		// Классы для десериализации JSON
-		public record CurrencyRate(
-			int Cur_ID,
-			string Date,
-			string Cur_Abbreviation,
-			int Cur_Scale,
-			string Cur_Name,
-			decimal Cur_OfficialRate
-		);
-
+		private const string BASE_URL = "https://api.nbrb.by/exrates/rates";
+		
 		public async Task<string> ParseCurrencyRates()
 		{
 			// Основной код
@@ -30,12 +22,8 @@ namespace BuisinessLogic.Services.Parsers
 			{
 				try
 				{
-					const string BASE_URL = "https://api.nbrb.by/exrates/rates";
-					var requestDate = DateTime.Now;
-
 					// Формируем URL запроса
 					var url = $"{BASE_URL}?periodicity=0";
-					Console.WriteLine($"Request URL: {url}");
 
 					// Настройка HttpClient
 					httpClient.Timeout = TimeSpan.FromSeconds(10);
@@ -44,7 +32,6 @@ namespace BuisinessLogic.Services.Parsers
 
 					// Выполнение запроса
 					var response = await httpClient.GetStringAsync(url);
-					Console.WriteLine("Raw response received");
 
 					// Десериализация JSON
 					var currencies = JsonSerializer.Deserialize<List<CurrencyRate>>(response);
@@ -54,7 +41,7 @@ namespace BuisinessLogic.Services.Parsers
 					// Получаем актуальную дату из первого элемента
 					var rateDate = DateTime.TryParse(currencies[0].Date, out var date)
 						? date.ToShortDateString()
-						: requestDate.ToShortDateString();
+						: DateTimeNow.ToShortDateString();
 
 					var sb = new StringBuilder();
 					sb.AppendLine($"💰 *Курсы валют НБ РБ на {rateDate}*:\n");
@@ -94,5 +81,15 @@ namespace BuisinessLogic.Services.Parsers
 				}
 			}
 		}
+
+		// Классы для десериализации JSON
+		public record CurrencyRate(
+			int Cur_ID,
+			string Date,
+			string Cur_Abbreviation,
+			int Cur_Scale,
+			string Cur_Name,
+			decimal Cur_OfficialRate
+		);
 	}
 }
