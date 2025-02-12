@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static Infrastructure.Helpers.FunctionsHelper;
@@ -13,12 +15,51 @@ namespace BuisinessLogic.Services.Parsers
 	{
 		private const string BASE_URL = "https://www.nbrb.by/Services/XmlExRates.aspx";
 
+		public static async Task<WebProxy> GetRandomProxyAsync()
+		{
+			string proxyListUrl = "https://www.sslproxies.org/";
+
+			using (var httpClient = new HttpClient())
+			{
+				try
+				{
+					string html = await httpClient.GetStringAsync(proxyListUrl);
+					var matches = Regex.Matches(html, @"<td>(\d+\.\d+\.\d+\.\d+)</td>\s*<td>(\d+)</td>");
+            
+					var proxies = matches
+						.Select(m => new WebProxy($"http://{m.Groups[1].Value}:{m.Groups[2].Value}"))
+						.ToList();
+
+					if (proxies.Count > 0)
+					{
+						var random = new Random();
+						return proxies[random.Next(proxies.Count)];
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Ошибка загрузки прокси: {ex.Message}");
+				}
+			}
+
+			return null;
+		}
+
 		public async Task<string> ParseCurrencyRates()
 		{
+			var proxy = await GetRandomProxyAsync();
+
+			if (proxy == null)
+			{
+				return "❌ Не удалось получить рабочий прокси.";
+			}
+
 			var handler = new HttpClientHandler
 			{
-				ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+				Proxy = proxy,
+				UseProxy = true
 			};
+
 
 			using (var httpClient = new HttpClient(handler))
 			{
