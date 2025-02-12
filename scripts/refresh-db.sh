@@ -81,7 +81,7 @@ wait_for_db_ready() {
 
         if [ "$STATUS" == "available" ]; then
             log_success "✅ БД готова! Статус: $STATUS."
-            break
+            return 0
         fi
 
         log_info "⏳ Статус базы данных: ${STATUS:-неизвестен}. Повтор через $RETRY_INTERVAL секунд..."
