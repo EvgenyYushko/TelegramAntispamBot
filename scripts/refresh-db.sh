@@ -151,6 +151,7 @@ log_success "Бэкап успешно создан: $BACKUP_FILE_NAME"
 upload_to_gdrive || true
 
 render_api_request "POST" "${RENDER_SERVICE_TYPE}/$DB_ID/suspend" ""
+render_api_request "DELETE" "${RENDER_SERVICE_TYPE}/$DB_ID" ""
 
 # Пересоздание базы данных
 log_info "Пересоздание базы данных..."
@@ -166,7 +167,13 @@ render_api_request "POST" "$RENDER_SERVICE_TYPE" "{
 }" | jq '.' > response.json
 
 NEW_DB_ID=$(jq -r '.id' response.json)
-log_success "Новая база данных создана (ID: $NEW_DB_ID)"
+if [ -n "$NEW_DB_ID" ] && [ "$NEW_DB_ID" != "null" ]; then
+    log_success "Новая база данных создана (ID: $NEW_DB_ID)"
+else
+    log_info "Ответ от Render API:"
+    jq '.' response.json
+    exit 1
+fi
 
 sleep 30
 
