@@ -133,7 +133,7 @@ DB_HOST="$DB_ID.oregon-postgres.render.com"
 DB_PORT=5432  # Порт PostgreSQL по умолчанию
 
 if [ -n "$DB_NAME" ] && [ "$DB_NAME" != "null" ] && [ -n "$DB_USER_FROM_INFO" ] && [ "$DB_USER_FROM_INFO" != "null" ] && [ -n "$PGPASSWORD" ] && [ "$PGPASSWORD" != "null" ]; then
-    log_success "Данные получены (ID: $DB_ID)"
+    log_success "Данные получены (DB_ID: $DB_ID)"
 else
     log_error "Не хватает данных: $DB_INFO"
     echo "DB_NAME="$DB_NAME "DB_USER_FROM_INFO="$DB_USER_FROM_INFO "PGPASSWORD="$PGPASSWORD
@@ -149,6 +149,8 @@ log_success "Бэкап успешно создан: $BACKUP_FILE_NAME"
 
 # Опциональная загрузка бэкапа в Google Drive
 upload_to_gdrive || true
+
+render_api_request "POST" "${RENDER_SERVICE_TYPE}/$DB_ID/suspend" ""
 
 # Пересоздание базы данных
 log_info "Пересоздание базы данных..."
