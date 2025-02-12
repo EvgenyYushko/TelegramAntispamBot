@@ -15,7 +15,7 @@ namespace TelegramAntispamBot.BackgroundServices
 			{
 				ScheduledTimes = new[]
 				{
-					new TimeSpan(16, 8, 0), // 09:00
+					new TimeSpan(16, 21, 0), // 09:00
 				}
 			})
 		{

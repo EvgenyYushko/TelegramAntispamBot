@@ -11,11 +11,16 @@ namespace BuisinessLogic.Services.Parsers
 {
 	public class NbrbCurrencyParser
 	{
-		private const string BASE_URL = "http://www.nbrb.by/Services/XmlExRates.aspx";
+		private const string BASE_URL = "https://www.nbrb.by/Services/XmlExRates.aspx";
 
 		public async Task<string> ParseCurrencyRates()
 		{
-			using (var httpClient = new HttpClient())
+			var handler = new HttpClientHandler
+			{
+				ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+			};
+
+			using (var httpClient = new HttpClient(handler))
 			{
 				try
 				{
@@ -24,6 +29,7 @@ namespace BuisinessLogic.Services.Parsers
 					string url = $"{BASE_URL}?ondate={dateParam}";
 
 					Console.WriteLine(url);
+					httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
 					httpClient.Timeout = new TimeSpan(0, 0, 3, 0);
 					var response = await httpClient.GetStringAsync(url);
 					var xdoc = XDocument.Parse(response);
