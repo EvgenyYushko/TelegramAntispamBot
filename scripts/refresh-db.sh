@@ -42,17 +42,6 @@ log_error() {
     printf "\e[31m❌ %s\e[0m\n" "$1" >&2
 }
 
-log_progress() {
-    local msg="$1"
-    local total=10  # Длина прогресс-бара
-    printf "\r\e[34m⏳ %s [%-${total}s] %d%%\e[0m" "$msg" "" 0
-    for i in $(seq 1 $total); do
-        sleep 0.2
-        printf "\r\e[34m⏳ %s [%-${total}s] %d%%\e[0m" "$msg" "$(printf "%0.s#" $(seq 1 $i))" $((i * 10))
-    done
-    echo -e "\r\e[32m✔ $msg [##########] 100%\e[0m"
-}
-
 # Вызов API Render.com
 render_api_request() {
     local method=$1
@@ -77,7 +66,6 @@ trap 'handle_error' ERR
 
 # Функция ожидания готовности новой базы данных
 wait_for_db_ready() {
-    log_progress "Проверка переменных окружения"
     log_info "⏳ Ожидание готовности новой базы данных (NEW_DB_ID: $NEW_DB_ID)..."
 
     for i in $(seq 1 $MAX_RETRIES); do
@@ -128,7 +116,7 @@ else
 fi
 
 # Остановка веб-сервиса
-log_info "Остановка веб-сервиса (RENDER_SERVICE_ID=$RENDER_SERVICE_ID)..."
+log_info "Остановка веб-сервиса..."
 render_api_request "POST" "services/$RENDER_SERVICE_ID/suspend" "" > /dev/null
 
 # Создание бэкапа
@@ -210,20 +198,22 @@ if ! pg_restore -h "${NEW_DB_ID}.oregon-postgres.render.com" -p 5432 -U "$NEW_DB
     exit 1
 fi
 
-log_success "База данных $NEW_DB_NAME успешно восстановлена"
+log_success "База данных $NEW_DB_NAME успешно восстановлена! (NEW_DB_ID=$NEW_DB_ID)"
 
 # Обновление переменных окружения (DB_URL_POSTGRESQL)
 log_info "Обновление переменных окружения..."
 CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;Password=$NEW_DB_PASSWORD;Port=5432;SSL Mode=Require;Trust Server Certificate=true"
 render_api_request "PUT" "services/$RENDER_SERVICE_ID/env-vars/DB_URL_POSTGRESQL" "{\"value\":\"$CONNECTION_STRING\"}" > /dev/null
+log_success "Переменные окружения обновлены!"
 
 # Перезапуск веб-сервиса
-log_info "🔄 Перезапуск веб-сервиса (RENDER_SERVICE_ID=$RENDER_SERVICE_ID)..."
+log_info "🔄 Перезапуск веб-сервиса..."
 render_api_request "POST" "services/$RENDER_SERVICE_ID/resume" "" > /dev/null
 render_api_request "POST" "services/$RENDER_SERVICE_ID/deploys" "{\"clearCache\":\"do_not_clear\"}" > /dev/null
+log_success "Веб-сервис запущен!"
 
 # Проверка доступности веб-сервиса
-log_info "Проверка доступности веб-сервиса (RENDER_SERVICE_ID=$RENDER_SERVICE_ID)..."
+log_info "Проверка доступности веб-сервиса..."
 for i in $(seq 1 $MAX_RETRIES); do
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL")
     if [ "$HTTP_STATUS" -eq 200 ]; then
