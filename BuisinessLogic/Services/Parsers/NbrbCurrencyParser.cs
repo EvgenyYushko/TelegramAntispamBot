@@ -17,28 +17,32 @@ namespace BuisinessLogic.Services.Parsers
 
 		public static async Task<WebProxy> GetRandomProxyAsync()
 		{
-			string proxyListUrl = "https://www.sslproxies.org/";
+			string[] proxyList = new string[]
+			{
+				"http://83.217.23.36:8090",
+				"http://190.61.88.147:8080",
+				"http://45.167.95.184:999",
+			};
 
-			using (var httpClient = new HttpClient())
+			foreach (var proxyUrl in proxyList)
 			{
 				try
 				{
-					string html = await httpClient.GetStringAsync(proxyListUrl);
-					var matches = Regex.Matches(html, @"<td>(\d+\.\d+\.\d+\.\d+)</td>\s*<td>(\d+)</td>");
-            
-					var proxies = matches
-						.Select(m => new WebProxy($"http://{m.Groups[1].Value}:{m.Groups[2].Value}"))
-						.ToList();
-
-					if (proxies.Count > 0)
-					{
-						var random = new Random();
-						return proxies[random.Next(proxies.Count)];
-					}
+					var proxy = new WebProxy(proxyUrl);
+					var httpClientHandler = new HttpClientHandler { Proxy = proxy, UseProxy = true };
+					var httpClient = new HttpClient(httpClientHandler);
+        
+					Console.WriteLine($"🔄 Пробую прокси: {proxyUrl}");
+					var response = await httpClient.GetStringAsync("http://www.nbrb.by/Services/XmlExRates.aspx?ondate=2/12/2025");
+        
+					Console.WriteLine("✅ Успешный ответ через прокси!");
+					Console.WriteLine(response);
+					return proxy;
+					break;
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Ошибка загрузки прокси: {ex.Message}");
+					Console.WriteLine($"❌ Ошибка с прокси {proxyUrl}: {ex.Message}");
 				}
 			}
 
@@ -74,7 +78,7 @@ namespace BuisinessLogic.Services.Parsers
 					string url = $"{BASE_URL}?ondate={dateParam}";
 
 					Console.WriteLine(url);
-					httpClient.Timeout = new TimeSpan(0, 0, 3, 0);
+					httpClient.Timeout = new TimeSpan(0, 0, 1, 40);
 					httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0");
 					var response = await httpClient.GetStringAsync(url);
 					Console.WriteLine($"Ответ от сервера:\n{response}"); // 🔴 Добавляем вывод ответа в лог
