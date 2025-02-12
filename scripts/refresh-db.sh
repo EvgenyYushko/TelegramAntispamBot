@@ -167,6 +167,9 @@ render_api_request "POST" "$RENDER_SERVICE_TYPE" "{
 }" | jq '.' > response.json
 
 NEW_DB_ID=$(jq -r '.id' response.json)
+NEW_DB_NAME=$(jq -r '.databaseName' response.json)
+NEW_DB_USER=$(jq -r '.databaseUser' response.json)
+
 if [ -n "$NEW_DB_ID" ] && [ "$NEW_DB_ID" != "null" ]; then
     log_success "Новая база данных создана (ID: $NEW_DB_ID)"
 else
@@ -175,7 +178,7 @@ else
     exit 1
 fi
 
-sleep 30
+sleep 40
 
 # Ожидание готовности новой базы данных
 if ! wait_for_db_ready; then
