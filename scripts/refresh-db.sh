@@ -69,24 +69,24 @@ wait_for_db_ready() {
     local retries=30
     local interval=10
     log_info "⏳ Ожидание готовности новой базы данных (ID: $NEW_DB_ID)..."
-    for i in $(seq 1 $retries); do
-        local CHECK_DB_RESPONSE
-        CHECK_DB_RESPONSE=$(curl -s --request GET \
-            --url "https://api.render.com/v1/postgres/$NEW_DB_ID" \
-            --header 'accept: application/json' \
-            --header "authorization: Bearer $RENDER_API_KEY")
-        
-        # Извлекаем статус из первого элемента массива (если API возвращает массив)
-        local STATUS
-        STATUS=$(echo "$CHECK_DB_RESPONSE" | jq -r '.[0].postgres.status // empty')
+    for i in $(seq 1 $MAX_RETRIES); do
+    CHECK_DB_RESPONSE=$(curl -s --request GET \
+             --url "https://api.render.com/v1/postgres/$NEW_DB_ID" \
+             --header 'accept: application/json' \
+             --header "authorization: Bearer $RENDER_API_KEY")
+
+    log_info "Ответ от Render API: $CHECK_DB_RESPONSE"  # Для отладки
+
+    # Попробуем определить статус базы
+    STATUS=$(echo "$CHECK_DB_RESPONSE" | jq -r '.postgres.status // empty' 2>/dev/null)
+
+    if [ "$STATUS" == "available" ]; then
+        log_success "✅ БД готова! Статус: $STATUS."
+        break
+    fi
     
-        if [ "$STATUS" == "available" ]; then
-            log_success "База данных готова! Статус: $STATUS."
-            return 0
-        fi
-        
-        log_info "Статус базы данных: $STATUS. Повтор через $interval секунд..."
-        sleep "$interval"
+    log_info "⏳ Статус базы данных: ${STATUS:-неизвестен}. Повтор через $RETRY_INTERVAL секунд..."
+    sleep $RETRY_INTERVAL
     done
     log_error "База данных не стала доступной в течение отведённого времени."
     return 1
