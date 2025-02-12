@@ -225,7 +225,7 @@ for i in $(seq 1 $MAX_RETRIES); do
 done
 
 if [ "$HTTP_STATUS" -eq 200 ]; then
-    log_success "Сервис доступен!"
+    log_success "Сервис доступен! 🚀🚀🚀"
 else
     log_error "Сервис недоступен"
 fi
