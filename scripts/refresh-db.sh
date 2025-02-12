@@ -31,7 +31,6 @@ fi
 echo "🛑 Stopping web service..."
 curl -s -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/suspend" \
   -H "Authorization: Bearer $RENDER_API_KEY"
-#sleep 60
 
 # Шаг 1: Получение данных текущей БД
 echo "🔄 Получение данных БД..."
@@ -99,8 +98,8 @@ curl --request POST \
      --url https://api.render.com/v1/postgres/$DB_ID/suspend \
      --header 'accept: application/json' \
      --header "authorization: Bearer $RENDER_API_KEY"
-echo "Sleep 20 sec"
-sleep 20
+echo "Sleep 10 sec"
+sleep 10
 
 #echo "Try resume DB"
 #curl --request POST \
@@ -114,11 +113,11 @@ curl --request DELETE \
      --header 'accept: application/json' \
      --header "authorization: Bearer $RENDER_API_KEY"
      
-echo "Sleep 20 sec"
-sleep 20
+echo "Sleep 10 sec"
+sleep 10
 
 echo "Try Create DB"
-Response=$(curl --request POST \
+CREATE_DB_RESPONSE=$(curl --request POST \
      --url https://api.render.com/v1/postgres \
      --header "accept: application/json" \
      --header "authorization: Bearer $RENDER_API_KEY" \
@@ -146,18 +145,18 @@ MAX_RETRIES=30
 RETRY_INTERVAL=10
 
 for i in $(seq 1 $MAX_RETRIES); do
-    RESPONSE=$(curl -s --request GET \
+    CHECK_DB_RESPONSE=$(curl -s --request GET \
              --url "https://api.render.com/v1/postgres/$NEW_DB_ID" \
              --header 'accept: application/json' \
              --header "authorization: Bearer $RENDER_API_KEY")
     
-    echo "📝 Ответ API: $RESPONSE"  # Вывод ответа API для отладки
+    #echo "📝 Ответ API: $CHECK_DB_RESPONSE"  
 
     # Получаем статус, учитывая массив и объект postgres
-    STATUS=$(echo "$RESPONSE" | jq -r '.[0].postgres.status // empty')
+    STATUS=$(echo "$CHECK_DB_RESPONSE" | jq -r '.[0].postgres.status // empty')
 
     if [ "$STATUS" == "available" ]; then
-        echo "✅ БД готова!"
+        echo "✅ БД готова! Статус: $STATUS."
         break
     fi
     
@@ -165,15 +164,15 @@ for i in $(seq 1 $MAX_RETRIES); do
     sleep $RETRY_INTERVAL
 done
 
-NEW_DB_ID=$(echo "$Response" | jq -r '.id')
-NEW_DB_NAME=$(echo "$Response" | jq -r '.databaseName')
-NEW_DB_USER=$(echo "$Response" | jq -r '.databaseUser')
+NEW_DB_ID=$(echo "$CREATE_DB_RESPONSE" | jq -r '.id')
+NEW_DB_NAME=$(echo "$CREATE_DB_RESPONSE" | jq -r '.databaseName')
+NEW_DB_USER=$(echo "$CREATE_DB_RESPONSE" | jq -r '.databaseUser')
 
-echo "NEW_DB_ID:" $NEW_DB_ID
+#echo "NEW_DB_ID:" $NEW_DB_ID
 
 if [ -z "$NEW_DB_ID" ] || [ "$NEW_DB_ID" == "null" ]; then
   echo "❌ Ошибка: Не удалось создать БД!"
-  echo "Ответ API: $Response"
+  echo "Ответ API: $CREATE_DB_RESPONSE"
   exit 1
 fi
 
@@ -196,7 +195,7 @@ export PGPASSWORD=$NEW_DB_PASSWORD
 pg_restore -h "$NEW_DB_ID.oregon-postgres.render.com" -p 5432 -U $NEW_DB_USER -d $NEW_DB_NAME --no-owner backup.dump
 
 CONNECTION_STRING="Host=$NEW_DB_ID;Database=$NEW_DB_NAME;Username=$NEW_DB_USER;Password=$NEW_DB_PASSWORD;Port=5432;SSL Mode=Require;Trust Server Certificate=true"
-echo "CONNECTION_STRING=" $CONNECTION_STRING
+echo "New CONNECTION_STRING=" $CONNECTION_STRING
 
 curl --request PUT \
      --url https://api.render.com/v1/services/$RENDER_SERVICE_ID/env-vars/DB_URL_POSTGRESQL \

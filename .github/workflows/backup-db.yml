@@ -2,8 +2,8 @@ name: Backup Database
 
 on:
   schedule:
-    - cron: '* */3 * * *'  # Каждые 3 часа
-  workflow_dispatch:         # Ручной запуск
+    - cron: '0 20 * * *'  # Каждый день в 8 вечера
+  workflow_dispatch:        
 
 jobs:
   refresh-db:
@@ -36,17 +36,6 @@ jobs:
           GCP_SA_JSON: ${{ secrets.GCP_SA_JSON }}
         run: |
           echo "$GCP_SA_JSON" > /home/runner/service_account.json
-
-      - name: Validate files
-        run: |
-          echo "rclone.conf:"
-          cat ~/.config/rclone/rclone.conf
-          echo "service_account.json:"
-          cat /home/runner/service_account.json
-
-      - name: Create test backup file
-        run: |
-          echo "This is a test backup file." > backup.dump
 
       - name: Run script
         env:
