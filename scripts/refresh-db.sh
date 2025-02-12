@@ -42,6 +42,17 @@ log_error() {
     printf "\e[31m❌ %s\e[0m\n" "$1" >&2
 }
 
+log_progress() {
+    local msg="$1"
+    local total=10  # Длина прогресс-бара
+    printf "\r\e[34m⏳ %s [%-${total}s] %d%%\e[0m" "$msg" "" 0
+    for i in $(seq 1 $total); do
+        sleep 0.2
+        printf "\r\e[34m⏳ %s [%-${total}s] %d%%\e[0m" "$msg" "$(printf "%0.s#" $(seq 1 $i))" $((i * 10))
+    done
+    echo -e "\r\e[32m✔ $msg [##########] 100%\e[0m"
+}
+
 # Вызов API Render.com
 render_api_request() {
     local method=$1
@@ -66,6 +77,7 @@ trap 'handle_error' ERR
 
 # Функция ожидания готовности новой базы данных
 wait_for_db_ready() {
+    log_progress "Проверка переменных окружения"
     log_info "⏳ Ожидание готовности новой базы данных (NEW_DB_ID: $NEW_DB_ID)..."
 
     for i in $(seq 1 $MAX_RETRIES); do
@@ -84,7 +96,7 @@ wait_for_db_ready() {
             return 0
         fi
 
-        log_warning "Статус базы данных: ${STATUS:-неизвестен}. Повтор через $RETRY_INTERVAL секунд..."
+        log_info "Статус базы данных: ${STATUS:-неизвестен}. Повтор через $RETRY_INTERVAL секунд..."
         sleep $RETRY_INTERVAL
     done
     log_error "База данных не стала доступной в течение отведённого времени."
@@ -170,7 +182,7 @@ NEW_DB_NAME=$(jq -r '.databaseName' response.json)
 NEW_DB_USER=$(jq -r '.databaseUser' response.json)
 
 if [ -n "$NEW_DB_ID" ] && [ "$NEW_DB_ID" != "null" ]; then
-    log_success "Новая база данных создана (NEW_DB_ID: $NEW_DB_ID)"
+    log_success "Новая база данных создана (NEW_DB_NAME=$NEW_DB_NAME NEW_DB_ID: $NEW_DB_ID)"
 else
     log_info "Ответ от Render API:"
     jq '.' response.json
@@ -183,19 +195,22 @@ if ! wait_for_db_ready; then
     exit 1
 fi
 
+log_info "⏳ ЖДём 10 секунд..."
+sleep 10
+
 # Восстановление данных из бэкапа
-log_info "Восстановление данных из бэкапа..."
+log_info "Восстановление данных из бэкапа $BACKUP_FILE_NAME..."
 NEW_DB_PASSWORD=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$NEW_DB_ID/connection-info" "" | jq -r '.password')
 export PGPASSWORD=$NEW_DB_PASSWORD
 
 #echo "NEW_DB_USER="$NEW_DB_USER "NEW_DB_NAME=" $NEW_DB_NAME "NEW_DB_PASSWORD="$NEW_DB_PASSWORD
-log_info "⏳ ЖДём 10 секунд..."
-sleep 10
 
 if ! pg_restore -h "${NEW_DB_ID}.oregon-postgres.render.com" -p 5432 -U "$NEW_DB_USER" -d "$NEW_DB_NAME" --no-owner "$BACKUP_FILE_NAME"; then
     log_error "Ошибка восстановления данных"
     exit 1
 fi
+
+log_success "База данных $NEW_DB_NAME успешно восстановлена"
 
 # Обновление переменных окружения (DB_URL_POSTGRESQL)
 log_info "Обновление переменных окружения..."
