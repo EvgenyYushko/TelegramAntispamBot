@@ -19,9 +19,7 @@ namespace BuisinessLogic.Services.Parsers
 		{
 			string[] proxyList = new string[]
 			{
-				"http://83.217.23.36:8090",
-				"http://190.61.88.147:8080",
-				"http://45.167.95.184:999",
+				"http://140.238.24.231",
 			};
 
 			foreach (var proxyUrl in proxyList)
