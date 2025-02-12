@@ -27,19 +27,19 @@ RETRY_INTERVAL=15               # Интервал между проверкам
 
 # Логирование с цветами и иконками
 log_info() {
-    printf "\e[34mℹ %s\e[0m\n" "$1"
+    printf "\e[34mℹ %s\e[0m\n" "⏳ $1"
 }
 
 log_success() {
-    printf "✅\e[32m✔ %s\e[0m\n" "$1"
+    printf "\e[32m✔ %s\e[0m\n" "✅ $1"
 }
 
 log_warning() {
-    printf "\e[33m⚠ %s\e[0m\n" "$1"
+    printf "\e[33m⚠ %s\e[0m\n" "🔄 $1"
 }
 
 log_error() {
-    printf "\e[31m❌ %s\e[0m\n" "$1" >&2
+    printf "\e[31m❌ %s\e[0m\n" "❌ $1" >&2
 }
 
 # Вызов API Render.com
@@ -74,17 +74,17 @@ wait_for_db_ready() {
                  --header 'accept: application/json' \
                  --header "authorization: Bearer $RENDER_API_KEY")
 
-        log_info "Ответ от Render API: $CHECK_DB_RESPONSE"  # Логирование полного ответа
+        log_warning "Ответ от Render API: $CHECK_DB_RESPONSE"  # Логирование полного ответа
 
         # Корректно извлекаем статус (он в корневом объекте)
         STATUS=$(echo "$CHECK_DB_RESPONSE" | jq -r '.status // empty' 2>/dev/null)
 
         if [ "$STATUS" == "available" ]; then
-            log_success "✅ БД готова! Статус: $STATUS."
+            log_success "БД готова! Статус: $STATUS."
             return 0
         fi
 
-        log_info "⏳ Статус базы данных: ${STATUS:-неизвестен}. Повтор через $RETRY_INTERVAL секунд..."
+        log_warning "Статус базы данных: ${STATUS:-неизвестен}. Повтор через $RETRY_INTERVAL секунд..."
         sleep $RETRY_INTERVAL
     done
     log_error "База данных не стала доступной в течение отведённого времени."
@@ -177,6 +177,7 @@ else
     exit 1
 fi
 
+log_info "ЖДём 40 секунд..."
 sleep 40
 
 # Ожидание готовности новой базы данных
@@ -215,7 +216,8 @@ for i in $(seq 1 $MAX_RETRIES); do
     if [ "$HTTP_STATUS" -eq 200 ]; then
         break
     fi
-    sleep "$RETRY_INTERVAL"
+    log_info "⏳ Статус сервиса: $HTTP_STATUS. Повтор через $RETRY_INTERVAL секунд..."
+    sleep $RETRY_INTERVAL
 done
 
 if [ "$HTTP_STATUS" -eq 200 ]; then
