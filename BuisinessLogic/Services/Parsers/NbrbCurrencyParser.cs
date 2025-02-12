@@ -56,6 +56,8 @@ namespace BuisinessLogic.Services.Parsers
 				return "❌ Не удалось получить рабочий прокси.";
 			}
 
+			Console.WriteLine("Address="+proxy.Address);
+
 			var handler = new HttpClientHandler
 			{
 				Proxy = proxy,
@@ -75,6 +77,7 @@ namespace BuisinessLogic.Services.Parsers
 					httpClient.Timeout = new TimeSpan(0, 0, 3, 0);
 					httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0");
 					var response = await httpClient.GetStringAsync(url);
+					Console.WriteLine($"Ответ от сервера:\n{response}"); // 🔴 Добавляем вывод ответа в лог
 					var xdoc = XDocument.Parse(response);
 					var dateElement = xdoc.Root.Element("Date")?.Value;
 
