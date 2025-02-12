@@ -31,7 +31,7 @@ log_info() {
 }
 
 log_success() {
-    printf "\e[32m✔ %s\e[0m\n" "$1"
+    printf "✅\e[32m✔ %s\e[0m\n" "$1"
 }
 
 log_warning() {
@@ -123,11 +123,12 @@ render_api_request "POST" "services/$RENDER_SERVICE_ID/suspend" "" > /dev/null
 # Создание бэкапа
 log_info "Создание бэкапа базы данных..."
 # Получаем JSON с данными подключения и сохраняем его в DB_INFO
-DB_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID/connection-info" "")
+DB_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID" "")
+CONNECTION_INFO=$(render_api_request "GET" "${RENDER_SERVICE_TYPE}/$DB_ID/connection-info" "")
 # Извлекаем пароль и имя пользователя из DB_INFO
 DB_NAME=$(jq -r '.databaseName' <<< "$DB_INFO")
 DB_USER_FROM_INFO=$(jq -r '.databaseUser' <<< "$DB_INFO")
-PGPASSWORD=$(jq -r '.password' <<< "$DB_INFO")
+PGPASSWORD=$(jq -r '.password' <<< "$CONNECTION_INFO")
 DB_HOST="$DB_ID.oregon-postgres.render.com"
 DB_PORT=5432  # Порт PostgreSQL по умолчанию
 
@@ -135,7 +136,7 @@ if [ -n "$DB_NAME" ] && [ "$DB_NAME" != "null" ] && [ -n "$DB_USER_FROM_INFO" ] 
     log_success "Данные получены (ID: $DB_ID)"
 else
     log_error "Не хватает данных: $DB_INFO"
-    echo "$DB_NAME="$DB_NAME "DB_USER_FROM_INFO="$DB_USER_FROM_INFO "PGPASSWORD="$PGPASSWORD
+    echo "DB_NAME="$DB_NAME "DB_USER_FROM_INFO="$DB_USER_FROM_INFO "PGPASSWORD="$PGPASSWORD
     exit 1
 fi
 
