@@ -3,15 +3,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using ServiceLayer.Services.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -71,18 +62,44 @@ namespace TelegramAntispamBot.Pages.Account
 			if (result.Succeeded)
 			{
 				Console.WriteLine("result.Succeeded=" + result.Succeeded);
+
+				if (result.Principal == null)
+				{
+					Console.WriteLine("result.Principal is null.");
+					return Page();
+				}
+
 				var claims = result.Principal.Claims;
 
 				// Получаем данные из VK
 				var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 				var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 				var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
-				var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
+				var nameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
 
-				Console.WriteLine(userId);
-				Console.WriteLine(email);
-				Console.WriteLine(photo);
-				Console.WriteLine(name);
+				if (nameClaim == null)
+				{
+					Console.WriteLine("ClaimTypes.Name not found in claims.");
+					return Page();
+				}
+				var name = nameClaim.Value;
+
+				Console.WriteLine("UserId: " + userId);
+				Console.WriteLine("Email: " + email);
+				Console.WriteLine("Photo: " + photo);
+				Console.WriteLine("Name: " + name);
+
+				if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userId))
+				{
+					Console.WriteLine("Email or UserId is null or empty.");
+					return Page();
+				}
+
+				if (_userService == null)
+				{
+					Console.WriteLine("_userService is null.");
+					return Page();
+				}
 
 				var user = await _userService.GetUserByName(name);
 				if (user is null)
@@ -93,6 +110,11 @@ namespace TelegramAntispamBot.Pages.Account
 				var token = await _userService.Login(email, userId);
 				Console.WriteLine($"token={token}");
 
+				if (HttpContext?.Response == null)
+				{
+					Console.WriteLine("HttpContext or HttpContext.Response is null.");
+					return Page();
+				}
 				HttpContext.Response.Cookies.Append("token", token);
 
 				Console.WriteLine("OnGetCallbackAsync-END");
