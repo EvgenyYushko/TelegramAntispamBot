@@ -77,29 +77,29 @@ namespace TelegramAntispamBot.Pages.Account
 				var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
 				var nameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
 
-				if (nameClaim == null)
-				{
-					Console.WriteLine("ClaimTypes.Name not found in claims.");
-					return Page();
-				}
-				var name = nameClaim.Value;
-
 				Console.WriteLine("UserId: " + userId);
 				Console.WriteLine("Email: " + email);
 				Console.WriteLine("Photo: " + photo);
-				Console.WriteLine("Name: " + name);
+				Console.WriteLine("Name: " + nameClaim);
+
+				if (nameClaim == null)
+				{
+					Console.WriteLine("ClaimTypes.Name not found in claims.");
+				}
+				var name = nameClaim.Value;
 
 				if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userId))
 				{
 					Console.WriteLine("Email or UserId is null or empty.");
-					return Page();
 				}
 
 				if (_userService == null)
 				{
 					Console.WriteLine("_userService is null.");
-					return Page();
 				}
+
+				return Page();
+
 
 				var user = await _userService.GetUserByName(name);
 				if (user is null)
