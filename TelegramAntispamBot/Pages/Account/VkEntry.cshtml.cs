@@ -101,10 +101,8 @@ namespace TelegramAntispamBot.Pages.Account
 				if (name == null)
 				{
 					Console.WriteLine("ClaimTypes.Name not found in claims.");
-					return Page();
 				}
 
-				return Page();
 				var userName = $"{name} {surname}";
 				var password = userId + email;
 
