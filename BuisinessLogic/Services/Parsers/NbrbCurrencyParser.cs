@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
-using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using static Infrastructure.Common.TimeZoneHelper;
 
 namespace BuisinessLogic.Services.Parsers
@@ -14,7 +12,7 @@ namespace BuisinessLogic.Services.Parsers
 	public class NbrbCurrencyParser
 	{
 		private const string BASE_URL = "https://api.nbrb.by/exrates/rates";
-		
+
 		public async Task<string> ParseCurrencyRates()
 		{
 			// Основной код
@@ -40,15 +38,15 @@ namespace BuisinessLogic.Services.Parsers
 
 					// Получаем актуальную дату из первого элемента
 					var rateDate = DateTime.TryParse(currencies[0].Date, out var date)
-						? date.ToShortDateString()
-						: DateTimeNow.ToShortDateString();
+						? date.ToString("dd.MM.yyyy")
+						: DateTimeNow.ToString("dd.MM.yyyy");
 
 					var sb = new StringBuilder();
 					sb.AppendLine($"💰 *Курсы валют НБ РБ на {rateDate}*:\n");
 
 					// Фильтр и сортировка валют
 					var selectedCurrencies = currencies
-						.Where(c => new[] { "EUR", "USD", "RUB", "CNY", "GBP" }.Contains(c.Cur_Abbreviation))
+						.Where(c => new[] { "EUR", "USD", "RUB", "CNY" }.Contains(c.Cur_Abbreviation))
 						.OrderBy(c => c.Cur_Abbreviation)
 						.ToList();
 
@@ -70,7 +68,7 @@ namespace BuisinessLogic.Services.Parsers
 					}
 
 					sb.AppendLine("—————————————");
-					sb.AppendLine($"🕒 _Обновлено: {DateTime.Now:HH:mm}_");
+					sb.AppendLine($"🕒 _Обновлено: {DateTimeNow:HH:mm}_");
 
 					return sb.ToString();
 				}
