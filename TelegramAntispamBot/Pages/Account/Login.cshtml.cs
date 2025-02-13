@@ -1,6 +1,7 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AspNet.Security.OAuth.Vkontakte;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -63,6 +64,13 @@ namespace TelegramAntispamBot.Pages.Account
 			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback");
 			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
 			return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+		}
+
+		public IActionResult OnPostExternalLoginVk(string provider)
+		{
+			var redirectUrl = Url.Page("./VkEntry", pageHandler: "Callback");
+			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+			return Challenge(properties, VkontakteAuthenticationDefaults.AuthenticationScheme);
 		}
 	}
 }

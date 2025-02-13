@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using BuisinessLogic.Handlers;
@@ -36,6 +37,8 @@ using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
 using static Infrastructure.Constants.TelegramConstatns;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
+using AspNet.Security.OAuth.Vkontakte;
+using Microsoft.AspNetCore.Authentication;
 
 namespace TelegramAntispamBot
 {
@@ -243,6 +246,27 @@ namespace TelegramAntispamBot
 					options.ClientId = Configuration.GetValue<string>(GOOGLE_CLIENT_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_ID);
 					options.ClientSecret = Configuration.GetValue<string>(GOOGLE_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(GOOGLE_CLIENT_SECRET);
 					options.CallbackPath = new PathString("/signin-google");
+				})
+				.AddVkontakte(options =>
+				{
+					options.ClientId = Configuration.GetValue<string>(VK_CLIENT_ID) ?? Environment.GetEnvironmentVariable(VK_CLIENT_ID);
+					options.ClientSecret = Configuration.GetValue<string>(VK_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(VK_CLIENT_SECRET);
+					// Scope
+					options.Scope.Clear();
+					options.Scope.Add("email");
+
+					// Fields
+					options.Fields.Clear();
+					options.Fields.Add("photo_200,email,first_name,last_name");
+
+					// Маппинг claims
+					options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+					options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "first_name");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Surname, "last_name");
+					options.ClaimActions.MapJsonKey("urn:vkontakte:photo", "photo_200");
+
+					options.CallbackPath = new PathString("/signin-vkontakte");
 				})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
