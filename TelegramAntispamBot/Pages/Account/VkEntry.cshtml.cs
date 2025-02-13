@@ -75,8 +75,8 @@ namespace TelegramAntispamBot.Pages.Account
 				var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 				var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 				var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
-				var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
-				var surname = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
+				var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname").Value;
+				var surname = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname").Value;
 
 				//foreach (var claim in claims)
 				//{
@@ -107,6 +107,8 @@ namespace TelegramAntispamBot.Pages.Account
 				return Page();
 				var userName = $"{name} {surname}";
 				var password = userId + email;
+
+				Console.WriteLine($"userName={userName} password={password} ");
 
 				var user = await _userService.GetUserByName(userName);
 				if (user is null)
