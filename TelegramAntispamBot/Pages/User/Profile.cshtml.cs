@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,7 @@ namespace TelegramAntispamBot.Pages.User
 		{
 			if (User.Identity.IsAuthenticated)
 			{
+				Console.WriteLine("ProfileModel-OnGetAsync-UserId=" + UserId);
 				CurrentUser = await _usersService.GetUserById(UserId);
 				return Page();
 			}

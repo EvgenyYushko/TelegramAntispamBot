@@ -42,7 +42,7 @@ namespace TelegramAntispamBot.Pages.Account
 
 		public void OnGet()
 		{
-			Console.WriteLine("OnGet");
+			Console.WriteLine("Console.WriteLine OnGet");
 		}
 
 		public async Task<IActionResult> OnGetCallbackAsync()
