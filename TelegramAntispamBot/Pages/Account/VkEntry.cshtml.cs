@@ -14,6 +14,7 @@ namespace TelegramAntispamBot.Pages.Account
     {
         public void OnGet()
         {
+			Console.WriteLine("OnGet");
         }
 
 		public async Task<IActionResult> OnGetCallbackAsync()
@@ -21,13 +22,14 @@ namespace TelegramAntispamBot.Pages.Account
 			var result = await HttpContext.AuthenticateAsync();
 			if (result.Succeeded)
 			{
+				Console.WriteLine("result.Succeeded="+result.Succeeded);
 				var claims = result.Principal.Claims;
         
 				// Получаем данные из VK
 				var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 				var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 				var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
-
+				Console.WriteLine(email);
 				//var user = await _userService.GetUserByName(name);
 				//if (user is null)
 				//{

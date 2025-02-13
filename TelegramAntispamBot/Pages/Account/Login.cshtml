@@ -105,7 +105,11 @@
                         <span class="mx-3 text-muted">Другие способы входа</span>
                         <hr class="flex-grow-1">
                     </div>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <span>IsAuthenticated</span>
 
+                        }
                     <!-- Кнопка Google -->
                     <form method="post" asp-page-handler="ExternalLogin" class="w-100">
                         <button type="submit"
@@ -144,7 +148,7 @@
 
       VKID.Config.init({
         app: 52173503,
-        redirectUrl: 'https://telegramantispambot.onrender.com',
+        redirectUrl: 'https://telegramantispambot.onrender.com/Account/VkEntry',
         responseMode: VKID.ConfigResponseMode.Callback,
         source: VKID.ConfigSource.LOWCODE,
         scope: '', // Заполните нужными доступами по необходимости
