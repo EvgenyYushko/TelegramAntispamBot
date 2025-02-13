@@ -268,7 +268,7 @@ namespace TelegramAntispamBot
 					options.ClaimActions.MapJsonKey(ClaimTypes.Surname, "last_name");
 					options.ClaimActions.MapJsonKey("urn:vkontakte:photo", "photo_200");
 
-					options.CallbackPath = new PathString("/Account/VkEntry");
+					options.CallbackPath = new PathString("/signin-vkontakte");
 				})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{

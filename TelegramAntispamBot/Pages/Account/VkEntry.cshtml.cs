@@ -16,8 +16,8 @@ namespace TelegramAntispamBot.Pages.Account
 		public async Task OnGetAsync()
 		{
 			// ѕолучаем токен из параметров запроса
+			Console.WriteLine("VkEntryModel-OnGetAsync-Token");
 			Token = Request.Query["token"];
-			Console.WriteLine("Token");
 
 			if (!string.IsNullOrEmpty(Token))
 			{
@@ -47,6 +47,8 @@ namespace TelegramAntispamBot.Pages.Account
 
 		public async Task<IActionResult> OnGetCallbackAsync()
 		{
+			Console.WriteLine("OnGetCallbackAsync");
+
 			var result = await HttpContext.AuthenticateAsync();
 			if (result.Succeeded)
 			{
