@@ -75,19 +75,18 @@ namespace TelegramAntispamBot.Pages.Account
 				var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 				var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 				var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
-				var nameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+				var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
+				var surname = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
 
-				foreach (var claim in claims)
-				{
-					Console.WriteLine($"claim.Type={claim.Type} claim.Value={claim.Value}");
-				}
+				//foreach (var claim in claims)
+				//{
+				//	Console.WriteLine($"claim.Type={claim.Type} claim.Value={claim.Value}");
+				//}
 
 				Console.WriteLine("UserId: " + userId);
 				Console.WriteLine("Email: " + email);
 				Console.WriteLine("Photo: " + photo);
-				Console.WriteLine("Name: " + nameClaim);
-
-				
+				Console.WriteLine("Name: " + name);
 
 				if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userId))
 				{
@@ -99,22 +98,23 @@ namespace TelegramAntispamBot.Pages.Account
 					Console.WriteLine("_userService is null.");
 				}
 
-				if (nameClaim == null)
+				if (name == null)
 				{
 					Console.WriteLine("ClaimTypes.Name not found in claims.");
 					return Page();
 				}
-				var name = nameClaim.Value;
 
 				return Page();
+				var userName = $"{name} {surname}";
+				var password = userId + email;
 
-				var user = await _userService.GetUserByName(name);
+				var user = await _userService.GetUserByName(userName);
 				if (user is null)
 				{
-					await _userService.Register(name, email, userId, Role.User.ToString());
+					await _userService.Register(userName, email, password, Role.User.ToString());
 				}
 
-				var token = await _userService.Login(email, userId);
+				var token = await _userService.Login(email, password);
 				Console.WriteLine($"token={token}");
 
 				if (HttpContext?.Response == null)
