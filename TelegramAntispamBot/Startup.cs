@@ -163,7 +163,9 @@ namespace TelegramAntispamBot
 			else
 			{
 				local = false;
-				app.UseExceptionHandler("/Error");
+				//app.UseExceptionHandler("/Error");
+				app.UseDeveloperExceptionPage();
+
 				app.UseHsts();
 				var dbContext = app.ApplicationServices.GetRequiredService<ApplicationDbContext>();
 				dbContext.Database.Migrate();
@@ -266,7 +268,7 @@ namespace TelegramAntispamBot
 					options.ClaimActions.MapJsonKey(ClaimTypes.Surname, "last_name");
 					options.ClaimActions.MapJsonKey("urn:vkontakte:photo", "photo_200");
 
-					options.CallbackPath = new PathString("/signin-vkontakte");
+					options.CallbackPath = new PathString("/Account/VkEntry");
 				})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
