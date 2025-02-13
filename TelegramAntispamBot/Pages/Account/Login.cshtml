@@ -172,9 +172,9 @@
     
       function vkidOnSuccess(data) {
                                       // Перенаправляем пользователя на страницу Razor Pages, передавая токен
-                                    window.location.href = `/Account/VkEntry?token=${encodeURIComponent(token)}`;
           console.log('vkidOnSuccess');
           console.log(data);
+            window.location.href = `/Account/VkEntry?token=${encodeURIComponent(data)}`;
           
         // Обработка полученного результата
       }
