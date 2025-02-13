@@ -6,12 +6,30 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using ServiceLayer.Services.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Infrastructure.Enumerations;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using ServiceLayer.Services.Authorization;
 
 namespace TelegramAntispamBot.Pages.Account
 {
 	public class VkEntryModel : PageModel
 	{
+		private readonly IUserService _userService;
+
 		public string Token { get; set; }
+
+		public VkEntryModel(IUserService userService)
+		{
+			this._userService = userService;
+		}
 
 		public async Task OnGetAsync()
 		{
@@ -47,7 +65,7 @@ namespace TelegramAntispamBot.Pages.Account
 
 		public async Task<IActionResult> OnGetCallbackAsync()
 		{
-			Console.WriteLine("OnGetCallbackAsync");
+			Console.WriteLine("OnGetCallbackAsync-START");
 
 			var result = await HttpContext.AuthenticateAsync();
 			if (result.Succeeded)
@@ -59,16 +77,25 @@ namespace TelegramAntispamBot.Pages.Account
 				var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 				var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 				var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
+				var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
+
+				Console.WriteLine(userId);
 				Console.WriteLine(email);
-				//var user = await _userService.GetUserByName(name);
-				//if (user is null)
-				//{
-				//	await _userService.Register(name, gMail, googleId, Role.User.ToString());
-				//}
+				Console.WriteLine(photo);
+				Console.WriteLine(name);
 
-				//var token = await _userService.Login(gMail, googleId);
+				var user = await _userService.GetUserByName(name);
+				if (user is null)
+				{
+					await _userService.Register(name, email, userId, Role.User.ToString());
+				}
 
-				//HttpContext.Response.Cookies.Append("token", token);
+				var token = await _userService.Login(email, userId);
+				Console.WriteLine($"token={token}");
+
+				HttpContext.Response.Cookies.Append("token", token);
+
+				Console.WriteLine("OnGetCallbackAsync-END");
 
 				return RedirectToPage("/User/Profile");
 			}
