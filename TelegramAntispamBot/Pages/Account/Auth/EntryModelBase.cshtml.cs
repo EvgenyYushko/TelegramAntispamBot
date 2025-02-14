@@ -24,6 +24,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			{
 				// Получение данных пользователя
 				var model = GetRegisterModel(result);
+				Console.WriteLine(model);
 
 				var user = await _userService.GetUserByName(model.Username);
 				if (user is null)
@@ -32,6 +33,8 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 				}
 
 				var token = await _userService.Login(model.Email, model.Password);
+
+				Console.WriteLine($"token={token}");
 
 				HttpContext.Response.Cookies.Append("token", token);
 
@@ -53,5 +56,10 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 		public string Password { get; set; }
 
 		public string Email { get; set; }
+
+		public override string ToString()
+		{
+			return $"Username={Username} Email={Email} Password={Password}";
+		}
 	}
 }

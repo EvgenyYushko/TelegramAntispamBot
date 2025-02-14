@@ -1,7 +1,10 @@
 using System;
 using System.Globalization;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BuisinessLogic.Handlers;
 using BuisinessLogic.Services.Authorization;
@@ -16,6 +19,7 @@ using Infrastructure.InjectSettings;
 using Infrastructure.Models;
 using MailSenderService.BuisinessLogic.Services;
 using MailSenderService.ServiceLayer.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -37,8 +41,6 @@ using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
 using static Infrastructure.Constants.TelegramConstatns;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
-using AspNet.Security.OAuth.Vkontakte;
-using Microsoft.AspNetCore.Authentication;
 
 namespace TelegramAntispamBot
 {
@@ -283,6 +285,46 @@ namespace TelegramAntispamBot
 
 					options.CallbackPath = new PathString("/signin-vkontakte");
 				})
+				//.AddGitHub(options => // Добавьте это
+				//{
+				//	options.ClientId = builder.Configuration["GitHub:ClientId"];
+				//	options.ClientSecret = builder.Configuration["GitHub:ClientSecret"];
+				//	options.CallbackPath = new PathString("/signin-github");
+
+				//	// Scope для доступа к email (если нужно)
+				//	options.Scope.Add("user:email");
+
+				//	// Маппинг claims (опционально)
+				//	options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+				//	options.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
+				//	options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+				//	options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
+
+				//	// Если нужны дополнительные поля:
+				//	options.UserEmailsEndpoint = "https://api.github.com/user/emails";
+				//	options.Events.OnCreatingTicket = async context =>
+				//	{
+				//		if (context.AccessToken != null)
+				//		{
+				//			var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserEmailsEndpoint);
+				//			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+				//			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+				//			var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
+				//			response.EnsureSuccessStatusCode();
+
+				//			var emails = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+				//			foreach (var email in emails.RootElement.EnumerateArray())
+				//			{
+				//				if (email.GetProperty("primary").GetBoolean())
+				//				{
+				//					context.Identity?.AddClaim(new Claim(ClaimTypes.Email, email.GetProperty("email").GetString()));
+				//					break;
+				//				}
+				//			}
+				//		}
+				//	};
+				//})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
 					options.TokenValidationParameters = new TokenValidationParameters
@@ -307,7 +349,7 @@ namespace TelegramAntispamBot
 
 		private static void ApdAppAuthorization(IServiceCollection service)
 		{
-			service.AddAuthorization(options => 
+			service.AddAuthorization(options =>
 			{
 				options.AddPolicy("Admin", policy => policy.AddRequirements(new PermissionRequirement(Permission.Delete)));
 				options.AddPolicy("User", policy => policy.AddRequirements(new PermissionRequirement(Permission.Read)));
