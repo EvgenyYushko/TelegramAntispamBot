@@ -19,7 +19,10 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 
 		public IActionResult OnPostExternalLogin(string provider)
 		{
-			AuthParams.TryGetValue(provider, out var pageName);
+			if(!AuthParams.TryGetValue(provider, out var pageName))
+			{
+				throw new KeyNotFoundException("Ќе найден зарегистрированный провайдер");
+			}
 
 			var redirectUrl = Url.Page(pageName, pageHandler: "Callback");
 			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
