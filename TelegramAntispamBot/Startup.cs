@@ -89,6 +89,9 @@ namespace TelegramAntispamBot
 			ConfigureSettings(services);
 			ConfigureAuthorization(services);
 
+			var env = services.BuildServiceProvider().GetService<IHostEnvironment>();
+			var environmentName = env.EnvironmentName;
+
 			services.AddRazorPages();
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddHttpContextAccessor();
@@ -96,8 +99,18 @@ namespace TelegramAntispamBot
 			services.AddScoped<IDeleteMessageService, DeleteMessageService>();
 			services.AddScoped<IProfanityCheckerService, ProfanityCheckerService>();
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
-			services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
-			services.AddSingleton<ITelegramUserService, TelegramUserService>();
+			if (environmentName == Environments.Development)
+			{
+				Console.WriteLine("Мы в Development среде!");
+				services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
+				services.AddScoped<ITelegramUserService, TelegramUserService>();
+			}
+			else if (environmentName == Environments.Production)
+			{
+				Console.WriteLine("Мы в Production среде!");
+				services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
+				services.AddSingleton<ITelegramUserService, TelegramUserService>();
+			}
 			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 			services.AddHostedService<SendMailBackgroundService>();

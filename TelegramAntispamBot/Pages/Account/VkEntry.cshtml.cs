@@ -1,134 +1,41 @@
-using System;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using ServiceLayer.Services.Authorization;
+using TelegramAntispamBot.Pages.Account.Auth;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-	public class VkEntryModel : PageModel
+	public class VkEntryModel : EntryModelBaseModel
 	{
-		private readonly IUserService _userService;
-
-		public string Token { get; set; }
-
 		public VkEntryModel(IUserService userService)
+			: base(userService)
 		{
-			this._userService = userService;
 		}
 
-		public async Task OnGetAsync()
+		public void OnGet() { }
+
+		protected override EntryModel GetRegisterModel(AuthenticateResult authenticateResult)
 		{
-			// ѕолучаем токен из параметров запроса
-			Console.WriteLine("VkEntryModel-OnGetAsync-Token");
-			Token = Request.Query["token"];
+			var model = new EntryModel();
 
-			if (!string.IsNullOrEmpty(Token))
-			{
-				// »спользуем токен дл€ получени€ данных пользовател€ через API VK
-				var userInfo = await GetVKUserInfo(Token);
-				Console.WriteLine(userInfo);
+			var claims = authenticateResult.Principal.Claims;
 
-				// «десь можно добавить логику регистрации пользовател€ на вашем сайте
-				// Ќапример, сохранить данные в базу данных
-			}
-		}
+			// ѕолучаем данные из VK
+			var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+			var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+			var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
+			var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname").Value;
+			var surname = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname").Value;
 
-		private async Task<string> GetVKUserInfo(string token)
-		{
-			using (var httpClient = new HttpClient())
-			{
-				// «апрос к API VK дл€ получени€ информации о пользователе
-				var response = await httpClient.GetStringAsync($"https://api.vk.com/method/users.get?access_token={token}&v=5.131");
-				return response;
-			}
-		}
+			var userName = $"{name} {surname}";
+			var password = userId + email;
 
-		public void OnGet()
-		{
-			Console.WriteLine("Console.WriteLine OnGet");
-		}
+			model.Username = userName;
+			model.Email = email;
+			model.Password = password;
 
-		public async Task<IActionResult> OnGetCallbackAsync()
-		{
-			Console.WriteLine("OnGetCallbackAsync-START");
-
-			var result = await HttpContext.AuthenticateAsync();
-			if (result.Succeeded)
-			{
-				Console.WriteLine("result.Succeeded=" + result.Succeeded);
-
-				if (result.Principal == null)
-				{
-					Console.WriteLine("result.Principal is null.");
-					return Page();
-				}
-
-				var claims = result.Principal.Claims;
-
-				// ѕолучаем данные из VK
-				var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-				var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-				var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
-				var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname").Value;
-				var surname = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname").Value;
-
-				//foreach (var claim in claims)
-				//{
-				//	Console.WriteLine($"claim.Type={claim.Type} claim.Value={claim.Value}");
-				//}
-
-				Console.WriteLine("UserId: " + userId);
-				Console.WriteLine("Email: " + email);
-				Console.WriteLine("Photo: " + photo);
-				Console.WriteLine("Name: " + name);
-
-				if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userId))
-				{
-					Console.WriteLine("Email or UserId is null or empty.");
-				}
-
-				if (_userService == null)
-				{
-					Console.WriteLine("_userService is null.");
-				}
-
-				if (name == null)
-				{
-					Console.WriteLine("ClaimTypes.Name not found in claims.");
-				}
-
-				var userName = $"{name} {surname}";
-				var password = userId + email;
-
-				Console.WriteLine($"userName={userName} password={password} ");
-
-				var user = await _userService.GetUserByName(userName);
-				if (user is null)
-				{
-					await _userService.Register(userName, email, password, Role.User.ToString());
-				}
-
-				var token = await _userService.Login(email, password);
-				Console.WriteLine($"token={token}");
-
-				if (HttpContext?.Response == null)
-				{
-					Console.WriteLine("HttpContext or HttpContext.Response is null.");
-					return Page();
-				}
-				HttpContext.Response.Cookies.Append("token", token);
-
-				Console.WriteLine("OnGetCallbackAsync-END");
-
-				return RedirectToPage("/User/Profile");
-			}
-			return Page();
+			return model;
 		}
 	}
 }

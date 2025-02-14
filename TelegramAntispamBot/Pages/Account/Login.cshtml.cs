@@ -1,20 +1,18 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AspNet.Security.OAuth.Vkontakte;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Filters;
-using TelegramAntispamBot.Pages.Base;
+using TelegramAntispamBot.Pages.Account.Auth;
 using static Infrastructure.Helpers.AuthorizeHelper;
 
 namespace TelegramAntispamBot.Pages.Account
 {
 	[ServiceFilter(typeof(LogPageFilter))]
-	public class LoginModel : PageModelBase
+	public class LoginModel : AuthModelModel
 	{
 		private readonly IUserService _userService;
 
@@ -57,20 +55,6 @@ namespace TelegramAntispamBot.Pages.Account
 				ErrorMessage = ex.Message;
 				return RedirectToPage("/Account/Login");
 			}
-		}
-
-		public IActionResult OnPostExternalLogin(string provider)
-		{
-			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback");
-			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-			return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-		}
-
-		public IActionResult OnPostExternalLoginVk(string provider)
-		{
-			var redirectUrl = Url.Page("./VkEntry", pageHandler: "Callback");
-			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-			return Challenge(properties, VkontakteAuthenticationDefaults.AuthenticationScheme);
 		}
 	}
 }

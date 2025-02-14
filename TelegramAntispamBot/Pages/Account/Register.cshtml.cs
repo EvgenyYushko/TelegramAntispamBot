@@ -4,14 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.Enumerations;
 using MailSenderService.ServiceLayer.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
-using TelegramAntispamBot.Pages.Base;
+using TelegramAntispamBot.Pages.Account.Auth;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-	public class RegisterModel : PageModelBase
+	public class RegisterModel : AuthModelModel
 	{
 		private readonly IUserService _userService;
 		private readonly IMailService _mailService;
@@ -83,13 +82,6 @@ namespace TelegramAntispamBot.Pages.Account
 			}
 
 			return RedirectToPage("/Account/Register");
-		}
-
-		public IActionResult OnPostExternalLogin(string provider)
-		{
-			var redirectUrl = Url.Page("./GoogleEntry", pageHandler: "Callback");
-			var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-			return Challenge(properties, provider);
 		}
 	}
 }

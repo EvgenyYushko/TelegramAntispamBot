@@ -1,61 +1,42 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using ServiceLayer.Services.Authorization;
+using TelegramAntispamBot.Pages.Account.Auth;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-    public class GoogleEntryModel : PageModel
-    {
-		private readonly IUserService _userService;
-
+	public class GoogleEntryModel : EntryModelBaseModel
+	{
 		public GoogleEntryModel(IUserService userService)
+			: base(userService)
 		{
-			_userService = userService;
 		}
 
-        public void OnGet()
-        {
-        }
+		public void OnGet() { }
 
-		public async Task<IActionResult> OnGetCallbackAsync()
+		protected override EntryModel GetRegisterModel(AuthenticateResult authenticateResult)
 		{
-			var result = await HttpContext.AuthenticateAsync();
-			if (result.Succeeded)
-			{
-				// Получение данных пользователя
-				var claims = result.Principal.Identities
-					.FirstOrDefault()?.Claims.Select(claim => new
-					{
-						claim.Issuer,
-						claim.OriginalIssuer,
-						claim.Type,
-						claim.Value
-					});
+			var model = new EntryModel();
 
-				var googleId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-				var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
-				var gMail = claims.FirstOrDefault(c=>c.Type == ClaimTypes.Email).Value;
-
-				var user = await _userService.GetUserByName(name);
-				if (user is null)
+			var claims = authenticateResult.Principal.Identities
+				.FirstOrDefault()?.Claims.Select(claim => new
 				{
-					await _userService.Register(name, gMail, googleId, Role.User.ToString());
-				}
+					claim.Issuer,
+					claim.OriginalIssuer,
+					claim.Type,
+					claim.Value
+				});
 
-				var token = await _userService.Login(gMail, googleId);
+			var googleId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+			var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
+			var gMail = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
 
-				HttpContext.Response.Cookies.Append("token", token);
+			model.Username = name;
+			model.Email = gMail;
+			model.Password = googleId;
 
-				return RedirectToPage("/User/Profile");
-			}
-			return Page();
+			return model;
 		}
-    }
+	}
 }
