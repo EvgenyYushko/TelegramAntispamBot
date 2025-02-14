@@ -14,14 +14,14 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 		static AuthModelModel()
 		{
 			AuthParams.Add(GoogleDefaults.AuthenticationScheme, "./GoogleEntry");
-			AuthParams.Add(VkontakteAuthenticationDefaults.AuthenticationScheme, "/VkEntry");
+			AuthParams.Add(VkontakteAuthenticationDefaults.AuthenticationScheme, "./VkEntry");
 		}
 
 		public IActionResult OnPostExternalLogin(string provider)
 		{
 			if(!AuthParams.TryGetValue(provider, out var pageName))
 			{
-				throw new KeyNotFoundException("Не найден зарегистрированный провайдер");
+				throw new KeyNotFoundException("ГЌГҐ Г­Г Г©Г¤ГҐГ­ Г§Г Г°ГҐГЈГЁГ±ГІГ°ГЁГ°Г®ГўГ Г­Г­Г»Г© ГЇГ°Г®ГўГ Г©Г¤ГҐГ°");
 			}
 
 			var redirectUrl = Url.Page(pageName, pageHandler: "Callback");
