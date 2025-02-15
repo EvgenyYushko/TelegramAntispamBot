@@ -93,7 +93,7 @@ wait_for_db_ready() {
 # Функция опциональной загрузки бэкапа в Google Drive с использованием rclone
 upload_to_gdrive() {
     log_info "Загрузка бэкапа в Google Drive..."
-    if ! rclone copy "$BACKUP_FILE_NAME" "gdrive:$(date +'%Y-%m-%d_%H-%M-%S').dump" --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"; then
+    if ! rclone copy "$BACKUP_FILE_NAME" "gdrive:backup_$(date +'%Y-%m-%d_%H-%M-%S').dump" --drive-root-folder-id="$GOOGLE_DRIVE_FOLDER_ID"; then
         log_warning "Не удалось загрузить файл в Google Drive"
         else
         log_success "Бэкапа успешно загружен в Google Drive!"
