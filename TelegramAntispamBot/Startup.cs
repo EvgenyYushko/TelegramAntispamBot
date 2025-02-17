@@ -40,6 +40,7 @@ using TelegramAntispamBot.BackgroundServices;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
 using static Infrastructure.Constants.TelegramConstatns;
+using static TelegramAntispamBot.TelegramAuthExtensions;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 
 namespace TelegramAntispamBot
@@ -321,6 +322,11 @@ namespace TelegramAntispamBot
 					//		}
 					//	}
 					//};
+				})
+				.AddTelegramAuth(opt =>
+				{
+					opt.CallbackPath = new PathString("/signin-github");
+
 				})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
