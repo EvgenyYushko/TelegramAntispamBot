@@ -45,7 +45,17 @@ jobs:
       #   run: |
       #     chmod +x scripts/refresh-db.sh
       #     ./scripts/refresh-db.sh
-      - name: Send failure message to Telegram
-        # if: failure()
+
+      - name: Send success message to Telegram
+        if: success()
         run: |
-         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -d text="❌ Backup Database failed!"
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="✅ Backup Database completed successfully\! [Commit] (https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+            
+      - name: Send failure message to Telegram
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="❌ Backup Database failed! ${{ github.repository }}"
