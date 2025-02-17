@@ -133,7 +133,7 @@
         </div>
         <div class="profile-item">
             <span class="label">@Loc["Roles"]</span>
-            <span>@string.Join(", ", user.Roles.First())</span>
+            <span>@string.Join(", ", user.Roles.FirstOrDefault())</span>
         </div>
     </div>
     @if (User.Identity.IsAuthenticated)

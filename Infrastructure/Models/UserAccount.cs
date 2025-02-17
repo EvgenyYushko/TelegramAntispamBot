@@ -30,7 +30,7 @@ namespace Infrastructure.Models
 
 		public override string ToString()
 		{
-			return $"Id={Id} UserName={UserName} PasswordHash={PasswordHash} Email={Email}";
+			return $"Id={Id} UserName={UserName} PasswordHash={PasswordHash} Email={Email} Roles={Roles.FirstOrDefault()}";
 		}
 	}
 }
