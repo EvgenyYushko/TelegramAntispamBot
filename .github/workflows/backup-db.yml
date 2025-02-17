@@ -1,4 +1,4 @@
-name: Backup Database
+﻿name: Backup Database
 
 on:
   schedule:
@@ -37,15 +37,15 @@ jobs:
         run: |
           echo "$GCP_SA_JSON" > /home/runner/service_account.json
 
-      - name: Run script
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-        run: |
-          chmod +x scripts/refresh-db.sh
-          ./scripts/refresh-db.sh
+      # - name: Run script
+      #   env:
+      #     RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      #     RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      #     GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+      #   run: |
+      #     chmod +x scripts/refresh-db.sh
+      #     ./scripts/refresh-db.sh
       - name: Send failure message to Telegram
-        if: failure()
+        # if: failure()
         run: |
-         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -d text="? Backup Database failed!"
+         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -d text="❌ Backup Database failed!"
