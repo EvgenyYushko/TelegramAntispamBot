@@ -1,66 +1,61 @@
 using System;
 using System.Linq;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Account.Auth;
+using static Infrastructure.Constants.TelegramConstatns;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-    public class TelegramEntryModel : EntryModelBaseModel
+	public class TelegramEntryModel : EntryModelBaseModel
 	{
-		public TelegramEntryModel(IUserService userService)
+		private readonly IConfiguration configuration;
+
+		public TelegramEntryModel(IUserService userService, IConfiguration configuration)
 			: base(userService)
 		{
+			this.configuration = configuration;
 		}
 
-		 public IActionResult OnGet(
-            [FromQuery] long id,
-            [FromQuery] string first_name,
-            [FromQuery] string last_name,
-            [FromQuery] string username,
-            [FromQuery] string photo_url,
-            [FromQuery] long auth_date,
-            [FromQuery] string hash)
-        {
+		public IActionResult OnGet(
+		   [FromQuery] long id,
+		   [FromQuery] string first_name,
+		   [FromQuery] string last_name,
+		   [FromQuery] string username,
+		   [FromQuery] string photo_url,
+		   [FromQuery] long auth_date,
+		   [FromQuery] string hash)
+		{
 			Console.WriteLine($"id={id}, first_name={first_name}, last_name={last_name}, username={username}, photo_url={photo_url}, auth_date={auth_date}, hash={hash}");
-            //// 1. Проверяем хеш-подпись запроса
-            //if (!ValidateTelegramHash(id, first_name, last_name, username, photo_url, auth_date, hash))
-            //{
-            //    return Unauthorized("Invalid hash");
-            //}
+			var botToken = configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
+			Console.WriteLine($"botToken={botToken}");
 
-            //// 2. Логика авторизации пользователя (например, сохранение в сессию)
-            //HttpContext.Session.SetString("TelegramUserId", id.ToString());
-            //HttpContext.Session.SetString("TelegramUsername", username);
+			var checkHash = auth_date;
+			var dataToCheck = new[]
+		    {
+				$"auth_date={checkHash}",
+				$"first_name={first_name}",
+				$"id={id}",
+				$"last_name={last_name}",
+				$"username={username}"
+			};
 
-            //// 3. Перенаправление после успешной авторизации
-            return Page();
-        }
+			var secretKey = SHA256.HashData(Encoding.UTF8.GetBytes(botToken));
+			var hashString = new HMACSHA256(secretKey)
+			   .ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", dataToCheck)))
+			   .Select(b => b.ToString("x2"))
+			   .Aggregate((a, b) => a + b);
 
-		//protected override EntryModel GetRegisterModel(AuthenticateResult authenticateResult)
-		//{
-		//	var model = new EntryModel();
+			Console.WriteLine($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
+			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
+			{
+				return Page();
+			}
 
-		//	var claims = authenticateResult.Principal.Claims;
-
-		//	// Получаем данные из VK
-		//	var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-		//	var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-		//	var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
-		//	var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname").Value;
-		//	var surname = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname").Value;
-
-		//	var userName = $"{name} {surname}";
-		//	var password = userId + email;
-
-		//	model.Username = userName;
-		//	model.Email = email;
-		//	model.Password = password;
-
-		//	return model;
-		//}
+			return Page();
+		}
 	}
 }
