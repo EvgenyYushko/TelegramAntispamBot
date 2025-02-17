@@ -22,6 +22,8 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			var result = await HttpContext.AuthenticateAsync();
 			if (result.Succeeded)
 			{
+				Console.WriteLine($"result.Succeeded={result.Succeeded}");
+
 				// Получение данных пользователя
 				var model = GetRegisterModel(result);
 				Console.WriteLine(model);
