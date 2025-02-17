@@ -32,15 +32,21 @@ namespace TelegramAntispamBot.Pages.Account
 			Console.WriteLine($"id={id}, first_name={first_name}, last_name={last_name}, username={username}, photo_url={photo_url}, auth_date={auth_date}, hash={hash}");
 			var botToken = configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
 			Console.WriteLine($"botToken={botToken}");
-
-			var checkHash = auth_date;
+			//id=1231047171
+			//first_name=Evgeny
+			//last_name=Yushko
+			//username=EvgenyYushko
+			//photo_url=https%3A%2F%2Ft.me%2Fi%2Fuserpic%2F320%2FFoI8FHvdVdhA59-KWrYKtuuwIlOAT5BRheEtxz6DeuU.jpg
+			//auth_date=1739798735
+			//hash=fa54b9e53609322725911c55b7e8e2599b0df6041400982495283a0e7dcc7d1d
 			var dataToCheck = new[]
 		    {
-				$"auth_date={checkHash}",
-				$"first_name={first_name}",
 				$"id={id}",
+				$"first_name={first_name}",
 				$"last_name={last_name}",
-				$"username={username}"
+				$"username={username}",
+				$"photo_url={photo_url}",
+				$"auth_date={auth_date}"
 			};
 
 			var secretKey = SHA256.HashData(Encoding.UTF8.GetBytes(botToken));
