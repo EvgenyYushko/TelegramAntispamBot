@@ -42,6 +42,8 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 
 				return RedirectToPage("/User/Profile");
 			}
+				Console.WriteLine($"result.Succeeded={result.Succeeded}");
+
 			return Page();
 		}
 
