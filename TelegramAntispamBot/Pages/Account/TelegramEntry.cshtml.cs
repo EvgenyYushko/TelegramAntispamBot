@@ -61,6 +61,6 @@ namespace TelegramAntispamBot.Pages.Account
 		//	model.Password = password;
 
 		//	return model;
-		}
+		//}
 	}
 }
