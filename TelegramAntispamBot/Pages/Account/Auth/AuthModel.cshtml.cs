@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AspNet.Security.OAuth.GitHub;
 using AspNet.Security.OAuth.Vkontakte;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -15,13 +16,14 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 		{
 			AuthParams.Add(GoogleDefaults.AuthenticationScheme, "./GoogleEntry");
 			AuthParams.Add(VkontakteAuthenticationDefaults.AuthenticationScheme, "./VkEntry");
+			AuthParams.Add(GitHubAuthenticationDefaults.AuthenticationScheme, "./GitHubEntry");
 		}
 
 		public IActionResult OnPostExternalLogin(string provider)
 		{
 			if(!AuthParams.TryGetValue(provider, out var pageName))
 			{
-				throw new KeyNotFoundException("Íå íàéäåí çàðåãèñòðèðîâàííûé ïðîâàéäåð");
+				throw new KeyNotFoundException("AuthenticationScheme not register!");
 			}
 
 			var redirectUrl = Url.Page(pageName, pageHandler: "Callback");

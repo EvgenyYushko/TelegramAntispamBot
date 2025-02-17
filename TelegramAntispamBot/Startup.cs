@@ -103,13 +103,11 @@ namespace TelegramAntispamBot
 			services.AddScoped<IProfanityCheckerRepository, ProfanityCheckerRepository>();
 			if (env.IsProduction())
 			{
-				Console.WriteLine("Мы в Production среде!");
 				services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddSingleton<ITelegramUserService, TelegramUserService>();
 			}
 			else
 			{
-				Console.WriteLine("Мы в Development среде!");
 				services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddScoped<ITelegramUserService, TelegramUserService>();
 			}
@@ -285,46 +283,45 @@ namespace TelegramAntispamBot
 
 					options.CallbackPath = new PathString("/signin-vkontakte");
 				})
-				//.AddGitHub(options => // Добавьте это
-				//{
-				//	options.ClientId = builder.Configuration["GitHub:ClientId"];
-				//	options.ClientSecret = builder.Configuration["GitHub:ClientSecret"];
-				//	options.CallbackPath = new PathString("/signin-github");
+				.AddGitHub(options => // Добавьте это
+				{
+					options.ClientId = Configuration.GetValue<string>(GITHUB_CLIENT_ID) ?? Environment.GetEnvironmentVariable(GITHUB_CLIENT_ID);
+					options.ClientSecret = Configuration.GetValue<string>(GITHUB_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(GITHUB_CLIENT_SECRET);
+					options.CallbackPath = new PathString("/signin-github");
 
-				//	// Scope для доступа к email (если нужно)
-				//	options.Scope.Add("user:email");
+					// Scope для доступа к email (если нужно)
+					options.Scope.Add("user:email");
 
-				//	// Маппинг claims (опционально)
-				//	options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-				//	options.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
-				//	options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
-				//	options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
+					// Маппинг claims (опционально)
+					options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+					options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
 
-				//	// Если нужны дополнительные поля:
-				//	options.UserEmailsEndpoint = "https://api.github.com/user/emails";
-				//	options.Events.OnCreatingTicket = async context =>
-				//	{
-				//		if (context.AccessToken != null)
-				//		{
-				//			var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserEmailsEndpoint);
-				//			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-				//			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+					//// Если нужны дополнительные поля:
+					//options.Events.OnCreatingTicket = async context =>
+					//{
+					//	if (context.AccessToken != null)
+					//	{
+					//		var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+					//		request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+					//		request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-				//			var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
-				//			response.EnsureSuccessStatusCode();
+					//		var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
+					//		response.EnsureSuccessStatusCode();
 
-				//			var emails = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-				//			foreach (var email in emails.RootElement.EnumerateArray())
-				//			{
-				//				if (email.GetProperty("primary").GetBoolean())
-				//				{
-				//					context.Identity?.AddClaim(new Claim(ClaimTypes.Email, email.GetProperty("email").GetString()));
-				//					break;
-				//				}
-				//			}
-				//		}
-				//	};
-				//})
+					//		var emails = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+					//		foreach (var email in emails.RootElement.EnumerateArray())
+					//		{
+					//			if (email.GetProperty("primary").GetBoolean())
+					//			{
+					//				context.Identity?.AddClaim(new Claim(ClaimTypes.Email, email.GetProperty("email").GetString()));
+					//				break;
+					//			}
+					//		}
+					//	}
+					//};
+				})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
 					options.TokenValidationParameters = new TokenValidationParameters

@@ -8,5 +8,7 @@
 		public const string GOOGLE_CLIENT_SECRET = "GOOGLE_CLIENT_SECRET";
 		public const string VK_CLIENT_ID = "VK_CLIENT_ID";
 		public const string VK_CLIENT_SECRET = "VK_CLIENT_SECRET";
+		public const string GITHUB_CLIENT_ID = "GITHUB_CLIENT_ID";
+		public const string GITHUB_CLIENT_SECRET = "GITHUB_CLIENT_SECRET";
 	}
 }

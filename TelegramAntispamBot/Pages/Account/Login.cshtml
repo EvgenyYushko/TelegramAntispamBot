@@ -140,6 +140,18 @@
                                 <span>Войти через ВКонтакте</span>
                             </button>
                         </form>
+                        <form method="post" asp-page-handler="ExternalLogin" class="w-100">
+                            <button type="submit"
+                                    name="provider"
+                                    value="GitHub"
+                                    class="btn social-signin-btn vk-signin-btn">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/2/21/VK.com-logo.svg"
+                                     alt="VK Logo"
+                                     width="20"
+                                     height="20">
+                                <span>Войти через GitHub</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -27,5 +27,10 @@ namespace Infrastructure.Models
 			var roleEnumValue = Enum.GetValues<Role>().Where(r => role == r.ToString()).FirstOrDefault();
 			return new UserAccount(Guid.NewGuid(), userName, passwordHash, email, new List<Role>() { roleEnumValue });
 		}
+
+		public override string ToString()
+		{
+			return $"Id={Id} UserName={UserName} PasswordHash={PasswordHash} Email={Email}";
+		}
 	}
 }
