@@ -2,7 +2,7 @@ name: Backup Database
 
 on:
   schedule:
-    - cron: '0 20 * * *'  # Каждый день в 8 вечера
+    - cron: '0 20 */10 * *'
   workflow_dispatch:        
 
 jobs:
