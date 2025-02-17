@@ -59,7 +59,8 @@ render_api_request() {
 # Обработка ошибок: вывод сообщения, попытка возобновления веб-сервиса и завершение работы
 handle_error() {
     log_error "Script failed! Attempting to start the web service..."
-    render_api_request "POST" "services/$RENDER_SERVICE_ID/resume" "" || true
+    render_api_request "POST" "services/$RENDER_SERVICE_ID/resume" "" > /dev/null
+    render_api_request "POST" "services/$RENDER_SERVICE_ID/deploys" "{\"clearCache\":\"do_not_clear\"}" > /dev/null
     exit 1
 }
 trap 'handle_error' ERR
@@ -137,12 +138,14 @@ if [ -z "$DB_NAME" ] || [ "$DB_NAME" == "null" ] ||
    [ -z "$PGPASSWORD" ] || [ "$PGPASSWORD" == "null" ]; then
     log_error "Не хватает данных для создания бекапа: $DB_INFO"
     log_error "DB_NAME=$DB_NAME DB_USER_FROM_INFO=$DB_USER_FROM_INFO PGPASSWORD=$PGPASSWORD"
+    handle_error
     exit 1
 fi
 
 export PGPASSWORD
 if ! pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER_FROM_INFO" -d "$DB_NAME" --no-owner --no-acl -Fc -f "$BACKUP_FILE_NAME"; then
     log_error "Ошибка при создании бэкапа"
+    handle_error
     exit 1
 fi
 log_success "Бэкап успешно создан: $BACKUP_FILE_NAME"
@@ -173,14 +176,16 @@ NEW_DB_USER=$(jq -r '.databaseUser' response.json)
 if [ -n "$NEW_DB_ID" ] && [ "$NEW_DB_ID" != "null" ]; then
     log_success "Новая база данных создана (NEW_DB_NAME=$NEW_DB_NAME NEW_DB_ID: $NEW_DB_ID)"
 else
-    log_info "Ответ от Render API:"
+    log_error "Ошибка при создании БД. Ответ от Render API:"
     jq '.' response.json
+    handle_error
     exit 1
 fi
 
 # Ожидание готовности новой базы данных
 if ! wait_for_db_ready; then
     log_error "База данных не стала доступной. Прерывание восстановления."
+    handle_error
     exit 1
 fi
 
@@ -196,6 +201,7 @@ sleep 20
 
 if ! pg_restore -h "${NEW_DB_ID}.oregon-postgres.render.com" -p 5432 -U "$NEW_DB_USER" -d "$NEW_DB_NAME" --no-owner "$BACKUP_FILE_NAME"; then
     log_error "Ошибка восстановления данных"
+    handle_error
     exit 1
 fi
 
