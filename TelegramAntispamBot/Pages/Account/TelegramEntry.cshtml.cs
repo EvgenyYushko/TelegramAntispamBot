@@ -41,12 +41,11 @@ namespace TelegramAntispamBot.Pages.Account
 			//hash=fa54b9e53609322725911c55b7e8e2599b0df6041400982495283a0e7dcc7d1d
 			var dataToCheck = new[]
 		    {
-				$"id={id}",
+				$"auth_date={auth_date}",
 				$"first_name={first_name}",
+				$"id={id}",
 				$"last_name={last_name}",
-				$"username={username}",
-				$"photo_url={photo_url}",
-				$"auth_date={auth_date}"
+				$"username={username}"
 			};
 
 			var secretKey = SHA256.HashData(Encoding.UTF8.GetBytes(botToken));
@@ -58,10 +57,11 @@ namespace TelegramAntispamBot.Pages.Account
 			Console.WriteLine($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
 			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
 			{
-				return Page();
+				return RedirectToPage("/User/Profile");
+
 			}
 
-			return Page();
+			return RedirectToPage("/User/Profile");
 		}
 	}
 }
