@@ -40,11 +40,12 @@ namespace TelegramAntispamBot.Pages.Account
 			//auth_date=1739798735
 			//hash=fa54b9e53609322725911c55b7e8e2599b0df6041400982495283a0e7dcc7d1d
 			var dataToCheck = new[]
-		    {
+			{
 				$"auth_date={auth_date}",
 				$"first_name={first_name}",
 				$"id={id}",
 				$"last_name={last_name}",
+				$"photo_url={photo_url}", 
 				$"username={username}"
 			};
 
@@ -55,6 +56,9 @@ namespace TelegramAntispamBot.Pages.Account
 			   .Aggregate((a, b) => a + b);
 
 			Console.WriteLine($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
+			var isValid = hashString.Equals(hash, StringComparison.Ordinal); // Без IgnoreCase
+			Console.WriteLine($"Exact match: {isValid}");
+
 			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
 			{
 				return RedirectToPage("/User/Profile");
