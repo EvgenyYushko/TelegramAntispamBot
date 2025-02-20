@@ -79,7 +79,7 @@ namespace TelegramAntispamBot
 
 			services.Configure<CookiePolicyOptions>(options =>
 			{
-				options.MinimumSameSitePolicy = SameSiteMode.Lax;
+				options.MinimumSameSitePolicy = SameSiteMode.None;
 				options.Secure = CookieSecurePolicy.Always;
 			});
 		}
