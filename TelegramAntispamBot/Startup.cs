@@ -213,6 +213,12 @@ namespace TelegramAntispamBot
 				dbContext.Database.Migrate();
 			}
 
+			// Важно: включаем логику распознавания X-Forwarded-Proto
+			app.UseForwardedHeaders(new ForwardedHeadersOptions
+			{
+				ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+			});
+
 			Task.Run(async () => await ConfigureWebhookAsync(local));
 
 			app.UseHttpsRedirection();
@@ -220,13 +226,6 @@ namespace TelegramAntispamBot
 			app.UseRequestLocalization();
 			app.UseCookiePolicy();
 			app.UseRouting();
-
-			// Важно: включаем логику распознавания X-Forwarded-Proto
-			app.UseForwardedHeaders(new ForwardedHeadersOptions
-			{
-				ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-			});
-
 			app.UseAuthentication();
 			app.UseAuthorization();
 			app.UseEndpoints(endpoints =>

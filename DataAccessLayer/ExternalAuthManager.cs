@@ -72,6 +72,16 @@ namespace DataAccessLayer
 				.Include(u => u.ExternalLogins)
 				.FirstOrDefaultAsync(u => u.ExternalLogins.Any(e => e.Provider == provider && e.ProviderKey == providerKey));
 
+			var userEntityTest =  _context.ExternalLogins
+				.ToList();
+
+			foreach (var login in userEntityTest)
+			{
+				Console.WriteLine($"login={login.Id}");
+			}
+
+			Console.WriteLine($"FindUserByExternalLoginAsync -> info.LoginProvider={provider}, info.ProviderKey={providerKey}");
+
 			return userEntity;
 		}
 
