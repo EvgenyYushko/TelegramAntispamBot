@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"]</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    @* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> *@
 
     <style>
         /* Общие стили для кнопок социальной авторизации */
@@ -97,7 +97,7 @@
                         <p>@Loc["have't_account"] <a href="/Account/Register" class="text-decoration-none">@Loc["Register_here"]</a></p>
                     </div>
                     <!-- Блок социальных логинов -->
-                    @await Html.PartialAsync("_ExternalLoginButtons")
+                    @* @await Html.PartialAsync("_ExternalLoginButtons") *@
                 </div>
             </div>
         </div>
