@@ -12,7 +12,7 @@
         <h1 class="title">Connected Accounts</h1>
         <p class="subtitle">Manage third-party services linked to your account</p>
     </div>
-
+    <div asp-validation-summary="All" class="text-danger"></div>
     <div class="connected-accounts-list">
         @foreach (var login in Model.ExternalLogins.OrderBy(p => p.DateAdd))
         {

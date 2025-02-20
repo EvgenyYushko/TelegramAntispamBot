@@ -7,7 +7,6 @@ using DomainLayer.Models.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ServiceLayer.Services.Authorization;
 
 namespace TelegramAntispamBot.Pages.Account.Auth
 {

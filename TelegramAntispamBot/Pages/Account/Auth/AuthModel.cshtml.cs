@@ -49,73 +49,89 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 
 		public async Task<IActionResult> OnGetCallbackAsync()
 		{
-			var u = User;
 			var info = await _signInManager.GetExternalLoginInfoAsync();
 			if (info == null)
 			{
-				Console.WriteLine("error GetExternalLoginInfoAsync");
+				// Логирование ошибки
 				return RedirectToPage("/Account/Login");
 			}
 
+			// Получаем redirectUrl
 			if (!info.AuthenticationProperties.Items.TryGetValue("ReturnUrl", out var redirectUrl))
 			{
-				Console.WriteLine("redirectUrl is null");
-				return RedirectToPage("/Account/Login");
+				redirectUrl = Url.Content("~/");
 			}
 
-			// Проверяем, есть ли уже существующий связанный аккаунт
-			var existingUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
-			if (existingUser != null)
+			// Если пользователь уже авторизован, привязываем аккаунт
+			if (User.Identity.IsAuthenticated)
 			{
-				// Если аккаунт уже связан - выполняем вход
-				await _signInManager.SignInAsync(existingUser, isPersistent: false);
-				return LocalRedirect(redirectUrl);
-			}
-
-			// Получаем email
-			var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-			if (string.IsNullOrEmpty(email))
-			{
-				Console.WriteLine("email is null");
-				return RedirectToPage("/Account/Register");
-			}
-
-			// Ищем пользователя по email
-			var user = await _externalAuthManager.FindUserByEmail(email);
-			if (user != null)
-			{
-				// Проверяем, не связан ли уже этот провайдер с пользователем
-				var existingLogin = await _externalAuthManager.ExistsExternalLoginAsync(user.Id, info.LoginProvider);
-				if (existingLogin == null)
+				var currentUser = await _externalAuthManager.FindUserById(UserId);
+				if (currentUser == null)
 				{
-					await _externalAuthManager.LinkExternalLoginAsync(user, info.LoginProvider, info.ProviderKey);
+					return NotFound($"Не удалось загрузить пользователя с ID '{UserId}'.");
 				}
 
-				// Выполняем вход через SignInManager
-				await _signInManager.SignInAsync(user, isPersistent: false);
+				// Проверяем, не привязан ли аккаунт к другому пользователю
+				var existingLoginUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
+				if (existingLoginUser != null)
+				{
+					// Ошибка: аккаунт уже связан
+					LocalRedirect(redirectUrl);
+				}
+
+				// Привязываем внешний аккаунт
+				await _externalAuthManager.LinkExternalLoginAsync(currentUser, info.LoginProvider, info.ProviderKey);
+
+				// Обновляем куки аутентификации
+				await _signInManager.RefreshSignInAsync(currentUser);
 				return LocalRedirect(redirectUrl);
 			}
-
-			// Создаем нового пользователя
-			var model = GetRegisterModel(info.Principal);
-			var registrationResult = await _externalAuthManager.RegisterExternalUserAsync(model.Username, model.Email, Role.User.ToString());
-
-			if (!registrationResult.Succeeded)
+			else
 			{
-				// Обработка ошибок регистрации
-				foreach (var error in registrationResult.Errors)
+				// Логика для неавторизованного пользователя (вход/регистрация)
+
+				var existingUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
+				if (existingUser != null)
 				{
-					ModelState.AddModelError(string.Empty, error.Description);
+					await _signInManager.SignInAsync(existingUser, isPersistent: false);
+					return LocalRedirect(redirectUrl);
 				}
-				return Page();
+
+				var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+				if (string.IsNullOrEmpty(email))
+					return RedirectToPage("/Account/Register");
+
+				// Поиск пользователя по email
+				var user = await _externalAuthManager.FindUserByEmail(email);
+				if (user != null)
+				{
+					// Проверяем, не связан ли уже провайдер
+					var existingLogin = await _externalAuthManager.ExistsExternalLoginAsync(user.Id, info.LoginProvider);
+					if (existingLogin == null)
+						await _externalAuthManager.LinkExternalLoginAsync(user, info.LoginProvider, info.ProviderKey);
+
+					await _signInManager.SignInAsync(user, isPersistent: false);
+					return LocalRedirect(redirectUrl);
+				}
+
+				// Регистрация нового пользователя
+				var model = GetRegisterModel(info.Principal);
+				var registrationResult = await _externalAuthManager.RegisterExternalUserAsync(model.Username, model.Email, Role.User.ToString());
+
+				if (!registrationResult.Succeeded)
+				{
+					foreach (var error in registrationResult.Errors)
+						ModelState.AddModelError(string.Empty, error.Description);
+
+					return LocalRedirect(redirectUrl);
+				}
+
+				var newUser = await _externalAuthManager.FindUserByEmail(email);
+				await _externalAuthManager.LinkExternalLoginAsync(newUser, info.LoginProvider, info.ProviderKey);
+
+				await _signInManager.SignInAsync(newUser, isPersistent: false);
+				return LocalRedirect(redirectUrl);
 			}
-
-			var newUser = await _externalAuthManager.FindUserByEmail(email);
-			await _externalAuthManager.LinkExternalLoginAsync(newUser, info.LoginProvider, info.ProviderKey);
-
-			// Выполняем вход
-			await _signInManager.SignInAsync(newUser, isPersistent: false);
-			return LocalRedirect(redirectUrl);
 		}
 
 		protected virtual EntryModel GetRegisterModel(ClaimsPrincipal claimsPrincipal)

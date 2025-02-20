@@ -160,11 +160,11 @@ namespace TelegramAntispamBot
 					options.SignIn.RequireConfirmedEmail = false;
 
 					// временно отключим требования к паролю
-					//options.Password.RequireDigit = false;
-					//options.Password.RequiredLength = 6;
-					//options.Password.RequireNonAlphanumeric = false;
-					//options.Password.RequireUppercase = false;
-					//options.Password.RequireLowercase = false;
+					options.Password.RequireDigit = false;
+					options.Password.RequiredLength = 6;
+					options.Password.RequireNonAlphanumeric = false;
+					options.Password.RequireUppercase = false;
+					options.Password.RequireLowercase = false;
 
 					// отключим требования к логину
 					options.User.AllowedUserNameCharacters = null;

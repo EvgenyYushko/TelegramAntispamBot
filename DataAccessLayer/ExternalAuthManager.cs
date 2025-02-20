@@ -32,6 +32,11 @@ namespace DataAccessLayer
 			return userEntity;
 		}
 
+		public async Task<UserEntity> FindUserById(Guid id)
+		{
+			return await _userManager.FindByIdAsync(id.ToString());
+		}
+
 		public async Task<IdentityResult> RegisterExternalUserAsync(string username, string email, string role)
 		{
 			var temporaryPassword = GenerateTemporaryPassword();
