@@ -44,17 +44,23 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
 			properties.Items["ReturnUrl"] = returnUrl;
 
+			Console.WriteLine($"redirectUrl={redirectUrl}, returnUrl={returnUrl}");
+
 			return new ChallengeResult(provider, properties);
 		}
 
 		public async Task<IActionResult> OnGetCallbackAsync()
 		{
+			Console.WriteLine("AuthModelModel-OnGetCallbackAsync");
+
 			var info = await _signInManager.GetExternalLoginInfoAsync();
 			if (info == null)
 			{
 				// Логирование ошибки
 				return RedirectToPage("/Account/Login");
 			}
+
+			Console.WriteLine($"info.LoginProvider={info.LoginProvider}, info.ProviderKey={info.ProviderKey}");
 
 			// Получаем redirectUrl
 			if (!info.AuthenticationProperties.Items.TryGetValue("ReturnUrl", out var redirectUrl))
@@ -70,6 +76,8 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 				{
 					return NotFound($"Не удалось загрузить пользователя с ID '{UserId}'.");
 				}
+
+				Console.WriteLine($"UserId={UserId}");
 
 				// Проверяем, не привязан ли аккаунт к другому пользователю
 				var existingLoginUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
@@ -89,7 +97,6 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			else
 			{
 				// Логика для неавторизованного пользователя (вход/регистрация)
-
 				var existingUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
 				if (existingUser != null)
 				{

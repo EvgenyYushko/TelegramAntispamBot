@@ -19,22 +19,22 @@ namespace TelegramAntispamBot.Pages.Account
 
 		protected override EntryModel GetRegisterModel(ClaimsPrincipal claimsPrincipal)
 		{
+			Console.WriteLine($"VkEntryModel");
+			Console.WriteLine($"claimsPrincipal ={claimsPrincipal}");
+
 			var model = new EntryModel();
 
 			var claims = claimsPrincipal.Claims;
-
+			foreach (var item in claimsPrincipal.Claims)
+			{
+				Console.WriteLine($"{item.Type}={item.Value}");
+			}
 			// Получаем данные из VK
 			var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 			var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 			var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
 			var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname").Value;
 			var surname = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname").Value;
-			var test = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
-
-			foreach (var item in claimsPrincipal.Claims)
-			{
-				Console.WriteLine($"{item.Type}={item.Value}");
-			}
 
 			var userName = $"{name} {surname}";
 

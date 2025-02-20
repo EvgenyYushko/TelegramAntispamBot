@@ -155,6 +155,8 @@ namespace TelegramAntispamBot
 
 			services.AddIdentity<UserEntity, RoleEntity>(options =>
 				{
+					options.User.RequireUniqueEmail = true;
+
 					options.SignIn.RequireConfirmedAccount = false;
 					options.SignIn.RequireConfirmedPhoneNumber = false;
 					options.SignIn.RequireConfirmedEmail = false;
