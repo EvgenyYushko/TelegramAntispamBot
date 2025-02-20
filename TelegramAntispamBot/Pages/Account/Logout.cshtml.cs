@@ -1,9 +1,7 @@
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
+using DomainLayer.Models.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TelegramAntispamBot.Pages.Base;
 
@@ -11,17 +9,32 @@ namespace TelegramAntispamBot.Pages.Account
 {
 	public class LogoutModel : PageModelBase
 	{
+		private readonly SignInManager<UserEntity> _signInManager;
+
+		public LogoutModel(SignInManager<UserEntity> signInManager)
+		{
+			_signInManager = signInManager;
+		}
+
 		public async Task<IActionResult> OnGetAsync()
 		{
-			// 1. Удаляем локальные куки
-			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-			Response.Cookies.Delete("token");
-
-			// 2. Получаем идентификатор пользователя Google (если есть)
-			var googleUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 			var authScheme = User.Identity?.AuthenticationType;
 
 			Console.WriteLine($"LogoutModel-OnGetAsync-authScheme = {authScheme}");
+
+			// 1. Выход из локальной аутентификации (куки)
+			await _signInManager.SignOutAsync();
+			Response.Cookies.Delete("token");
+
+			// 2. Получаем идентификатор пользователя Google (если есть)
+			//var googleUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+			// Если пользователь вошел через внешнего провайдера, завершаем сессию
+			//if (!string.IsNullOrEmpty(authScheme) && authScheme != CookieAuthenticationDefaults.AuthenticationScheme)
+			//{
+			//	await HttpContext.SignOutAsync(authScheme);
+			//}
 
 			// 3. Если это Google, завершаем сессию
 			//if (!string.IsNullOrEmpty(googleUserId) && authScheme == GoogleDefaults.AuthenticationScheme)

@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Infrastructure.Enumerations;
+using DataAccessLayer;
+using DomainLayer.Models.Authorization;
 using MailSenderService.ServiceLayer.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Account.Auth;
@@ -15,7 +14,8 @@ namespace TelegramAntispamBot.Pages.Account
 		private readonly IUserService _userService;
 		private readonly IMailService _mailService;
 
-		public RegisterModel(IUserService userService, IMailService mailService)
+		public RegisterModel(IUserService userService, IMailService mailService, SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
+			: base(signInManager, externalAuthManager)
 		{
 			_userService = userService;
 			_mailService = mailService;
@@ -33,11 +33,8 @@ namespace TelegramAntispamBot.Pages.Account
 		[BindProperty]
 		public string SelectedRole { get; set; } = string.Empty;
 
-		public List<string> Roles { get; set; }
-
 		public async Task OnGetAsync()
 		{
-			Roles = Enum.GetNames(typeof(Role)).Where(role => role != nameof(Role.Admin)).ToList();
 		}
 
 		//private int _kod;
@@ -46,7 +43,7 @@ namespace TelegramAntispamBot.Pages.Account
 		//	_kod = new Random().Next(1, 99);
 		//	try
 		//	{
-		//		await _mailService.Send(Email, $"Код регистрации: {_kod}", "Регистрация Антиспам бот");
+		//		await _mailService.Send(UserName, $"Код регистрации: {_kod}", "Регистрация Антиспам бот");
 		//	}
 		//	catch (Exception e)
 		//	{
@@ -57,31 +54,32 @@ namespace TelegramAntispamBot.Pages.Account
 
 		public async Task<IActionResult> OnPostRegisterAsync()
 		{
-			try
+			if (ModelState.IsValid)
 			{
-				if (ModelState.IsValid)
+
+				//if (null)
+				//{
+				//	"Заполните код регистрации"
+				//}
+
+				//if (!_kod.Equals())
+				//{
+				//	"Не верный код регистрации";
+				//}
+
+				var result = await _userService.Register(Username, Email, Password, SelectedRole);
+				if (result.Succeeded)
 				{
-
-					//if (null)
-					//{
-					//	"Заполните код регистрации"
-					//}
-
-					//if (!_kod.Equals())
-					//{
-					//	"Не верный код регистрации";
-					//}
-
-					await _userService.Register(Username, Email, Password, SelectedRole);
 					return RedirectToPage("/Account/Login");
 				}
-			}
-			catch (Exception ex)
-			{
-				ErrorMessage = ex.Message;
-			}
 
-			return RedirectToPage("/Account/Register");
+				foreach (var error in result.Errors)
+				{
+					ModelState.AddModelError("", error.Description);
+				}
+				return Page();
+			}
+			return Page();
 		}
 	}
 }

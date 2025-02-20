@@ -13,8 +13,12 @@ namespace DataAccessLayer.Configurations
 			builder.HasMany(u => u.Roles)
 				.WithMany(r => r.Users)
 				.UsingEntity<UserRoleEntity>(
-					l => l.HasOne<RoleEntity>().WithMany().HasForeignKey(r => r.RoleId),
-					r => r.HasOne<UserEntity>().WithMany().HasForeignKey(u => u.UserId));
+					l => l.HasOne(ur => ur.Role).WithMany().HasForeignKey(ur => ur.RoleId),  
+					r => r.HasOne(ur => ur.User).WithMany().HasForeignKey(ur => ur.UserId));
+
+			builder.HasMany(u => u.ExternalLogins)
+				.WithOne(e => e.User)
+				.HasForeignKey(e => e.UserId);
 		}
 	}
 }

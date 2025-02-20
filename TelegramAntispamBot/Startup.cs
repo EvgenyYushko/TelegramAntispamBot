@@ -1,10 +1,7 @@
 using System;
 using System.Globalization;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using BuisinessLogic.Handlers;
 using BuisinessLogic.Services.Authorization;
@@ -27,6 +24,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -40,7 +38,6 @@ using TelegramAntispamBot.BackgroundServices;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
 using static Infrastructure.Constants.TelegramConstatns;
-using static TelegramAntispamBot.TelegramAuthExtensions;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 
 namespace TelegramAntispamBot
@@ -106,11 +103,13 @@ namespace TelegramAntispamBot
 			{
 				services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddSingleton<ITelegramUserService, TelegramUserService>();
+				services.AddSingleton<ExternalAuthManager>();
 			}
 			else
 			{
 				services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddScoped<ITelegramUserService, TelegramUserService>();
+				services.AddScoped<ExternalAuthManager>();
 			}
 			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
@@ -153,6 +152,33 @@ namespace TelegramAntispamBot
 
 			services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseNpgsql(connectionString, options => options.MigrationsAssembly("DataAccessLayer")));
+
+			services.AddIdentity<UserEntity, RoleEntity>(options =>
+				{
+					options.SignIn.RequireConfirmedAccount = false;
+					options.SignIn.RequireConfirmedPhoneNumber = false;
+					options.SignIn.RequireConfirmedEmail = false;
+
+					// временно отключим требования к паролю
+					//options.Password.RequireDigit = false;
+					//options.Password.RequiredLength = 6;
+					//options.Password.RequireNonAlphanumeric = false;
+					//options.Password.RequireUppercase = false;
+					//options.Password.RequireLowercase = false;
+
+					// отключим требования к логину
+					options.User.AllowedUserNameCharacters = null;
+
+				})
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders();
+
+			services.Configure<IdentityOptions>(options =>
+			{
+				//options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Время блокировки
+				//options.Lockout.MaxFailedAccessAttempts = 5; // Количество попыток
+				options.Lockout.AllowedForNewUsers = false; // Применять ли блокировку для новых пользователей
+			});
 		}
 
 		private static void AddFilters(IServiceCollection services)
@@ -316,18 +342,18 @@ namespace TelegramAntispamBot
 					//		{
 					//			if (email.GetProperty("primary").GetBoolean())
 					//			{
-					//				context.Identity?.AddClaim(new Claim(ClaimTypes.Email, email.GetProperty("email").GetString()));
+					//				context.Identity?.AddClaim(new Claim(ClaimTypes.UserName, email.GetProperty("email").GetString()));
 					//				break;
 					//			}
 					//		}
 					//	}
 					//};
 				})
-				.AddTelegramAuth(opt =>
-				{
-					opt.CallbackPath = new PathString("/signin-github");
+				//.AddTelegramAuth(opt =>
+				//{
+				//	opt.CallbackPath = new PathString("/signin-github");
 
-				})
+				//})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
 					options.TokenValidationParameters = new TokenValidationParameters

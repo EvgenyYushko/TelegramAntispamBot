@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BuisinessLogic.Services.Authorization;
-using Infrastructure.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceLayer.Services.Authorization;
@@ -20,9 +20,9 @@ namespace BuisinessLogic.Handlers
 
 		protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
 		{
-			var userId = context.User.Claims.FirstOrDefault(c => c.Type == CustomClaims.UserId);
+			var userId = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-			if (userId is null || !Guid.TryParse(userId.Value, out var id))
+			if (userId is null || !Guid.TryParse(userId, out var id))
 			{
 				return;
 			}

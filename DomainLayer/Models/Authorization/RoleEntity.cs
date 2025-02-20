@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 
 namespace DomainLayer.Models.Authorization
 {
-	public class RoleEntity
+	public class RoleEntity : IdentityRole<Guid>
 	{
-		public int Id { get; set; }
-
-		public string Name { get; set; } = string.Empty;
+		public int IdRole { get; set; }
 
 		public ICollection<PermissionEntity> Permissions { get; set; } = new List<PermissionEntity>();
 

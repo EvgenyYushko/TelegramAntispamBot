@@ -1,25 +1,26 @@
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using ServiceLayer.Services.Authorization;
+using DataAccessLayer;
+using DomainLayer.Models.Authorization;
+using Microsoft.AspNetCore.Identity;
 using TelegramAntispamBot.Pages.Account.Auth;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-	public class GoogleEntryModel : EntryModelBaseModel
+	public class GoogleEntryModel : AuthModelModel
 	{
-		public GoogleEntryModel(IUserService userService)
-			: base(userService)
+		public GoogleEntryModel(SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
+			: base(signInManager, externalAuthManager)
 		{
 		}
 
 		public void OnGet() { }
 
-		protected override EntryModel GetRegisterModel(AuthenticateResult authenticateResult)
+		protected override EntryModel GetRegisterModel(ClaimsPrincipal claimsPrincipal)
 		{
 			var model = new EntryModel();
 
-			var claims = authenticateResult.Principal.Identities
+			var claims = claimsPrincipal.Identities
 				.FirstOrDefault()?.Claims.Select(claim => new
 				{
 					claim.Issuer,
@@ -34,7 +35,6 @@ namespace TelegramAntispamBot.Pages.Account
 
 			model.Username = name;
 			model.Email = gMail;
-			model.Password = googleId;
 
 			return model;
 		}

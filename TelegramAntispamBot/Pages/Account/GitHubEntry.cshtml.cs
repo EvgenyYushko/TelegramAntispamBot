@@ -1,15 +1,16 @@
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using ServiceLayer.Services.Authorization;
+using DataAccessLayer;
+using DomainLayer.Models.Authorization;
+using Microsoft.AspNetCore.Identity;
 using TelegramAntispamBot.Pages.Account.Auth;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-	public class GitHubEntryModel : EntryModelBaseModel
+	public class GitHubEntryModel : AuthModelModel
 	{
-		public GitHubEntryModel(IUserService userService)
-			: base(userService)
+		public GitHubEntryModel(SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
+			: base(signInManager, externalAuthManager)
 		{
 		}
 
@@ -17,24 +18,23 @@ namespace TelegramAntispamBot.Pages.Account
 		{
 		}
 
-		protected override EntryModel GetRegisterModel(AuthenticateResult authenticateResult)
+		protected override EntryModel GetRegisterModel(ClaimsPrincipal claimsPrincipal)
 		{
 			var model = new EntryModel();
 
-			var claims = authenticateResult.Principal.Claims;
+			var claims = claimsPrincipal.Claims;
 
 			// Получаем данные из VK
 			var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 			var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-			var name = claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name").Value;
+			var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
 
 			var password = userId + email;
 
 			model.Username = name;
 			model.Email = email;
-			model.Password = password;
 
 			return model;
-		} 
+		}
 	}
 }

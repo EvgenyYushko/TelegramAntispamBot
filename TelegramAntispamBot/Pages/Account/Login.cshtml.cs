@@ -1,28 +1,27 @@
-using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using DataAccessLayer;
+using DomainLayer.Models.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Filters;
 using TelegramAntispamBot.Pages.Account.Auth;
-using static Infrastructure.Helpers.AuthorizeHelper;
 
 namespace TelegramAntispamBot.Pages.Account
 {
 	[ServiceFilter(typeof(LogPageFilter))]
 	public class LoginModel : AuthModelModel
 	{
-		private readonly IUserService _userService;
+		private readonly IUserService _usersService;
 
-		public LoginModel(IUserService usersService)
+		public LoginModel(IUserService usersService, SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
+			: base(signInManager, externalAuthManager)
 		{
-			_userService = usersService;
+			_usersService = usersService;
 		}
 
 		[BindProperty]
-		public string Email { get; set; } = string.Empty;
+		public string UserName { get; set; } = string.Empty;
 
 		[BindProperty]
 		public string Password { get; set; } = string.Empty;
@@ -39,22 +38,20 @@ namespace TelegramAntispamBot.Pages.Account
 
 		public async Task<IActionResult> OnPostLogin()
 		{
-			try
+			if (ModelState.IsValid)
 			{
-				var token = await _userService.Login(Email, Password);
-				HttpContext.Response.Cookies.Append("token", token);
+				var result = await _usersService.Login(UserName, Password);
 
-				var user = await _userService.GetByEmail(Email);
-				var claimsIdentity = new ClaimsIdentity(GetClaims(user), CookieAuthenticationDefaults.AuthenticationScheme);
-				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-
-				return RedirectToPage("/User/Profile");
+				if (result.Succeeded)
+				{
+					return RedirectToPage("/User/Profile");
+				}
+				else
+				{
+					ModelState.AddModelError(string.Empty, "Неверный email или пароль.");
+				}
 			}
-			catch (Exception ex)
-			{
-				ErrorMessage = ex.Message;
-				return RedirectToPage("/Account/Login");
-			}
+			return Page();
 		}
 	}
 }

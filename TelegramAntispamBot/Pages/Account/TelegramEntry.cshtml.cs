@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Account.Auth;
@@ -10,12 +11,11 @@ using static Infrastructure.Constants.TelegramConstatns;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-	public class TelegramEntryModel : EntryModelBaseModel
+	public class TelegramEntryModel : PageModel
 	{
 		private readonly IConfiguration configuration;
 
 		public TelegramEntryModel(IUserService userService, IConfiguration configuration)
-			: base(userService)
 		{
 			this.configuration = configuration;
 		}

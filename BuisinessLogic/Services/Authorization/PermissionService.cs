@@ -11,7 +11,7 @@ namespace BuisinessLogic.Services.Authorization
 	{
 		private readonly IUserRepository _usersRepository;
 
-		public PermissionService(IUserRepository usersRepository) 
+		public PermissionService(IUserRepository usersRepository)
 		{
 			_usersRepository = usersRepository;
 		}

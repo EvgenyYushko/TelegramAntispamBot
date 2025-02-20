@@ -1,10 +1,11 @@
 ﻿using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace DomainLayer.Models.Authorization
 {
-	public class UserRoleEntity
+	public class UserRoleEntity : IdentityUserRole<Guid>
 	{
-		public Guid UserId { get; set; }
-		public int RoleId { get; set; }
+		public UserEntity User { get; set; }
+		public RoleEntity Role { get; set; }
 	}
 }

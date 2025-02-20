@@ -16,8 +16,36 @@ namespace DataAccessLayer.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.10")
+                .HasAnnotation("ProductVersion", "5.0.17")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+            modelBuilder.Entity("DomainLayer.Models.Authorization.ExternalLoginEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateAdd")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Provider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Provider", "ProviderKey")
+                        .IsUnique();
+
+                    b.ToTable("ExternalLogins");
+                });
 
             modelBuilder.Entity("DomainLayer.Models.Authorization.PermissionEntity", b =>
                 {
@@ -58,40 +86,57 @@ namespace DataAccessLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Authorization.RoleEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
+                    b.Property<int>("IdRole")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("RoleEntity");
 
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Name = "Admin"
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            ConcurrencyStamp = "6c7a8a42-426e-41c2-b179-f5a554337014",
+                            IdRole = 1,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = 2,
-                            Name = "User"
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            ConcurrencyStamp = "9d4c5c65-8873-4e56-8fb5-3370e72fc8eb",
+                            IdRole = 2,
+                            Name = "User",
+                            NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = 3,
-                            Name = "Tutor"
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            ConcurrencyStamp = "43cb629c-0056-4382-8190-dbd700c06017",
+                            IdRole = 3,
+                            Name = "Tutor",
+                            NormalizedName = "TUTOR"
                         });
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Authorization.RolePermissionEntity", b =>
                 {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("PermissionId")
                         .HasColumnType("integer");
@@ -105,32 +150,32 @@ namespace DataAccessLayer.Migrations
                     b.HasData(
                         new
                         {
-                            RoleId = 1,
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111"),
                             PermissionId = 2
                         },
                         new
                         {
-                            RoleId = 1,
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111"),
                             PermissionId = 1
                         },
                         new
                         {
-                            RoleId = 1,
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111"),
                             PermissionId = 3
                         },
                         new
                         {
-                            RoleId = 1,
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111"),
                             PermissionId = 4
                         },
                         new
                         {
-                            RoleId = 2,
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222"),
                             PermissionId = 1
                         },
                         new
                         {
-                            RoleId = 3,
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333"),
                             PermissionId = 3
                         });
                 });
@@ -141,31 +186,64 @@ namespace DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedUserName")
                         .HasColumnType("text");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("UserEntity");
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Authorization.UserRoleEntity", b =>
                 {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("RoleId", "UserId");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("UserRoleEntity");
                 });
@@ -228,6 +306,86 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("TelegramUsers");
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IdentityRoleClaim<Guid>");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IdentityUserClaim<Guid>");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.ToTable("IdentityUserLogin<Guid>");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("IdentityUserToken<Guid>");
+                });
+
             modelBuilder.Entity("ServiceLayer.Models.TelegramBannedUsersEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -244,6 +402,17 @@ namespace DataAccessLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BanedUsers");
+                });
+
+            modelBuilder.Entity("DomainLayer.Models.Authorization.ExternalLoginEntity", b =>
+                {
+                    b.HasOne("DomainLayer.Models.Authorization.UserEntity", "User")
+                        .WithMany("ExternalLogins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Authorization.RolePermissionEntity", b =>
@@ -263,17 +432,21 @@ namespace DataAccessLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Authorization.UserRoleEntity", b =>
                 {
-                    b.HasOne("DomainLayer.Models.Authorization.RoleEntity", null)
+                    b.HasOne("DomainLayer.Models.Authorization.RoleEntity", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DomainLayer.Models.Authorization.UserEntity", null)
+                    b.HasOne("DomainLayer.Models.Authorization.UserEntity", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DomainLayer.Models.TelegramPermissionsEntity", b =>
@@ -285,6 +458,11 @@ namespace DataAccessLayer.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DomainLayer.Models.Authorization.UserEntity", b =>
+                {
+                    b.Navigation("ExternalLogins");
                 });
 
             modelBuilder.Entity("DomainLayer.Models.TelegramUserEntity", b =>

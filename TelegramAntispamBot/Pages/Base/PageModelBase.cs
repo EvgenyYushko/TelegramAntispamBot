@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using Infrastructure.Constants;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,22 +11,13 @@ namespace TelegramAntispamBot.Pages.Base
 	{
 		public Guid UserId { get; set; }
 
-		[TempData]
-		public string ErrorMessage { get; set; } = string.Empty;
-
 		public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
 		{
-			var token = context.HttpContext.Request.Cookies["token"];
+			var uId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-			if (!string.IsNullOrEmpty(token))
+			if (!string.IsNullOrEmpty(uId))
 			{
-				var handler = new JwtSecurityTokenHandler();
-				var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-
-				if (jsonToken != null)
-				{
-					UserId = Guid.Parse(jsonToken.Claims.FirstOrDefault(c => c.Type == CustomClaims.UserId)?.Value);
-				}
+				UserId = Guid.Parse(uId);
 			}
 
 			base.OnPageHandlerExecuting(context);

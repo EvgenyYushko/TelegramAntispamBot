@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 
 namespace DomainLayer.Models.Authorization
 {
-	public class UserEntity
+	public class UserEntity : IdentityUser<Guid>
 	{
-		public Guid Id { get; set; }
-		public string UserName { get; set; }
-		public string PasswordHash { get; set; }
-		public string Email { get; set; }
-
 		public ICollection<RoleEntity> Roles { get; set; } = new List<RoleEntity>();
+		public ICollection<ExternalLoginEntity> ExternalLogins { get; set; } = new List<ExternalLoginEntity>();
 	}
 }
