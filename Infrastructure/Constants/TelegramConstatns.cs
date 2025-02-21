@@ -10,5 +10,7 @@
 		public const string VK_CLIENT_SECRET = "VK_CLIENT_SECRET";
 		public const string GITHUB_CLIENT_ID = "GITHUB_CLIENT_ID";
 		public const string GITHUB_CLIENT_SECRET = "GITHUB_CLIENT_SECRET";
+		public const string MAILRU_CLIENT_ID = "MAILRU_CLIENT_ID";
+		public const string MAILRU_CLIENT_SECRET = "MAILRU_CLIENT_SECRET";
 	}
 }

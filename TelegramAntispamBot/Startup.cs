@@ -350,6 +350,20 @@ namespace TelegramAntispamBot
 					//	}
 					//};
 				})
+				.AddMailRu(options =>
+				{
+					options.ClientId = Configuration.GetValue<string>(MAILRU_CLIENT_ID) ?? Environment.GetEnvironmentVariable(MAILRU_CLIENT_ID);
+					options.ClientSecret = Configuration.GetValue<string>(MAILRU_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(MAILRU_CLIENT_SECRET);
+					options.CallbackPath = new PathString("/signin-mailru");
+
+					// Настройка маппинга claims
+					options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+					options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "first_name");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Surname, "last_name");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Name, "nickname");
+					options.ClaimActions.MapJsonKey("urn:mailru:image", "image");
+				})
 				//.AddTelegramAuth(opt =>
 				//{
 				//	opt.CallbackPath = new PathString("/signin-github");

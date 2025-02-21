@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AspNet.Security.OAuth.GitHub;
+using AspNet.Security.OAuth.MailRu;
 using AspNet.Security.OAuth.Vkontakte;
 using DataAccessLayer;
 using DomainLayer.Models.Authorization;
@@ -31,6 +32,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			AuthParams.Add(GoogleDefaults.AuthenticationScheme, "/Account/GoogleEntry");
 			AuthParams.Add(VkontakteAuthenticationDefaults.AuthenticationScheme, "/Account/VkEntry");
 			AuthParams.Add(GitHubAuthenticationDefaults.AuthenticationScheme, "/Account/GitHubEntry");
+			AuthParams.Add(MailRuAuthenticationDefaults.AuthenticationScheme, "/Account/MailRuEntry");
 		}
 
 		public IActionResult OnPostExternalLogin(string provider, string returnUrl)
