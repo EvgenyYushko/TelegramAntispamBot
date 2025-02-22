@@ -9,6 +9,7 @@ using DataAccessLayer;
 using DomainLayer.Models.Authorization;
 using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TelegramAntispamBot.Pages.Base;
@@ -33,6 +34,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			AuthParams.Add(VkontakteAuthenticationDefaults.AuthenticationScheme, "/Account/VkEntry");
 			AuthParams.Add(GitHubAuthenticationDefaults.AuthenticationScheme, "/Account/GitHubEntry");
 			AuthParams.Add(MailRuAuthenticationDefaults.AuthenticationScheme, "/Account/MailRuEntry");
+			AuthParams.Add(MicrosoftAccountDefaults.AuthenticationScheme, "/Account/MicrosoftEntry");
 		}
 
 		public IActionResult OnPostExternalLogin(string provider, string returnUrl)

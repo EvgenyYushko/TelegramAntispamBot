@@ -19,6 +19,7 @@ using MailSenderService.ServiceLayer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -364,6 +365,21 @@ namespace TelegramAntispamBot
 					options.ClaimActions.MapJsonKey(ClaimTypes.Name, "nickname");
 					options.ClaimActions.MapJsonKey("urn:mailru:image", "image");
 				})
+				.AddMicrosoftAccount(options =>
+				{
+					options.ClientId = Configuration.GetValue<string>(MICROSOFT_CLIENT_ID) ?? Environment.GetEnvironmentVariable(MICROSOFT_CLIENT_ID);
+					options.ClientSecret = Configuration.GetValue<string>(MICROSOFT_CLIENT_SECRET) ?? Environment.GetEnvironmentVariable(MICROSOFT_CLIENT_SECRET);
+
+					// Расширенные настройки
+					options.CallbackPath = new PathString("/signin-microsoft");
+					options.AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint + "?prompt=select_account";
+					options.Scope.Add("openid");
+					options.Scope.Add("profile");
+					options.Scope.Add("email");
+					options.ClaimActions.MapJsonKey(ClaimTypes.Email, "mail");
+					options.SaveTokens = true;
+
+				})
 				//.AddTelegramAuth(opt =>
 				//{
 				//	opt.CallbackPath = new PathString("/signin-github");
@@ -371,24 +387,24 @@ namespace TelegramAntispamBot
 				//})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
-					options.TokenValidationParameters = new TokenValidationParameters
-					{
-						ValidateIssuer = false,
-						ValidateAudience = false,
-						ValidateLifetime = true,
-						ValidateIssuerSigningKey = true,
-						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
-					};
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = false,
+				ValidateAudience = false,
+				ValidateLifetime = true,
+				ValidateIssuerSigningKey = true,
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+			};
 
-					options.Events = new JwtBearerEvents
-					{
-						OnMessageReceived = context =>
-						{
-							context.Token = context.Request.Cookies["token"];
-							return Task.CompletedTask;
-						}
-					};
-				});
+			options.Events = new JwtBearerEvents
+			{
+				OnMessageReceived = context =>
+				{
+					context.Token = context.Request.Cookies["token"];
+					return Task.CompletedTask;
+				}
+			};
+		});
 		}
 
 		private static void ApdAppAuthorization(IServiceCollection service)

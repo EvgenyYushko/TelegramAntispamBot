@@ -12,5 +12,7 @@
 		public const string GITHUB_CLIENT_SECRET = "GITHUB_CLIENT_SECRET";
 		public const string MAILRU_CLIENT_ID = "MAILRU_CLIENT_ID";
 		public const string MAILRU_CLIENT_SECRET = "MAILRU_CLIENT_SECRET";
+		public const string MICROSOFT_CLIENT_ID = "MICROSOFT_CLIENT_ID";
+		public const string MICROSOFT_CLIENT_SECRET = "MICROSOFT_CLIENT_SECRET";
 	}
 }

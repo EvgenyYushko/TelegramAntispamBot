@@ -4,36 +4,31 @@
 }
 
 <style>
+
     .social-buttons-container {
         display: flex;
         gap: 12px;
         margin-top: 16px;
-        flex-wrap: nowrap; /* Гарантирует, что кнопки останутся в одной линии */
+        flex-wrap: nowrap;
+        width: 100%; /* Добавлено */
     }
 
     .social-signin-btn {
-        flex: 1;
+        flex: 1 1 0; /* Равномерное распределение */
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 8px;
         height: 40px;
-        min-width: 0; /* Важно для равномерного распределения */
-        width: 100%; /* Упрощает выравнивание */
-        box-sizing: border-box; /* Учитывает padding и border */
+        min-width: 40px; /* Минимальная ширина */
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid transparent; /* Добавить если нужно */
     }
 
-        .social-signin-btn img,
-        .social-signin-btn svg {
-            width: 24px !important;
-            height: 24px !important;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-
-    /* Специфичные стили для Mail.ru */
-    .mailru-signin-btn img {
-        object-fit: cover; /* Для сохранения пропорций логотипа */
+    .microsoft-btn svg {
+        width: 24px !important; /* Явное указание размера */
+        height: 24px !important;
     }
 
 </style>
@@ -91,11 +86,27 @@
                         name="provider"
                         value="MailRu"
                         class="btn social-signin-btn mailru-signin-btn">
-                    <img src="/images/logo-mailru.png"
+                    <img src="/images/logo-mailru.jpg"
                          alt="Mail.ru"
                          width="45"
                          height="35" />
                 </button>
             </form>
+
+        <form method="post" asp-page-handler="ExternalLogin" class="w-100">
+            <!-- Добавлен класс w-100 -->
+            <input type="hidden" name="returnUrl" value="@REDIREC_URL" />
+            <button type="submit"
+                    name="provider"
+                    value="Microsoft"
+                    class="btn social-signin-btn microsoft-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+                    <path fill="#f25022" d="M1 1h9v9H1z" />
+                    <path fill="#00a4ef" d="M1 11h9v9H1z" />
+                    <path fill="#7fba00" d="M11 1h9v9h-9z" />
+                    <path fill="#ffb900" d="M11 11h9v9h-9z" />
+                </svg>
+            </button>
+        </form>
         </div>
     </div>

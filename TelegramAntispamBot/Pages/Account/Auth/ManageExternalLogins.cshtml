@@ -5,6 +5,8 @@
     const string GOOGLE_PROVIDER = "google";
     const string GITHUB_PROVIDER = "github";
     const string VK_PROVIDER = "vkontakte";
+    const string MICROSOFT_PROVIDER = "microsoft";
+    const string MAILRU_PROVIDER = "mailru";
 }
 
 <div class="container">
@@ -29,6 +31,21 @@
                                 break;
                             case VK_PROVIDER:
                                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4A76A8" d="M12.7 18.29c-5.17 0-8.02-3.5-8.2-9.42h2.91c.09 4.19 1.93 5.96 3.86 6.26V8.87h2.76v3.67c1.9-.19 3.82-1.86 4.47-3.67h2.76c-.64 2.85-2.91 4.96-4.85 5.73 1.94.59 4.36 2.15 5.42 4.69h-3.19c-.82-1.62-2.63-2.83-5.14-3.01v3.01h-.33z" /></svg>
+                                break;
+                            case MICROSOFT_PROVIDER:
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21">
+                                    <path fill="#f25022" d="M1 1h9v9H1z" />
+                                    <path fill="#00a4ef" d="M1 11h9v9H1z" />
+                                    <path fill="#7fba00" d="M11 1h9v9h-9z" />
+                                    <path fill="#ffb900" d="M11 11h9v9h-9z" />
+                                </svg>
+                                break;
+                            case MAILRU_PROVIDER:
+                                <img class="btn social-signin-btn mailru-signin-btn"
+                                     src="/images/logo-mailru.jpg"
+                                     alt="Mail.ru"
+                                     width="45"
+                                     height="35" />
                                 break;
                             default:
                                 <span class="provider-name">@login.Provider</span>
@@ -84,6 +101,21 @@
                                             <path fill="#4A76A8" d="M12.7 18.29c-5.17 0-8.02-3.5-8.2-9.42h2.91c.09 4.19 1.93 5.96 3.86 6.26V8.87h2.76v3.67c1.9-.19 3.82-1.86 4.47-3.67h2.76c-.64 2.85-2.91 4.96-4.85 5.73 1.94.59 4.36 2.15 5.42 4.69h-3.19c-.82-1.62-2.63-2.83-5.14-3.01v3.01h-.33z" />
                                         </svg>
                                         break;
+                                    case MICROSOFT_PROVIDER:
+                                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21">
+                                            <path fill="#f25022" d="M1 1h9v9H1z" />
+                                            <path fill="#00a4ef" d="M1 11h9v9H1z" />
+                                            <path fill="#7fba00" d="M11 1h9v9h-9z" />
+                                            <path fill="#ffb900" d="M11 11h9v9h-9z" />
+                                        </svg>
+                                        break;
+                                    case MAILRU_PROVIDER:
+                                    <img class="btn social-signin-btn mailru-signin-btn"
+                                        src = "/images/logo-mailru.jpg"
+                                        alt="Mail.ru"
+                                        width="45"
+                                        height="35" />
+                                        break;
                                     default:
                                         <span class="provider-name">@provider.Name</span>
                                         break;
@@ -103,6 +135,22 @@
 </div>
 
 <style>
+    .provider-logo {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 50%;
+        padding: 8px; /* Добавлено */
+    }
+
+    .icon {
+        width: 24px;
+        height: 24px;
+        display: block; /* Добавлено */
+    }
     .add-external-login {
         margin-top: 2rem;
         padding: 1.5rem;
