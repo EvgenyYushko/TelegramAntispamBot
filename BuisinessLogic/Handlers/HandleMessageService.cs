@@ -70,7 +70,7 @@ namespace BuisinessLogic.Handlers
 				// Delete new community-comment if user not in white-list
 				case UpdateType.Message when update.Message.From.IsBot &&
 											 !update.Message.SenderChat.InChannelsWhitelist():
-					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken, BotSettings.InfoMessage);
+					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken, BotSettings.InfoMessage, BotSettings.LinkButton);
 					break;
 				case UpdateType.Message when update.Message.Text.Equals("/help") || update.Message.Text.Equals("/help@YN_AntispamBot"):
 					await SendWelcomeMessage(_telegramClient, update, cancellationToken, update.Message.From);
@@ -98,7 +98,7 @@ namespace BuisinessLogic.Handlers
 				// Delete edited community-comment if user not in white-list
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsBot &&
 												   !update.EditedMessage.SenderChat.InChannelsWhitelist():
-					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.EditedMessage, cancellationToken, BotSettings.InfoMessage);
+					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.EditedMessage, cancellationToken, BotSettings.InfoMessage, BotSettings.LinkButton);
 					break;
 				default:
 					return; 

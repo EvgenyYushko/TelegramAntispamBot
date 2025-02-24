@@ -5,15 +5,16 @@ using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BuisinessLogic.Services.Telegram
 {
 	public class DeleteMessageService : IDeleteMessageService
 	{
-		public async Task DeleteMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken, string msg)
+		public async Task DeleteMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken, string msg, InlineKeyboardMarkup inlineKeyboard)
 		{
 			var chatId = message.Chat.Id;
-			var messageText = message.Text; 
+			var messageText = message.Text;
 			var messageId = message.MessageId;
 
 			Console.WriteLine($"Message for delete: '{messageText}' (id: {messageId})");
@@ -23,12 +24,12 @@ namespace BuisinessLogic.Services.Telegram
 			{
 				try
 				{
-					await botClient.SendTextMessageAsync(message.From.Id, msg, cancellationToken: cancellationToken);
+					await botClient.SendTextMessageAsync(message.From.Id, msg, cancellationToken: cancellationToken, replyMarkup : inlineKeyboard);
 				}
 				catch (ApiRequestException ex) when (ex.ErrorCode == 403)
 				{
 					Console.WriteLine("User does not contact the bot or has blocked it");
-					await botClient.SendTextMessageAsync(chatId, msg, cancellationToken: cancellationToken);
+					await botClient.SendTextMessageAsync(chatId, msg, cancellationToken: cancellationToken, replyMarkup : inlineKeyboard);
 				}
 				catch (Exception e)
 				{

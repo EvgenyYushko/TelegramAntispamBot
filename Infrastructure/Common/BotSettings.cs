@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Infrastructure.Common
 {
 	public class BotSettings
 	{
 		public static string NoCommentWord = "лох";
+		private static string LINK = "https://telegramantispambot.onrender.com/User/Profile";
 
 		//Add your telegram nickname here
 		public static readonly List<string> WhiteList = new()
@@ -21,9 +23,18 @@ namespace Infrastructure.Common
 			"test"
 		};
 
-		public static readonly string InfoMessage =
-			"Если ты хочешь отправлять ссылки в комментариях канала, " +
-			"то заходи в репозиторий https://github.com/EvgenyYushko/TelegramAntispamBot и вноси себя в WhiteList (подробнее читай в файле README репозитория)";
+		public static readonly string InfoMessage =	$"Отправлять сслыки могут только авторизированные пользователи бота в своём аккаунте";
+
+		public static InlineKeyboardMarkup LinkButton = new InlineKeyboardMarkup(new[]
+			{
+				new[]
+				{
+					InlineKeyboardButton.WithUrl(
+						text: "Авторизоваться",
+						url: LINK
+					)
+				}
+			});
 
 		public static readonly string InfoMessageProfanityChecker =
 			"Ваше сообщение содержит нецензурное выражение и было удалено";

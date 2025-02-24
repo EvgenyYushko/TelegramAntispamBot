@@ -142,18 +142,10 @@
             <a href="/Admin/Analytics" class="admin-button">@Loc["Site_Statistics"]</a>
             <a href="/Admin/TelegramUsers" class="admin-button">@Loc["TgUsers"]</a>
         </div>
-
-       @*  <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="YN_AntispamBot" data-size="large" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>
-        <script type="text/javascript">
-            function onTelegramAuth(user) {
-              alert('Logged in as');
-            }
-        </script> *@
-
         <div  class="button-container">
             <a href="/Account/Auth/ManageExternalLogins" class="admin-button">Logins</a>
         </div>
-        <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="YN_AntispamBot" data-size="medium" data-auth-url="/Account/TelegramEntry" data-request-access="write"></script>
+        <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="YN_AntispamBot" data-size="large" data-auth-url="/Account/TelegramEntry" data-request-access="write"></script>
         <div class="logout-container">
             <button class="logout-button" onclick="location.href='@Url.Page("/Account/Logout")'">
                 @Loc["Log_Out"]
