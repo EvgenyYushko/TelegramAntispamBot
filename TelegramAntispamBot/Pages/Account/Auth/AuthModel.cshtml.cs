@@ -1,15 +1,10 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AspNet.Security.OAuth.GitHub;
-using AspNet.Security.OAuth.MailRu;
-using AspNet.Security.OAuth.Vkontakte;
 using DataAccessLayer;
 using DomainLayer.Models.Authorization;
 using Infrastructure.Enumerations;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TelegramAntispamBot.Pages.Base;
@@ -18,7 +13,6 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 {
 	public class AuthModelModel : PageModelBase
 	{
-		private static Dictionary<string, string> AuthParams = new();
 		protected readonly SignInManager<UserEntity> _signInManager;
 		protected readonly ExternalAuthManager _externalAuthManager;
 
@@ -28,23 +22,9 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			_externalAuthManager = externalAuthManager;
 		}
 
-		static AuthModelModel()
-		{
-			AuthParams.Add(GoogleDefaults.AuthenticationScheme, "/Account/GoogleEntry");
-			AuthParams.Add(VkontakteAuthenticationDefaults.AuthenticationScheme, "/Account/VkEntry");
-			AuthParams.Add(GitHubAuthenticationDefaults.AuthenticationScheme, "/Account/GitHubEntry");
-			AuthParams.Add(MailRuAuthenticationDefaults.AuthenticationScheme, "/Account/MailRuEntry");
-			AuthParams.Add(MicrosoftAccountDefaults.AuthenticationScheme, "/Account/MicrosoftEntry");
-		}
-
 		public IActionResult OnPostExternalLogin(string provider, string returnUrl)
 		{
-			if (!AuthParams.TryGetValue(provider, out var pageName))
-			{
-				throw new KeyNotFoundException("AuthenticationScheme not register!");
-			}
-
-			var redirectUrl = Url.Page(pageName, pageHandler: "Callback");
+			var redirectUrl = Url.Page("/Account/Auth/AuthModel", pageHandler: "Callback");
 			var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
 			properties.Items["ReturnUrl"] = returnUrl;
 
@@ -113,7 +93,9 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 
 				var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 				if (string.IsNullOrEmpty(email))
+				{
 					return RedirectToPage("/Account/Register");
+				}
 
 				// Поиск пользователя по email
 				var user = await _externalAuthManager.FindUserByEmail(email);
@@ -122,20 +104,24 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 					// Проверяем, не связан ли уже провайдер
 					var existingLogin = await _externalAuthManager.ExistsExternalLoginAsync(user.Id, info.LoginProvider);
 					if (existingLogin == null)
+					{
 						await _externalAuthManager.LinkExternalLoginAsync(user, info.LoginProvider, info.ProviderKey);
+					}
 
 					await _signInManager.SignInAsync(user, isPersistent: false);
 					return LocalRedirect(redirectUrl);
 				}
 
 				// Регистрация нового пользователя
-				var model = GetRegisterModel(info.Principal);
-				var registrationResult = await _externalAuthManager.RegisterExternalUserAsync(model.Username, model.Email, Role.User.ToString());
+				var regModel = GetRegisterModel(info.Principal);
+				var registrationResult = await _externalAuthManager.RegisterExternalUserAsync(regModel.Username, regModel.Email, Role.User.ToString());
 
 				if (!registrationResult.Succeeded)
 				{
 					foreach (var error in registrationResult.Errors)
+					{
 						ModelState.AddModelError(string.Empty, error.Description);
+					}
 
 					return LocalRedirect(redirectUrl);
 				}
@@ -148,9 +134,27 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			}
 		}
 
-		protected virtual EntryModel GetRegisterModel(ClaimsPrincipal claimsPrincipal)
+		private EntryModel GetRegisterModel(ClaimsPrincipal claimsPrincipal)
 		{
-			throw new NotImplementedException();
+			var claims = claimsPrincipal.Claims;
+
+			var mail = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+			var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+			if (name is null)
+			{
+				var givenname = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName).Value;
+				var surname = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname).Value;
+				name = $"{givenname} {surname}";
+			}
+
+			//var photo = claims.FirstOrDefault(c => c.Type == "urn:vkontakte:photo")?.Value;
+
+			return new ()
+			{
+				Email = mail,
+				Username = name
+			};
 		}
 	}
 
