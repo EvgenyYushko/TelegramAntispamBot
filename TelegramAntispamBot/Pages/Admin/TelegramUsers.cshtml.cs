@@ -1,27 +1,25 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Infrastructure.Enumerations;
+using Infrastructure.InjectSettings;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using ServiceLayer.Services.Telegram;
+using Telegram.Bot;
 using TelegramAntispamBot.Pages.Base;
 
 namespace TelegramAntispamBot.Pages.Admin
 {
 	[Authorize(Policy = nameof(Role.Admin))]
 	public class TelegramUsersModel : PageModelBase
-    {
+	{
 		private readonly ITelegramUserService _telegramUserService;
+		private TelegramBotClient _telegramClient;
 
-		public TelegramUsersModel(ITelegramUserService telegramUserService)
+		public TelegramUsersModel(ITelegramUserService telegramUserService, TelegramInject telegramInject)
 		{
 			_telegramUserService = telegramUserService;
+			_telegramClient = telegramInject.TelegramClient;
 		}
 
 		public IEnumerable<TelegramUser> TelegramUsers { get; set; } = new List<TelegramUser>();
@@ -46,5 +44,11 @@ namespace TelegramAntispamBot.Pages.Admin
 			TelegramUsers = _telegramUserService.GetAllTelegramUsers();
 			await _telegramUserService.UpdateLocalStorage();
 		}
-    }
+
+		public async Task OnGetSendMessage(long userId, string message)
+		{
+			await _telegramClient.SendTextMessageAsync(userId, message);
+			return;
+		}
+	}
 }
