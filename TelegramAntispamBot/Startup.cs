@@ -56,6 +56,13 @@ namespace TelegramAntispamBot
 
 		public void ConfigureSettings(IServiceCollection services)
 		{
+			services.AddSession(options =>
+			{
+				options.IdleTimeout = TimeSpan.FromMinutes(10);
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
+			});
+
 			services.Configure<AppOptions>(Configuration.GetSection(nameof(AppOptions)));
 			services.Configure<MailOptions>(Configuration.GetSection(nameof(MailOptions)));
 			services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
@@ -227,8 +234,10 @@ namespace TelegramAntispamBot
 			app.UseRequestLocalization();
 			app.UseCookiePolicy();
 			app.UseRouting();
+			app.UseSession();
 			app.UseAuthentication();
 			app.UseAuthorization();
+			//app.UseMvc();  
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
@@ -387,24 +396,24 @@ namespace TelegramAntispamBot
 				//})
 				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 				{
-			options.TokenValidationParameters = new TokenValidationParameters
-			{
-				ValidateIssuer = false,
-				ValidateAudience = false,
-				ValidateLifetime = true,
-				ValidateIssuerSigningKey = true,
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
-			};
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidateIssuer = false,
+						ValidateAudience = false,
+						ValidateLifetime = true,
+						ValidateIssuerSigningKey = true,
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+					};
 
-			options.Events = new JwtBearerEvents
-			{
-				OnMessageReceived = context =>
-				{
-					context.Token = context.Request.Cookies["token"];
-					return Task.CompletedTask;
-				}
-			};
-		});
+					options.Events = new JwtBearerEvents
+					{
+						OnMessageReceived = context =>
+						{
+							context.Token = context.Request.Cookies["token"];
+							return Task.CompletedTask;
+						}
+					};
+				});
 		}
 
 		private static void ApdAppAuthorization(IServiceCollection service)

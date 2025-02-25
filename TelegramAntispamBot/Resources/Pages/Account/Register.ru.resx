@@ -129,6 +129,9 @@
   <data name="Email" xml:space="preserve">
     <value>Электронная почта</value>
   </data>
+  <data name="Enter_Email_First" xml:space="preserve">
+    <value>Enter Email First</value>
+  </data>
   <data name="Enter_username" xml:space="preserve">
     <value>Введите свое имя пользователя</value>
   </data>
@@ -144,8 +147,14 @@
   <data name="Register" xml:space="preserve">
     <value>Зарегистрироваться</value>
   </data>
+  <data name="Resend_In" xml:space="preserve">
+    <value>Resend In</value>
+  </data>
   <data name="Select_Role" xml:space="preserve">
     <value>Выберите роль</value>
+  </data>
+  <data name="Send_Code" xml:space="preserve">
+    <value>Send code</value>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Имя пользователя</value>
