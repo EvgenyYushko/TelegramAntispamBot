@@ -1,0 +1,97 @@
+﻿@page
+@model TelegramAntispamBot.Pages.Admin.AllChatsModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Общие стили */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+        color: #212529;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 2rem;
+        color: #343a40;
+    }
+
+    /* Таблица */
+    .table-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1rem;
+    }
+
+    table, th, td {
+        border: 1px solid #dee2e6;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #007bff;
+        color: white;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    tr:nth-child(odd) {
+        background-color: #f8f9fa;
+    }
+
+    tr:hover {
+        background-color: #e9ecef;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function goToChat(chatId) {
+        window.location.href = '/ChatProfile?chatId=' + chatId;
+    }
+</script>
+
+<div policy="Admin" class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Creator Id</th>
+                <th>Creator Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var chat in Model.Chats)
+            {
+                <tr onclick="goToChat(@chat.TelegramChatId)">
+                    <td>@chat.TelegramChatId</td>
+                    <td>@chat.Title</td>
+                    <td>@chat.ChatType</td>
+                    <td>@chat.Creator.UserId</td>
+                    <td>@chat.Creator.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

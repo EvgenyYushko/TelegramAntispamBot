@@ -30,6 +30,7 @@ namespace TelegramAntispamBot.Pages.User
 			{
 				Console.WriteLine("ProfileModel-OnGetAsync-UserId=" + UserId);
 				CurrentUser = await _usersService.GetUserById(UserId);
+				//await _telegramUserService.GetChatsByUser(UserId);
 				Console.WriteLine(CurrentUser);
 				return Page();
 			}

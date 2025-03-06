@@ -34,6 +34,21 @@ namespace BuisinessLogic.Services.Telegram
 
 			return res;
 		}
+		
+		public List<Chanel> GetChatsByUser(long userId)
+		{
+			return _usersRepository.GetChatsByUser(userId);
+		}
+
+		public List<Chanel> GetAllChats()
+		{
+			return _usersRepository.GetAllChats();
+		}
+
+		public Chanel GetChatById(long id)
+		{
+			return _usersRepository.GetChatById(id);
+		}
 
 		public TelegramUser FindByPullId(string pullId)
 		{

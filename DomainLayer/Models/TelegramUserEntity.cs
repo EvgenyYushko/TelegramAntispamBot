@@ -12,5 +12,11 @@ namespace DomainLayer.Models
 		public DateTime CreateDate { get; set; }
 
 		public TelegramPermissionsEntity Permissions { get; set; }
+
+		public List<TelegramChannelAdmin> AdminInChannels { get; set; } = new();
+
+		public List<TelegramChannel> OwnedChannels { get; set; } = new();
+
+		public List<UserChannelMembership> ChannelMemberships { get; set; } = new();
 	}
 }

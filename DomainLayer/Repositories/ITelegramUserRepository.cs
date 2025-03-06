@@ -12,6 +12,10 @@ namespace DomainLayer.Repositories
 
 		public Task<bool> TryAdd(TelegramUser userInfo);
 
+		public List<Chanel> GetChatsByUser(long userId);
+		public List<Chanel> GetAllChats();
+		public Chanel GetChatById(long id);
+
 		public TelegramUser FindByPullId(string pullId);
 
 		public Task AddUserToBanList(TelegramUser user);

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DomainLayer.Models.Authorization;
 using Infrastructure.Enumerations;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Services.Authorization;
 
 namespace BuisinessLogic.Services.Authorization
@@ -57,7 +59,7 @@ namespace BuisinessLogic.Services.Authorization
 		public async Task<UserAccount> GetUserById(Guid id)
 		{
 			var userEntity = await _userManager.FindByIdAsync(id.ToString());
-			if(userEntity is null)
+			if (userEntity is null)
 			{
 				throw new Exception($"Пользователь не найдент id = {id}");
 			}
@@ -71,6 +73,24 @@ namespace BuisinessLogic.Services.Authorization
 				roles.Select(r => Enum.Parse<Role>(r)).ToList());
 
 			return user;
+		}
+
+		public List<UserAccount> GetAllUsers()
+		{
+			var userEntity = _userManager.Users.Include(u => u.Roles);
+			if (userEntity is null)
+			{
+				throw new Exception($"Пользователей не найдено");
+			}
+
+			return userEntity.Select(u =>
+
+				new UserAccount(u.Id,
+					u.UserName,
+					u.PasswordHash,
+					u.Email,
+					u.Roles.Select(r => Enum.Parse<Role>(r.Name)).ToList())
+			).ToList();
 		}
 	}
 }

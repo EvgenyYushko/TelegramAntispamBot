@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
@@ -14,5 +15,7 @@ namespace ServiceLayer.Services.Authorization
 		Task<IdentityResult> Delete(Guid id);
 
 		Task<UserAccount> GetUserById(Guid id);
+
+		List<UserAccount> GetAllUsers();
 	}
 }

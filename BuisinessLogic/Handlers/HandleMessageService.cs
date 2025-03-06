@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 using Infrastructure.Common;
 using Infrastructure.Extentions;
 using Infrastructure.InjectSettings;
+using Infrastructure.Models;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using static Infrastructure.Helpers.TelegramUserHelper;
 using static Infrastructure.Common.TimeZoneHelper;
+using static Infrastructure.Helpers.TelegramUserHelper;
 
 namespace BuisinessLogic.Handlers
 {
@@ -31,6 +32,24 @@ namespace BuisinessLogic.Handlers
 		/// <inheritdoc />
 		public async Task HandleUpdateAsync(TelegramInject botClient, Update update, UpdateType type, CancellationToken cancellationToken)
 		{
+			_telegramClient = botClient.TelegramClient;
+
+			//var s = await _telegramClient.GetChatAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
+			var chatMember = await _telegramClient.GetChatMemberAsync(new ChatId(update.Message.Chat.Id), update.Message.From.Id, cancellationToken);
+			var admins = await _telegramClient.GetChatAdministratorsAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
+			var creator = admins.Where(a => a is ChatMemberOwner)
+				.Select(c => new TelegramUser()
+				{
+					UserId = c.User.Id,
+					Name = c.User.Username
+				}).First();
+			var adminsMember = admins.Where(a => a is ChatMemberAdministrator adm && !adm.User.IsBot)
+				.Select(a => new TelegramUser()
+				{
+					UserId = a.User.Id,
+					Name = a.User.Username
+				}).ToList();
+
 			if (update.Message is not null)
 			{
 				await _telegramUserService.TryAdd(new()
@@ -38,11 +57,21 @@ namespace BuisinessLogic.Handlers
 					UserId = update.Message.From.Id,
 					Name = update.Message.From.Username,
 					CreateDate = DateTimeNow,
-					User = update.Message.From
+					User = update.Message.From,
+					Chanel = new Chanel()
+					{
+						TelegramChatId = update.Message.Chat.Id,
+						ChatType = update.Message.Chat.Type.ToString(),
+						Title = update.Message.Chat.Title,
+						Creator = creator,
+						CreatorId = creator.UserId,
+						AdminsMembers = adminsMember,
+						ChatMember = chatMember
+					}
 				});
 			}
 
-			_telegramClient = botClient.TelegramClient;
+			//var chats = _telegramUserService.GetChatsByUser(update.Message.From.Id);
 
 			if (update.HasEmptyMessage())
 			{
@@ -101,7 +130,7 @@ namespace BuisinessLogic.Handlers
 					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.EditedMessage, cancellationToken, BotSettings.InfoMessage, BotSettings.LinkButton);
 					break;
 				default:
-					return; 
+					return;
 			}
 		}
 

@@ -1,7 +1,9 @@
 ﻿@page
 @model TelegramAntispamBot.Pages.User.ProfileModel
-@{ Layout = "~/Pages/Shared/_Layout.cshtml";
-    var user = Model.CurrentUser; }
+@{ 
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    var user = Model.CurrentUser; 
+}
 
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
@@ -58,7 +60,7 @@
 
     /* Цвета для разных типов кнопок */
     .admin-button {
-        background-color: #3498db;
+        background-color: #634aa5;
         color: white;
     }
 
@@ -73,7 +75,7 @@
     }
 
     .telegram-button {
-        background-color: #0088cc;
+        background-color: #3176a5;
         color: white;
     }
 
@@ -147,29 +149,36 @@
         <div class="card-section">
             <h3 class="section-title">Настройки профиля</h3>
             <div class="button-grid">
-                <a href="/Account/Auth/ManageExternalLogins"
-                   class="action-button settings-button">
+                <a href="/Account/Auth/ManageExternalLogins" class="action-button settings-button">
                     Аккаунты
-                </a>
-                <button onclick="if (confirmDelete()) { location.href='@Url.Page("/User/Delete")'; }"
-                        class="action-button danger-button" policy="User">
-                    Удалить аккаунт
-                </button>
+                </a>                
             </div>
-        </div>
+        </div>        
 
         <!-- Секция административных действий -->
         <div policy="Admin" class="card-section">
-            <h3 class="section-title">Панель администратора</h3>
+            <h3 class="section-title">Настройки сайта</h3>
             <div class="button-grid">
+                <a href="/Admin/AllUsers" class="action-button admin-button">
+                    Пользователи сайта
+                </a>
                 <a href="/Admin/Analytics" class="action-button admin-button">
                     @Loc["Site_Statistics"]
-                </a>
-                <a href="/Admin/TelegramUsers" class="action-button admin-button">
+                </a>  
+            </div>
+        </div>
+
+        <div policy="Admin" class="card-section">
+            <h3 class="section-title">Настройки бота</h3>
+            <div class="button-grid">
+                <a href="/Admin/TelegramUsers" class="action-button telegram-button">
                     @Loc["TgUsers"]
                 </a>
+                <a href="/Admin/AllChats" class="action-button telegram-button">
+                    Чаты бота
+                </a>
             </div>
-        </div>  
+        </div>
 
         <!-- Опасные действия -->
         <div class="card-section">
@@ -178,7 +187,11 @@
                 <button onclick="location.href='@Url.Page("/Account/Logout")'"
                         class="action-button danger-button">
                     @Loc["Log_Out"]
-                </button>                
+                </button>
+                <button onclick="if (confirmDelete()) { location.href='@Url.Page("/User/Delete")'; }"
+                        class="action-button danger-button" policy="User">
+                    Удалить аккаунт
+                </button>
             </div>
         </div>
     }

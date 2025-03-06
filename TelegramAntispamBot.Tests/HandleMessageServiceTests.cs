@@ -45,7 +45,7 @@ namespace TelegramAntispamBot.Tests
 
 			//Assert
 			_deleteMessageService.Verify(m =>
-					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(), It.IsAny<CancellationToken>(), "test"),
+					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(), It.IsAny<CancellationToken>(), "test", null),
 				Times.Never);
 		}
 
@@ -70,7 +70,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), "test"),
+						It.IsAny<CancellationToken>(), "test", null),
 				Times.Never);
 		}
 
@@ -95,7 +95,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), "test"),
+						It.IsAny<CancellationToken>(), "test", null),
 				Times.Never);
 		}
 
@@ -130,7 +130,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), "test"),
+						It.IsAny<CancellationToken>(), "test", null),
 				Times.Never);
 		}
 
@@ -164,7 +164,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), "test"),
+						It.IsAny<CancellationToken>(), "test", null),
 				Times.Never);
 		}
 
@@ -190,7 +190,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 
@@ -216,7 +216,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), update.Message,
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 
@@ -251,7 +251,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 
@@ -286,7 +286,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 
@@ -321,7 +321,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 
@@ -356,7 +356,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 
@@ -386,7 +386,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 
@@ -416,7 +416,7 @@ namespace TelegramAntispamBot.Tests
 			//Assert
 			_deleteMessageService.Verify(m =>
 					m.DeleteMessageAsync(It.IsAny<ITelegramBotClient>(), It.IsAny<Message>(),
-						It.IsAny<CancellationToken>(), BotSettings.InfoMessage),
+						It.IsAny<CancellationToken>(), BotSettings.InfoMessage, null),
 				Times.Once);
 		}
 	}

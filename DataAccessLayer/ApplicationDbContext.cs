@@ -1,17 +1,20 @@
 ﻿using System;
+using System.Threading.Channels;
 using DataAccessLayer.Configurations;
 using DomainLayer.Models;
 using DomainLayer.Models.Authorization;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ServiceLayer.Models;
+using Telegram.Bot.Types;
 
 namespace DataAccessLayer
 {
-	public class ApplicationDbContext : IdentityDbContext<UserEntity, RoleEntity, Guid, 
-		IdentityUserClaim<Guid>, UserRoleEntity, IdentityUserLogin<Guid>, 
+	public class ApplicationDbContext : IdentityDbContext<UserEntity, RoleEntity, Guid,
+		IdentityUserClaim<Guid>, UserRoleEntity, IdentityUserLogin<Guid>,
 		IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
 	{
 		private readonly AuthorizationOptions _authorizationOptions;
@@ -34,6 +37,59 @@ namespace DataAccessLayer
 
 			modelBuilder.Entity<IdentityUserToken<Guid>>()
 				.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+
+			// Конфигурация для ChannelAdmin
+			modelBuilder.Entity<TelegramChannelAdmin>()
+				.HasKey(ca => new { ca.UserId, ca.ChannelId });
+
+			// Конфигурация для UserChannelMembership
+			modelBuilder.Entity<UserChannelMembership>()
+				.HasKey(ucm => new { ucm.UserId, ucm.ChannelId });
+
+			modelBuilder.Entity<TelegramChannel>()
+				.HasKey(ucm => new { ucm.Id });
+
+			// Связи для членства
+			modelBuilder.Entity<UserChannelMembership>()
+				.HasOne(ucm => ucm.User)
+				.WithMany(u => u.ChannelMemberships)
+				.HasForeignKey(ucm => ucm.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<UserChannelMembership>()
+				.HasOne(ucm => ucm.Channel)
+				.WithMany(c => c.Members)
+				.HasForeignKey(ucm => ucm.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// Конфигурация для создателя канала
+			modelBuilder.Entity<TelegramChannel>()
+				.HasOne(c => c.Creator)
+				.WithMany(u => u.OwnedChannels)
+				.HasForeignKey(c => c.CreatorId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			// Конфигурация связей администраторов
+			modelBuilder.Entity<TelegramChannelAdmin>()
+				.HasOne(ca => ca.User)
+				.WithMany(u => u.AdminInChannels)
+				.HasForeignKey(ca => ca.UserId)
+				.OnDelete(DeleteBehavior.Cascade)				;
+
+			modelBuilder.Entity<TelegramChannelAdmin>()
+				.HasOne(ca => ca.Channel)
+				.WithMany(c => c.Admins)
+				.HasForeignKey(ca => ca.ChannelId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// настройка индексов
+			modelBuilder.Entity<TelegramUserEntity>()
+				.HasIndex(u => u.UserId)
+				.IsUnique();
+
+			modelBuilder.Entity<TelegramUserEntity>()
+				.HasIndex(c => c.UserId)
+				.IsUnique();
 		}
 
 		public DbSet<IdentityUserClaim<Guid>> UserClaims { get; set; }
@@ -58,5 +114,11 @@ namespace DataAccessLayer
 		public DbSet<TelegramPermissionsEntity> TelegramPermissions { get; set; }
 
 		public DbSet<ExternalLoginEntity> ExternalLogins { get; set; }
+
+		public DbSet<TelegramChannel> TelegramChanel { get; set; }
+
+		public DbSet<TelegramChannelAdmin> TelegramChannelAdmin { get; set; }
+
+		public DbSet<UserChannelMembership> UserChannelMembership { get; set; }
 	}
 }
