@@ -62,7 +62,7 @@
                     <tbody>
                         @foreach (var member in Model.Chat.Members)
                         {
-                            <tr>
+                            <tr onclick="goToUser(@member.UserId, @Model.Chat.TelegramChatId)">
                                 <td>@member.UserId</td>
                                 <td>@member.Name</td>
                                 <td>@member.CreateDate.ToString("yyyy-MM-dd HH:mm")</td>
@@ -74,7 +74,11 @@
         </div>
     </div>
 </div>
-
+<script>
+    function goToUser(userId, chatId) {
+        window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
+    }
+</script>
 <style>
     .card {
         border-radius: 10px;

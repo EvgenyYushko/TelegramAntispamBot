@@ -26,7 +26,20 @@ namespace DataAccessLayer.Repositories
 
 		public TelegramUser Get(long id)
 		{
-			return LocalUserStorage.FirstOrDefault(user => user.UserId == id);
+			var user = LocalUserStorage.FirstOrDefault(user => user.UserId == id);
+			if(user == null)
+			{
+				var userDb = _context.TelegramUsers.FirstOrDefault(u => u.UserId.Equals(id));
+				user = new TelegramUser
+				{
+					UserId = userDb.UserId,
+					Name = userDb.Name,
+					CreateDate = userDb.CreateDate
+				};
+				LocalUserStorage.Add(user);
+			}
+
+			return user;
 		}
 
 		public async Task<bool> TryAdd(TelegramUser userInfo)
@@ -34,7 +47,6 @@ namespace DataAccessLayer.Repositories
 			if (LocalUserStorage.Exists(u => u.UserId == userInfo.UserId))
 			{
 				Console.WriteLine("Пользователь уже существует в локльном хранилище");
-				//return false;
 			}
 			else
 			{
@@ -56,7 +68,6 @@ namespace DataAccessLayer.Repositories
 					await UpdateChatAdmins(userInfo);
 				}
 				// есть в БД но нету в этом чате
-				//await UpdateLocalStorage();
 				await _context.SaveChangesAsync();
 				return false;
 			}

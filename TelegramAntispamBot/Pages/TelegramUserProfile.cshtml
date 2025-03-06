@@ -1,0 +1,75 @@
+﻿@page
+@model TelegramAntispamBot.Pages.TelegramUserProfileModel
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">@Model.TelegramUser.Name</h2>
+            <span class="badge bg-info text-white">User ID: @Model.TelegramUser.UserId</span>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5 class="text-primary">User Details</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">User ID:</dt>
+                        <dd class="col-sm-8">@Model.TelegramUser.UserId</dd>
+                        <dt class="col-sm-4">Username:</dt>
+                        <dd class="col-sm-8">@Model.TelegramUser.Name</dd>
+                        <dt class="col-sm-4">Join Date:</dt>
+                        <dd class="col-sm-8">@Model.TelegramUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                    </dl>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-success">Role in Chat</h5>
+                    <div class="p-3 border rounded bg-light">
+                        @* <p class="mb-0"><strong>Role:</strong> @Model.TelegramUser.Role</p> *@
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-4">
+                <h5 class="text-danger">Recent Messages</h5>
+                <table class="table table-hover table-bordered">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th>Message ID</th>
+                            <th>Text</th>
+                            <th>Sent At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       @*  @foreach (var message in Model.TelegramUser.Messages)
+                        {
+                            <tr>
+                                <td>@message.MessageId</td>
+                                <td>@message.Text</td>
+                                <td>@message.SentAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        } *@
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table th, .table td {
+        text-align: left;
+        padding: 12px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+</style>

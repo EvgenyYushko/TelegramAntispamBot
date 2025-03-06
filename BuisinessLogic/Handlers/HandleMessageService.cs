@@ -27,12 +27,20 @@ namespace BuisinessLogic.Handlers
 			_deleteMessageService = deleteMessageService;
 			_profanityCheckerService = profanityCheckerService;
 			_telegramUserService = telegramUserService;
+
 		}
 
+		private static bool _firstRunBot = true;
 		/// <inheritdoc />
 		public async Task HandleUpdateAsync(TelegramInject botClient, Update update, UpdateType type, CancellationToken cancellationToken)
 		{
 			_telegramClient = botClient.TelegramClient;
+
+			if (_firstRunBot)
+			{
+				await _telegramUserService.UpdateLocalStorage();
+				_firstRunBot = false;
+			}
 
 			//var s = await _telegramClient.GetChatAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
 			var chatMember = await _telegramClient.GetChatMemberAsync(new ChatId(update.Message.Chat.Id), update.Message.From.Id, cancellationToken);

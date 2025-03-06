@@ -183,6 +183,10 @@
                 alert('@Loc["SendError"]');
             }
         }
+         
+        function goToUser(userId, chatId) {
+            window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
+        }
     </script>
 </head>
 <body>
@@ -200,7 +204,7 @@
             <tbody>
                 @foreach (var user in Model.TelegramUsers)
                 {
-                    <tr>
+                    <tr onclick="goToUser(@user.UserId, null)">
                         <td>@user.UserId</td>
                         <td>@user.Name</td>
                         <td>@user.CreateDate</td>
