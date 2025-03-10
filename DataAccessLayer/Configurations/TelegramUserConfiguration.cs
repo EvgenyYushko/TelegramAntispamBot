@@ -10,11 +10,6 @@ namespace DataAccessLayer.Configurations
 		{
 			builder.HasKey(u => u.UserId);
 
-			builder.HasOne(u => u.Permissions)
-				.WithOne(p => p.User)
-				.HasForeignKey<TelegramPermissionsEntity>(p => p.UserId)
-				.HasPrincipalKey<TelegramUserEntity>(u => u.UserId) // Явно указываем, что UserId уникален
-				.OnDelete(DeleteBehavior.Cascade);
 		}
 	}
 }

@@ -74,13 +74,14 @@ namespace BuisinessLogic.Services.Telegram
 					UserId = u.UserId,
 					Name = u.Name,
 					CreateDate = u.CreateDate,
-					Permissions = new TelegramPermissions
+					Permissions = u.Permissions.Select(p => new TelegramPermissions()
 					{
-						Id = u.Permissions.Id,
-						UserId = u.Permissions.UserId,
-						SendLinks = u.Permissions.SendLinks
-					}
-				} )
+						Id = p.Id,
+						UserId = p.UserId,
+						SendLinks = p.SendLinks
+					})
+					.ToList()
+				})
 				.ToList();
 		}
 
@@ -98,7 +99,7 @@ namespace BuisinessLogic.Services.Telegram
 		public async Task<bool> InWhitelist(long id)
 		{
 			var user = _usersRepository.Get(id);
-			return user.Permissions.SendLinks;
+			return user.Permissions.First().SendLinks;
 		}
 
 		public async Task<bool> CheckReputation(Message message)

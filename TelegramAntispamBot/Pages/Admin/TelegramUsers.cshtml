@@ -81,109 +81,28 @@
             margin: 20px 0;
         }
 
-            .button-container button {
-                margin: 5px;
-                padding: 10px 20px;
-                font-size: 1rem;
-                color: white;
-                background-color: #28a745;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
+        .button-container button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-                .button-container button:hover {
-                    background-color: #218838;
-                }
+        .button-container button:hover {
+            background-color: #218838;
+        }
 
         table td:nth-child(4) {
             word-break: break-all;
         }
 
-        .message-container {
-            display: none; /* Скрываем контейнер по умолчанию */
-            gap: 10px;
-            margin-top: 10px;
-            align-items: center;
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            min-width: 200px;
-        }
-
-        .send-btn {
-            padding: 8px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-            .send-btn:hover {
-                background-color: #218838;
-            }
-
-        .toggle-btn {
-            padding: 6px 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-            .toggle-btn:hover {
-                background-color: #0056b3;
-            }
-
     </style>
     <script>
-        async function toggleSendLinks(userId, checkbox) {
-            const sendLinks = checkbox.checked;
-
-            const response = await fetch(`TelegramUsers?handler=SetRightLiks&userId=${userId}&sendLinks=${sendLinks}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            });
-
-            if (!response.ok) {
-                alert('Ошибка выполнения toggleSendLinks');
-                checkbox.checked = !sendLinks;
-            }
-        }
-
-         function toggleMessageInput(userId) {
-                const container = document.getElementById(`message-container-${userId}`);
-                container.style.display = container.style.display === 'flex' ? 'none' : 'flex';
-            }
-
-        async function sendMessage(userId) {
-            const input = document.getElementById(`message-input-${userId}`);
-            const message = input.value.trim();
-               
-            if (!message) {
-                alert('@Loc["EnterMessage"]');
-                return;
-            }
-
-            try {
-                const response = await fetch(`TelegramUsers?handler=SendMessage&userId=${userId}&message=${message}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                });
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert('@Loc["SendError"]');
-            }
-        }
-         
         function goToUser(userId, chatId) {
             window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
         }
@@ -198,7 +117,6 @@
                     <th>@Loc["UserId"]</th>
                     <th>@Loc["Name"]</th>
                     <th>@Loc["CreateDate"]</th>
-                    <th>@Loc["SendLinks"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -208,23 +126,6 @@
                         <td>@user.UserId</td>
                         <td>@user.Name</td>
                         <td>@user.CreateDate</td>
-                        <td>
-                            <input type="checkbox" @(user.Permissions.SendLinks ? "checked" : "")
-                                   onchange="toggleSendLinks(@user.UserId, this)">
-                        </td>
-                        <td>
-                            <button class="toggle-btn" onclick="toggleMessageInput(@user.UserId)">
-                               Написать сообщение
-                            </button>
-                            <div id="message-container-@user.UserId" class="message-container">
-                                <textarea class="message-input"
-                                          id="message-input-@user.UserId"
-                                          rows="2"></textarea>
-                                <button class="send-btn" onclick="sendMessage(@user.UserId)">
-                                    Отправить
-                                </button>
-                            </div>
-                        </td>
                     </tr>
                 }
             </tbody>

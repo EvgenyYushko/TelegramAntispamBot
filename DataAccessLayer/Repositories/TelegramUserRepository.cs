@@ -29,12 +29,29 @@ namespace DataAccessLayer.Repositories
 			var user = LocalUserStorage.FirstOrDefault(user => user.UserId == id);
 			if(user == null)
 			{
-				var userDb = _context.TelegramUsers.FirstOrDefault(u => u.UserId.Equals(id));
+				var userDb = _context.TelegramUsers
+					.Include(t => t.Permissions)
+					.ThenInclude(p => p.Chat)
+					.FirstOrDefault(u => u.UserId.Equals(id));
+
 				user = new TelegramUser
 				{
 					UserId = userDb.UserId,
 					Name = userDb.Name,
-					CreateDate = userDb.CreateDate
+					CreateDate = userDb.CreateDate,
+					Permissions = userDb.Permissions
+						.Select(p => new TelegramPermissions()
+						{
+							Id = p.Id,
+							UserId = p.UserId,
+							ChatId = p.ChatId,
+							SendLinks = p.SendLinks,
+							Chanel = new Chanel()
+							{
+								TelegramChatId = p.Chat.Id,
+								Title = p.Chat.Title
+							}
+						}).ToList()
 				};
 				LocalUserStorage.Add(user);
 			}
@@ -73,7 +90,7 @@ namespace DataAccessLayer.Repositories
 			}
 
 			// пользака нету в БД - создадим
-			await AddUserWithPErmissions(userInfo.User.Id, userInfo.User.Username);
+			await AddUserWithPErmissions(userInfo.User.Id, userInfo.User.Username, userInfo.Chanel.TelegramChatId);
 			await TryAddChanel(userInfo);
 
 			await _context.SaveChangesAsync();
@@ -94,7 +111,7 @@ namespace DataAccessLayer.Repositories
 				var creator = _context.TelegramUsers.FirstOrDefault(u => u.UserId.Equals(userInfo.Chanel.Creator.UserId));
 				if (creator is null && userInfo.Chanel.CreatorId != userInfo.UserId)
 				{
-					await AddUserWithPErmissions(userInfo.Chanel.Creator.UserId, userInfo.Chanel.Creator.Name);
+					await AddUserWithPErmissions(userInfo.Chanel.Creator.UserId, userInfo.Chanel.Creator.Name, userInfo.Chanel.TelegramChatId);
 				}
 
 				var chanel = new TelegramChannel
@@ -113,7 +130,7 @@ namespace DataAccessLayer.Repositories
 						var adm = _context.TelegramUsers.FirstOrDefault(u => u.UserId.Equals(admin.UserId));
 						if (adm is null)
 						{
-							await AddUserWithPErmissions(admin.UserId, admin.Name);
+							await AddUserWithPErmissions(admin.UserId, admin.Name, userInfo.Chanel.TelegramChatId);
 						}
 						await _context.TelegramChannelAdmin.AddAsync(new TelegramChannelAdmin
 						{
@@ -125,7 +142,7 @@ namespace DataAccessLayer.Repositories
 			}
 		}
 
-		private async Task AddUserWithPErmissions(long userId, string userName)
+		private async Task AddUserWithPErmissions(long userId, string userName, long chatId)
 		{
 			await _context.TelegramUsers.AddAsync(new TelegramUserEntity
 			{
@@ -136,6 +153,7 @@ namespace DataAccessLayer.Repositories
 			await _context.TelegramPermissions.AddAsync(new TelegramPermissionsEntity
 			{
 				UserId = userId,
+				ChatId = chatId,
 				SendLinks = false
 			});
 		}
@@ -329,7 +347,14 @@ namespace DataAccessLayer.Repositories
 				var telegramUser = LocalUserStorage.Find(u => u.UserId == userDbo.UserId);
 				if (telegramUser is not null)
 				{
-					telegramUser.Permissions.SendLinks = userDbo.Permissions.SendLinks;
+					telegramUser.Permissions = userDbo.Permissions
+						.Select(p => new TelegramPermissions()
+						{
+							Id = p.Id,
+							UserId = p.UserId,
+							ChatId = p.ChatId,
+							SendLinks = p.SendLinks
+						}).ToList();
 					continue;
 				}
 
@@ -338,12 +363,14 @@ namespace DataAccessLayer.Repositories
 					UserId = userDbo.UserId,
 					Name = userDbo.Name,
 					CreateDate = userDbo.CreateDate,
-					Permissions = new TelegramPermissions
-					{
-						UserId = userDbo.UserId,
-						Id = userDbo.Permissions.Id,
-						SendLinks = userDbo.Permissions.SendLinks
-					}
+					Permissions = userDbo.Permissions
+						.Select(p => new TelegramPermissions()
+						{
+							Id = p.Id,
+							UserId = p.UserId,
+							ChatId = p.ChatId,
+							SendLinks = p.SendLinks
+						}).ToList()
 				};
 
 				LocalUserStorage.Add(user);
@@ -354,12 +381,18 @@ namespace DataAccessLayer.Repositories
 
 		public async Task UpdateTelegramUser(TelegramUser user)
 		{
-			var tgPer = _context.TelegramPermissions.FirstOrDefault(p => p.UserId.Equals(user.UserId));
-			tgPer.SendLinks = user.Permissions.SendLinks;
+			var tgPer = _context.TelegramUsers.FirstOrDefault(p => p.UserId.Equals(user.UserId));
+			tgPer.Permissions = user.Permissions
+				.Select(p => new TelegramPermissionsEntity()
+				{
+					Id = p.Id,
+					UserId = p.UserId,
+					ChatId = p.ChatId,
+					SendLinks = p.SendLinks
+				}).ToList();
+				
 
 			await _context.SaveChangesAsync();
 		}
-
-
 	}
 }

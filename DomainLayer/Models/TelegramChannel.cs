@@ -16,5 +16,6 @@ namespace DomainLayer.Models
 		public TelegramUserEntity Creator { get; set; }
 		public List<TelegramChannelAdmin> Admins { get; set; } = new();
 		public List<UserChannelMembership> Members { get; set; } = new();
+		public List<TelegramPermissionsEntity> Permissions { get; set; } = new();
 	}
 }

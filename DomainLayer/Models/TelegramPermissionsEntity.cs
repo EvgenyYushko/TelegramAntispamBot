@@ -8,8 +8,12 @@ namespace DomainLayer.Models
 
 		public long UserId { get; set; }
 
+		public long ChatId {get;set; }
+
 		public bool SendLinks { get; set; }
 
 		public TelegramUserEntity User { get; set; }
+
+		public TelegramChannel Chat { get; set; }
 	}
 }

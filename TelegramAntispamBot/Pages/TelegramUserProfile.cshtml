@@ -2,13 +2,15 @@
 @model TelegramAntispamBot.Pages.TelegramUserProfileModel
 @{
     ViewData["Title"] = "User Profile";
+    var tgUser = Model.TgUser;
+    var chatLocal = @tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)).Select(p => p.Chanel).FirstOrDefault();
 }
 
 <div class="container mt-5">
     <div class="card shadow-lg border-0">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">@Model.TelegramUser.Name</h2>
-            <span class="badge bg-info text-white">User ID: @Model.TelegramUser.UserId</span>
+            <h2 class="mb-0">@tgUser.Name</h2>
+            <span class="badge bg-info text-white">User ID: @tgUser.UserId</span>
         </div>
 
         <div class="card-body">
@@ -17,47 +19,92 @@
                     <h5 class="text-primary">User Details</h5>
                     <dl class="row">
                         <dt class="col-sm-4">User ID:</dt>
-                        <dd class="col-sm-8">@Model.TelegramUser.UserId</dd>
+                        <dd class="col-sm-8">@tgUser.UserId</dd>
                         <dt class="col-sm-4">Username:</dt>
-                        <dd class="col-sm-8">@Model.TelegramUser.Name</dd>
+                        <dd class="col-sm-8">@tgUser.Name</dd>
                         <dt class="col-sm-4">Join Date:</dt>
-                        <dd class="col-sm-8">@Model.TelegramUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                        <dd class="col-sm-8">@tgUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</dd>
                     </dl>
                 </div>
-                <div class="col-lg-6">
-                    <h5 class="text-success">Role in Chat</h5>
-                    <div class="p-3 border rounded bg-light">
-                        @* <p class="mb-0"><strong>Role:</strong> @Model.TelegramUser.Role</p> *@
+                @if(Model.ChatId != 0)
+                {
+                    <div class="col-lg-6">
+                        <h5 class="text-success">Role in Chat</h5>
+                        <div class="p-3 border rounded bg-light">
+                            <p class="mb-0"><strong>Role:</strong> @chatLocal.Title</p>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
-
+            <div id="message-container-@tgUser.UserId" class="message-container">
+                <textarea class="message-input"
+                          id="message-input-@tgUser.UserId"
+                          rows="2"></textarea>
+                <button class="send-btn" onclick="sendMessage(@tgUser.UserId)">
+                    Отправить
+                </button>
+            </div>
             <div class="table-responsive mt-4">
                 <h5 class="text-danger">Recent Messages</h5>
                 <table class="table table-hover table-bordered">
                     <thead class="bg-dark text-white">
                         <tr>
-                            <th>Message ID</th>
-                            <th>Text</th>
-                            <th>Sent At</th>
+                            <th>Type right</th>
+                            <th>Allow</th>
                         </tr>
                     </thead>
                     <tbody>
-                       @*  @foreach (var message in Model.TelegramUser.Messages)
+                        @foreach (var permisson in @tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)))
                         {
                             <tr>
-                                <td>@message.MessageId</td>
-                                <td>@message.Text</td>
-                                <td>@message.SentAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>SendLinks</td>
+                                <td>
+                                    <input type="checkbox" @(permisson.SendLinks ? "checked" : "")
+                                           onchange="toggleSendLinks(@permisson.UserId, this, @permisson.ChatId)">
+                                </td>
                             </tr>
-                        } *@
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+<script>
+    async function toggleSendLinks(userId, checkbox, chatId) {
+           const sendLinks = checkbox.checked;
 
+           const response = await fetch(`TelegramUserProfile?handler=SetRightLiks&userId=${userId}&sendLinks=${sendLinks}&chatId=${chatId}`, {
+               method: 'GET',
+               headers: { 'Content-Type': 'application/json' },
+           });
+
+           if (!response.ok) {
+               alert('Ошибка выполнения toggleSendLinks');
+               checkbox.checked = !sendLinks;
+           }
+       }
+     async function sendMessage(userId) {
+            const input = document.getElementById(`message-input-${userId}`);
+            const message = input.value.trim();
+
+            if (!message) {
+                alert('Error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`TelegramUserProfile?handler=SendMessage&userId=${userId}&message=${message}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error');
+            }
+        }
+</script>
 <style>
     .card {
         border-radius: 10px;
@@ -72,4 +119,25 @@
     .table-hover tbody tr:hover {
         background-color: rgba(0, 123, 255, 0.1);
     }
+
+    .message-input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 200px;
+    }
+
+    .send-btn {
+        padding: 8px 15px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .send-btn:hover {
+            background-color: #218838;
+        }
 </style>
