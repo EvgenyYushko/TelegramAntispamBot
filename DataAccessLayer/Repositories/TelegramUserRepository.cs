@@ -83,6 +83,18 @@ namespace DataAccessLayer.Repositories
 			if (user is not null)
 			{
 				user.UserSiteId =  userInfo.UserSiteId;
+
+				var userChats = _context.UserChannelMembership
+					.Where(m => m.UserId == userInfo.UserId);
+
+				var usersChatPErmisions = _context.TelegramPermissions
+					.Where(p => userChats.Any(c => c.ChannelId.Equals(p.ChatId)))					;
+
+				foreach (var per in usersChatPErmisions)
+				{
+					per.SendLinks = true;
+				}
+
 				Console.WriteLine($"Данный пользователь уже существует в БД");
 				await _context.SaveChangesAsync();
 
