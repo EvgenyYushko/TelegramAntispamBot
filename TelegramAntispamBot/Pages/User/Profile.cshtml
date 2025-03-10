@@ -2,7 +2,8 @@
 @model TelegramAntispamBot.Pages.User.ProfileModel
 @{ 
     Layout = "~/Pages/Shared/_Layout.cshtml";
-    var user = Model.CurrentUser; 
+    var user = Model.CurrentUser;
+    var telegramUser = Model.TelegramUser;
 }
 
 @using Microsoft.AspNetCore.Mvc.TagHelpers
@@ -106,11 +107,26 @@
         margin: 30px 0;
         text-align: center;
     }
+
+    .card-section {
+        /* ... existing styles ... */
+        transition: background-color 0.3s;
+        cursor: pointer;
+    }
+
+        .card-section:hover {
+            background-color: #f8f9fa;
+        }
 </style>
 <script>
     function confirmDelete() {
         return confirm("Вы действительно хотите удалить аккаунт?");
     }
+
+    function goToUser(userId, chatId) {
+        window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
+    }
+
 </script>
 <div class="container">
     <div class="header">
@@ -134,26 +150,50 @@
     </div>
     @if (User.Identity.IsAuthenticated)
     {
-        <!-- Секция Telegram -->
-        <div class="telegram-container">
-            <script async
-                    src="https://telegram.org/js/telegram-widget.js?22"
-                    data-telegram-login="YN_AntispamBot"
-                    data-size="large"
-                    data-auth-url="/Account/TelegramEntry"
-                    data-request-access="write">
-            </script>
-        </div>
+        @if (telegramUser.UserId != 0)
+        {
+            <div class="card-section" 
+                 onclick="goToUser(@telegramUser.UserId, null)" 
+                 style="cursor: pointer; transition: background-color 0.3s;"
+                 onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                 onmouseout="this.style.backgroundColor='#fff'">
+                <h3 class="section-title">Telegram Профиль</h3>
+                <div class="profile-item">
+                    <span class="label">Telegram Id:</span>
+                    <span>@telegramUser.UserId</span>
+                </div>
+                <div class="profile-item">
+                    <span class="label">Имя:</span>
+                    <span>@telegramUser.Name</span>
+                </div>
+                <div class="profile-item">
+                    <span class="label">Дата привязки:</span>
+                    <span>@telegramUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="telegram-container">
+                <script async
+                        src="https://telegram.org/js/telegram-widget.js?22"
+                        data-telegram-login="YN_AntispamBot"
+                        data-size="large"
+                        data-auth-url="/Account/TelegramEntry"
+                        data-request-access="write">
+                </script>
+            </div>
+        }
 
-         <!-- Секция настроек аккаунта -->
+        <!-- Секция настроек аккаунта -->
         <div class="card-section">
             <h3 class="section-title">Настройки профиля</h3>
             <div class="button-grid">
                 <a href="/Account/Auth/ManageExternalLogins" class="action-button settings-button">
                     Аккаунты
-                </a>                
+                </a>
             </div>
-        </div>        
+        </div>
 
         <!-- Секция административных действий -->
         <div policy="Admin" class="card-section">
@@ -164,7 +204,7 @@
                 </a>
                 <a href="/Admin/Analytics" class="action-button admin-button">
                     @Loc["Site_Statistics"]
-                </a>  
+                </a>
             </div>
         </div>
 

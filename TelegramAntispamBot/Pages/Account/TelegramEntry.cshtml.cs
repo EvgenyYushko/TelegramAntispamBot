@@ -2,22 +2,28 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using ServiceLayer.Services.Authorization;
+using ServiceLayer.Services.Telegram;
+using Telegram.Bot.Types;
 using TelegramAntispamBot.Pages.Account.Auth;
+using TelegramAntispamBot.Pages.Base;
 using static Infrastructure.Constants.TelegramConstatns;
 
 namespace TelegramAntispamBot.Pages.Account
 {
-	public class TelegramEntryModel : PageModel
+	public class TelegramEntryModel : PageModelBase
 	{
 		private readonly IConfiguration configuration;
+		private readonly ITelegramUserService _telegramUserService;
 
-		public TelegramEntryModel(IUserService userService, IConfiguration configuration)
+		public TelegramEntryModel(IUserService userService, IConfiguration configuration, ITelegramUserService telegramUserService)
 		{
 			this.configuration = configuration;
+			_telegramUserService = telegramUserService;
 		}
 
 		public IActionResult OnGet(
@@ -61,6 +67,13 @@ namespace TelegramAntispamBot.Pages.Account
 
 			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
 			{
+				_telegramUserService.TryAddUserExteranl(new()
+				{
+					UserId = id,
+					Name = username,
+					UserSiteId = UserId
+				});
+
 				return RedirectToPage("/User/Profile");
 
 			}

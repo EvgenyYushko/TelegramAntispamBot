@@ -47,7 +47,7 @@ namespace BuisinessLogic.Services.Parsers
 					// Фильтр и сортировка валют
 					var selectedCurrencies = currencies
 						.Where(c => new[] { "EUR", "USD", "RUB", "CNY" }.Contains(c.Cur_Abbreviation))
-						.OrderBy(c => c.Cur_Abbreviation)
+						.OrderByDescending(c => c.Cur_Abbreviation)
 						.ToList();
 
 					// Формирование сообщения

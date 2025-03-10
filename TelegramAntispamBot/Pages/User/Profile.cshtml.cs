@@ -24,12 +24,22 @@ namespace TelegramAntispamBot.Pages.User
 		[BindProperty]
 		public UserAccount CurrentUser { get; set; }
 
+		[BindProperty]
+		public TelegramUser TelegramUser { get; set; } = new();
+
 		public async Task<IActionResult> OnGetAsync()
 		{
 			if (User.Identity.IsAuthenticated)
 			{
 				Console.WriteLine("ProfileModel-OnGetAsync-UserId=" + UserId);
 				CurrentUser = await _usersService.GetUserById(UserId);
+				var siteUser = _telegramUserService.GetByUserSiteId(UserId);
+				if (siteUser != null)
+				{
+					Console.WriteLine(siteUser);
+					TelegramUser = siteUser;
+				}
+
 				//await _telegramUserService.GetChatsByUser(UserId);
 				Console.WriteLine(CurrentUser);
 				return Page();

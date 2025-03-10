@@ -35,6 +35,11 @@ namespace BuisinessLogic.Services.Telegram
 			return res;
 		}
 		
+		public Task<bool> TryAddUserExteranl(TelegramUser userInfo)
+		{
+			return _usersRepository.TryAddUserExteranl(userInfo);
+		}
+
 		public List<Chanel> GetChatsByUser(long userId)
 		{
 			return _usersRepository.GetChatsByUser(userId);
@@ -63,6 +68,29 @@ namespace BuisinessLogic.Services.Telegram
 		public List<TelegramBannedUsersEntity> GetAllBanedUsers()
 		{
 			return _usersRepository.GetAllBanedUsers();
+		}
+
+		public TelegramUser GetByUserSiteId(Guid id)
+		{
+			var tgUser = _usersRepository.GetByUserSiteId(id);
+			if (tgUser == null)
+			{
+				return null;
+			}
+			return new TelegramUser
+			{
+				UserId = tgUser.UserId,
+				Name = tgUser.Name,
+				CreateDate = tgUser.CreateDate,
+				Permissions = tgUser.Permissions?.Select(p => new TelegramPermissions()
+				{
+					Id = p.Id,
+					UserId = p.UserId,
+					SendLinks = p.SendLinks
+				})
+				.ToList(),
+				UserSiteId = id
+			};
 		}
 
 		public List<TelegramUser> GetAllTelegramUsers()
@@ -122,6 +150,6 @@ namespace BuisinessLogic.Services.Telegram
 			}
 
 			return true;
-		}
+		}		
 	}
 }

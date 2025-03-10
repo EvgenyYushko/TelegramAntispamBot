@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DomainLayer.Models.Authorization;
 
 namespace DomainLayer.Models
 {
@@ -18,5 +19,8 @@ namespace DomainLayer.Models
 		public List<TelegramChannel> OwnedChannels { get; set; } = new();
 
 		public List<UserChannelMembership> ChannelMemberships { get; set; } = new();
+
+		public Guid? UserSiteId { get; set; }
+		public UserEntity? UserSite { get; set; }
 	}
 }

@@ -10,6 +10,11 @@ namespace DataAccessLayer.Configurations
 		{
 			builder.HasKey(u => u.UserId);
 
+			builder.HasOne(u => u.UserSite)
+				.WithOne() // Один к одному
+				.HasForeignKey<TelegramUserEntity>(u => u.UserSiteId) // Внешний ключ
+				.IsRequired(false) // Связь необязательная
+				.OnDelete(DeleteBehavior.SetNull); // При удалении UserEntity поле UserSiteId становится null
 		}
 	}
 }

@@ -7,6 +7,7 @@ using DomainLayer.Repositories;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Models;
+using Telegram.Bot.Types;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
 
@@ -57,6 +58,41 @@ namespace DataAccessLayer.Repositories
 			}
 
 			return user;
+		}
+
+		public TelegramUserEntity GetByUserSiteId(Guid id)
+		{
+			var allTgusers = GetAllTelegramUsers();
+			var user = allTgusers.FirstOrDefault(u => u.UserSiteId.Equals(id));
+			return user;
+		}
+
+		public async Task<bool> TryAddUserExteranl(TelegramUser userInfo)
+		{
+			if (LocalUserStorage.Exists(u => u.UserId == userInfo.UserId))
+			{
+				Console.WriteLine("Пользователь уже существует в локльном хранилище");
+			}
+			else
+			{
+				Console.WriteLine("Пользователь Не существует в локльном хранилище");
+				LocalUserStorage.Add(userInfo);
+			}
+
+			var user = await _context.TelegramUsers.FirstOrDefaultAsync(u => u.UserId.Equals(userInfo.UserId));
+			if (user is not null)
+			{
+				user.UserSiteId =  userInfo.UserSiteId;
+				Console.WriteLine($"Данный пользователь уже существует в БД");
+				await _context.SaveChangesAsync();
+
+				return false;
+			}
+
+			await AddUser(userInfo.UserId, userInfo.Name, userInfo.UserSiteId);
+			await _context.SaveChangesAsync();
+
+			return true;
 		}
 
 		public async Task<bool> TryAdd(TelegramUser userInfo)
@@ -144,17 +180,23 @@ namespace DataAccessLayer.Repositories
 
 		private async Task AddUserWithPErmissions(long userId, string userName, long chatId)
 		{
-			await _context.TelegramUsers.AddAsync(new TelegramUserEntity
-			{
-				UserId = userId,
-				Name = userName,
-				CreateDate = DateTimeNow
-			});
+			await AddUser(userId, userName);
 			await _context.TelegramPermissions.AddAsync(new TelegramPermissionsEntity
 			{
 				UserId = userId,
 				ChatId = chatId,
 				SendLinks = false
+			});
+		}
+
+		private async Task AddUser(long userId, string userName, Guid userSiteId = default)
+		{
+			await _context.TelegramUsers.AddAsync(new TelegramUserEntity
+			{
+				UserId = userId,
+				Name = userName,
+				CreateDate = DateTimeNow,
+				UserSiteId = userSiteId
 			});
 		}
 
@@ -297,6 +339,8 @@ namespace DataAccessLayer.Repositories
 		{
 			return _context.BanedUsers.ToList();
 		}
+
+
 
 		public List<TelegramUserEntity> GetAllTelegramUsers()
 		{

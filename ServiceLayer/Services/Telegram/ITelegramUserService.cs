@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Infrastructure.Models;
 using ServiceLayer.Models;
@@ -11,6 +12,10 @@ namespace ServiceLayer.Services.Telegram
 		public TelegramUser Get(long id);
 
 		public Task<bool> TryAdd(TelegramUser userInfo);
+
+		public Task<bool> TryAddUserExteranl(TelegramUser userInfo);
+
+		public TelegramUser GetByUserSiteId(Guid id);
 
 		public List<Chanel> GetChatsByUser(long userId);
 

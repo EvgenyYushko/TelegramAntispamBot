@@ -20,9 +20,16 @@ namespace Infrastructure.Models
 
 		public Chanel Chanel { get; set; } = new();
 
+		public Guid UserSiteId { get; set; } = default;
+
 		public override bool Equals(object obj)
 		{
 			return obj is TelegramUser u && u.User.Id == User.Id;
+		}
+
+		public override string ToString()
+		{
+			return $"UserId={UserId}, Name={Name} UserSiteId={UserSiteId}";
 		}
 	}
 
