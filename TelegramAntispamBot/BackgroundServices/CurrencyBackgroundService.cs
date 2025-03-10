@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using BuisinessLogic.Services.Parsers;
 using Infrastructure.InjectSettings;
+using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.BackgroundServices.Base;
 
 namespace TelegramAntispamBot.BackgroundServices
@@ -10,14 +11,15 @@ namespace TelegramAntispamBot.BackgroundServices
 	{
 		private readonly NbrbCurrencyParser _nbrbCurrencyParser;
 
-		public CurrencyBackgroundService(TelegramInject botClient, NbrbCurrencyParser nbrbCurrencyParser)
+		public CurrencyBackgroundService(TelegramInject botClient, NbrbCurrencyParser nbrbCurrencyParser, ITelegramUserService telegramUserService)
 			: base(botClient, new BackgroundSiteSetting
 			{
 				ScheduledTimes = new[]
 				{
 					new TimeSpan(9, 0, 0), // 09:00
 				}
-			})
+			},
+			telegramUserService)
 		{
 			_nbrbCurrencyParser = nbrbCurrencyParser;
 		}

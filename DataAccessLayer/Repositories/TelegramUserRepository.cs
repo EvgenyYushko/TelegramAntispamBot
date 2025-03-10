@@ -201,7 +201,7 @@ namespace DataAccessLayer.Repositories
 			});
 		}
 
-		private async Task AddUser(long userId, string userName, Guid userSiteId = default)
+		private async Task AddUser(long userId, string userName, Guid? userSiteId = null)
 		{
 			await _context.TelegramUsers.AddAsync(new TelegramUserEntity
 			{

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BuisinessLogic.Services.Telegram;
 using Infrastructure.InjectSettings;
 using Microsoft.Extensions.Hosting;
+using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using static Infrastructure.Common.TimeZoneHelper;
@@ -14,12 +16,14 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 	public abstract class BaseSiteBackgroundService : BackgroundService
 	{
 		private readonly BackgroundSiteSetting _setting;
+		private readonly ITelegramUserService _telegramUserService;
 		private readonly TelegramBotClient _telegramClient;
 		private Timer _timer;
 
-		protected BaseSiteBackgroundService(TelegramInject botClient, BackgroundSiteSetting setting)
+		protected BaseSiteBackgroundService(TelegramInject botClient, BackgroundSiteSetting setting, ITelegramUserService telegramUserService)
 		{
 			_setting = setting;
+			_telegramUserService = telegramUserService;
 			_telegramClient = botClient.TelegramClient;
 		}
 
@@ -62,14 +66,15 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 				var currStr = await Parse();
 				if (currStr is not null)
 				{
-					var channelsId = new List<long>
-					{
-						-1002227239224 // Тест бота
-						,-1002360730808  // Женя тестирует бота
-					};
+					var allChats = _telegramUserService.GetAllChats();
+					//var channelsId = new List<long>
+					//{
+					//	-1002227239224 // Тест бота
+					//	,-1002360730808  // Женя тестирует бота
+					//};
 
-					var tasks = channelsId
-						.Select(channelId => _telegramClient.SendTextMessageAsync(channelId, currStr, parseMode: ParseMode.Markdown))
+					var tasks = allChats
+						.Select(channel => _telegramClient.SendTextMessageAsync(channel.TelegramChatId, currStr, parseMode: ParseMode.Markdown))
 						.Cast<Task>().ToArray();
 
 					await Task.WhenAll(tasks);
