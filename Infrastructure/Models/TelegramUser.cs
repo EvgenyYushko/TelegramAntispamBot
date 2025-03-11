@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Telegram.Bot.Types;
 
 namespace Infrastructure.Models
@@ -44,5 +45,10 @@ namespace Infrastructure.Models
 		public List<TelegramUser> AdminsMembers { get; set; } = new();
 		public List<long> AdminsIds { get; set; } = new();
 		public List<TelegramUser> Members { get; set; } = new();
+
+		public override string ToString()
+		{
+			return $"TelegramChatId = {TelegramChatId}, Title = {Title}, CreatorId = {CreatorId}, AdminsIds ={string.Join(", ", AdminsIds)}";
+		}
 	}
 }

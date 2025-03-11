@@ -12,6 +12,8 @@ namespace ServiceLayer.Services.Authorization
 
 		Task<SignInResult> Login(string userName, string password);
 
+		Task<IdentityResult> Update(Guid id, string role);
+
 		Task<IdentityResult> Delete(Guid id);
 
 		Task<UserAccount> GetUserById(Guid id);

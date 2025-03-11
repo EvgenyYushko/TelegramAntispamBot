@@ -36,6 +36,25 @@ namespace BuisinessLogic.Services.Authorization
 			return result;
 		}
 
+		public async Task<IdentityResult> Update(Guid id, string role)
+		{
+			var user = await _userManager.FindByIdAsync(id.ToString());
+			if (user is null)
+			{
+				throw new Exception($"Пользователь не найдент id = {id}");
+			}
+
+			var roles = await _userManager.GetRolesAsync(user);
+			var result = await _userManager.RemoveFromRolesAsync(user, roles);
+
+			if (result.Succeeded)
+			{
+				await _userManager.AddToRoleAsync(user, role);
+			}
+
+			return result;
+		}
+
 		public async Task<SignInResult> Login(string userName, string password)
 		{
 			return await _signInManager.PasswordSignInAsync(

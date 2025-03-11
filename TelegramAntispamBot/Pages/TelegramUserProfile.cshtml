@@ -38,35 +38,38 @@
             </div>
             <div id="message-container-@tgUser.UserId" class="message-container">
                 <textarea class="message-input"
-                          id="message-input-@tgUser.UserId"
-                          rows="2"></textarea>
+                id="message-input-@tgUser.UserId"
+                rows="2"></textarea>
                 <button class="send-btn" onclick="sendMessage(@tgUser.UserId)">
                     Отправить
                 </button>
             </div>
-            <div class="table-responsive mt-4">
-                <h5 class="text-danger">Recent Messages</h5>
-                <table class="table table-hover table-bordered">
-                    <thead class="bg-dark text-white">
-                        <tr>
-                            <th>Type right</th>
-                            <th>Allow</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var permisson in @tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)))
-                        {
+            @if (Model.ChatId != 0)
+            {
+                <div class="table-responsive mt-4">
+                    <h5 class="text-danger">Recent Messages</h5>
+                    <table class="table table-hover table-bordered">
+                        <thead class="bg-dark text-white">
                             <tr>
-                                <td>SendLinks</td>
-                                <td>
-                                    <input type="checkbox" @(permisson.SendLinks ? "checked" : "")
-                                           onchange="toggleSendLinks(@permisson.UserId, this, @permisson.ChatId)">
-                                </td>
+                                <th>Type right</th>
+                                <th>Allow</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach (var permisson in @tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)))
+                            {
+                                <tr>
+                                    <td>SendLinks</td>
+                                    <td>
+                                        <input type="checkbox" @(permisson.SendLinks ? "checked" : "")
+                                               onchange="toggleSendLinks(@permisson.UserId, this, @permisson.ChatId)">
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
     </div>
 </div>

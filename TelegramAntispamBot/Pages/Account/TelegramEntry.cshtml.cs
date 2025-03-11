@@ -3,14 +3,10 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
-using Telegram.Bot.Types;
-using TelegramAntispamBot.Pages.Account.Auth;
 using TelegramAntispamBot.Pages.Base;
 using static Infrastructure.Constants.TelegramConstatns;
 
@@ -18,11 +14,13 @@ namespace TelegramAntispamBot.Pages.Account
 {
 	public class TelegramEntryModel : PageModelBase
 	{
+		private readonly IUserService _userService;
 		private readonly IConfiguration configuration;
 		private readonly ITelegramUserService _telegramUserService;
 
 		public TelegramEntryModel(IUserService userService, IConfiguration configuration, ITelegramUserService telegramUserService)
 		{
+			_userService = userService;
 			this.configuration = configuration;
 			_telegramUserService = telegramUserService;
 		}
@@ -52,7 +50,7 @@ namespace TelegramAntispamBot.Pages.Account
 				$"first_name={first_name}",
 				$"id={id}",
 				$"last_name={last_name}",
-				$"photo_url={photo_url}", 
+				$"photo_url={photo_url}",
 				$"username={username}"
 			};
 
@@ -69,12 +67,33 @@ namespace TelegramAntispamBot.Pages.Account
 			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
 			{
 				Console.WriteLine($"UserId = {id} Name = {username} UserSiteId = {UserId}");
-				await _telegramUserService.TryAddUserExteranl(new()
+				var res = await _telegramUserService.TryAddUserExteranl(new()
 				{
 					UserId = id,
 					Name = username,
 					UserSiteId = UserId
 				});
+
+				if (res)
+				{
+					Console.WriteLine("user link sucsec");
+					var userChats = _telegramUserService.GetChatsByUser(id);
+					if (userChats is not null)
+					{
+						Console.WriteLine("For user finde him chat");
+
+						foreach (var chat in userChats)
+						{
+							Console.WriteLine(chat);
+						}
+
+						if (userChats.Any(c => c.AdminsIds.Contains(id) || c.CreatorId.Equals(id)))
+						{
+							Console.WriteLine("User was make admin chat!");
+							await _userService.Update(UserId, "Tutor");
+						}
+					}
+				}
 
 				Console.WriteLine($"UserId = {id} Name = {username} UserSiteId = {UserId}");
 

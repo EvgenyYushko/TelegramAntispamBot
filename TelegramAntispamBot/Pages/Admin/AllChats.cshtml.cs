@@ -9,7 +9,7 @@ using ServiceLayer.Services.Telegram;
 
 namespace TelegramAntispamBot.Pages.Admin
 {
-	[Authorize(Policy = nameof(Role.Admin))]
+	[Authorize(Policy = nameof(Role.Tutor))]
 	public class AllChatsModel : PageModel
 	{
 		private ITelegramUserService _telegramUserService;

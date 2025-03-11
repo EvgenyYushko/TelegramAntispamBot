@@ -208,10 +208,10 @@
             </div>
         </div>
 
-        <div policy="Admin" class="card-section">
+        <div policy="Tutor" class="card-section">
             <h3 class="section-title">Настройки бота</h3>
             <div class="button-grid">
-                <a href="/Admin/TelegramUsers" class="action-button telegram-button">
+                <a policy="Admin" href="/Admin/TelegramUsers" class="action-button telegram-button">
                     @Loc["TgUsers"]
                 </a>
                 <a href="/Admin/AllChats" class="action-button telegram-button">
@@ -229,7 +229,7 @@
                     @Loc["Log_Out"]
                 </button>
                 <button onclick="if (confirmDelete()) { location.href='@Url.Page("/User/Delete")'; }"
-                        class="action-button danger-button" policy="User">
+                        class="action-button danger-button" >
                     Удалить аккаунт
                 </button>
             </div>

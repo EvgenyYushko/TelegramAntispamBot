@@ -125,7 +125,7 @@ namespace DataAccessLayer.Repositories
 				Console.WriteLine($"Данный пользователь уже существует в БД");
 				await _context.SaveChangesAsync();
 
-				return false;
+				return true;
 			}
 
 			Console.WriteLine("TryAddUserExteranl");
@@ -180,7 +180,7 @@ namespace DataAccessLayer.Repositories
 		private async Task TryAddChanel(TelegramUser userInfo)
 		{
 			await AddChanel(userInfo);
-			await UpdateMemberShip(userInfo);
+			await UpdateMemberShip(userInfo.UserId, userInfo.Chanel.TelegramChatId);
 		}
 
 		private async Task AddChanel(TelegramUser userInfo)
@@ -212,6 +212,7 @@ namespace DataAccessLayer.Repositories
 						{
 							await AddUserWithPErmissions(admin.UserId, admin.Name, userInfo.Chanel.TelegramChatId);
 						}
+						await UpdateMemberShip(admin.UserId, userInfo.Chanel.TelegramChatId);
 						await _context.TelegramChannelAdmin.AddAsync(new TelegramChannelAdmin
 						{
 							ChannelId = userInfo.Chanel.TelegramChatId,
@@ -278,12 +279,12 @@ namespace DataAccessLayer.Repositories
 			}).ToList();
 		}
 
-		private async Task UpdateMemberShip(TelegramUser userInfo)
+		private async Task UpdateMemberShip(long userId, long chatId)
 		{
 			var membership = new UserChannelMembership
 			{
-				UserId = userInfo.UserId,
-				ChannelId = userInfo.Chanel.TelegramChatId,
+				UserId = userId,
+				ChannelId = chatId,
 				JoinDate = DateTimeNow
 			};
 			await _context.UserChannelMembership.AddAsync(membership);
