@@ -24,6 +24,11 @@ namespace BuisinessLogic.Services.Telegram
 			return _usersRepository.Get(id);
 		}
 
+		public TelegramUser GetFromLocal(long id)
+		{
+			return _usersRepository.GetFromLocal(id);
+		}
+
 		public async Task<bool> TryAdd(TelegramUser userInfo)
 		{
 			var res = await _usersRepository.TryAdd(userInfo);
@@ -132,7 +137,7 @@ namespace BuisinessLogic.Services.Telegram
 
 		public async Task<bool> CheckReputation(Message message)
 		{
-			var user = _usersRepository.Get(message.From.Id);
+			var user = _usersRepository.GetFromLocal(message.From.Id);
 			if (user == null)
 			{
 				user = new()

@@ -112,6 +112,11 @@ namespace TelegramAntispamBot
 				services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddSingleton<ITelegramUserService, TelegramUserService>();
 				services.AddSingleton<ExternalAuthManager>();
+
+				services.AddHostedService<SendMailBackgroundService>();
+				services.AddHostedService<CurrencyBackgroundService>();
+				services.AddHostedService<HabrBackgroundService>();
+				services.AddHostedService<OnlinerBackgroundService>();
 			}
 			else
 			{
@@ -121,10 +126,6 @@ namespace TelegramAntispamBot
 			}
 			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
-			services.AddHostedService<SendMailBackgroundService>();
-			services.AddHostedService<CurrencyBackgroundService>();
-			services.AddHostedService<HabrBackgroundService>();
-			services.AddHostedService<OnlinerBackgroundService>();
 
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IUserService, UserService>();

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -26,7 +27,7 @@ namespace TelegramAntispamBot.Pages.Account
 			_telegramUserService = telegramUserService;
 		}
 
-		public IActionResult OnGet(
+		public async Task<IActionResult> OnGet(
 		   [FromQuery] long id,
 		   [FromQuery] string first_name,
 		   [FromQuery] string last_name,
@@ -35,9 +36,9 @@ namespace TelegramAntispamBot.Pages.Account
 		   [FromQuery] long auth_date,
 		   [FromQuery] string hash)
 		{
-			Console.WriteLine($"id={id}, first_name={first_name}, last_name={last_name}, username={username}, photo_url={photo_url}, auth_date={auth_date}, hash={hash}");
+			//Console.WriteLine($"id={id}, first_name={first_name}, last_name={last_name}, username={username}, photo_url={photo_url}, auth_date={auth_date}, hash={hash}");
 			var botToken = configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
-			Console.WriteLine($"botToken={botToken}");
+			//Console.WriteLine($"botToken={botToken}");
 			//id=1231047171
 			//first_name=Evgeny
 			//last_name=Yushko
@@ -61,21 +62,23 @@ namespace TelegramAntispamBot.Pages.Account
 			   .Select(b => b.ToString("x2"))
 			   .Aggregate((a, b) => a + b);
 
-			Console.WriteLine($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
+			//Console.WriteLine($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
 			var isValid = hashString.Equals(hash, StringComparison.Ordinal); // Без IgnoreCase
 			Console.WriteLine($"Exact match: {isValid}");
 
 			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
 			{
-				_telegramUserService.TryAddUserExteranl(new()
+				Console.WriteLine($"UserId = {id} Name = {username} UserSiteId = {UserId}");
+				await _telegramUserService.TryAddUserExteranl(new()
 				{
 					UserId = id,
 					Name = username,
 					UserSiteId = UserId
 				});
 
-				return RedirectToPage("/User/Profile");
+				Console.WriteLine($"UserId = {id} Name = {username} UserSiteId = {UserId}");
 
+				return RedirectToPage("/User/Profile");
 			}
 
 			return RedirectToPage("/User/Profile");

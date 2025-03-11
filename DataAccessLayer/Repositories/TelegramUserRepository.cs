@@ -7,7 +7,6 @@ using DomainLayer.Repositories;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Models;
-using Telegram.Bot.Types;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
 
@@ -27,12 +26,42 @@ namespace DataAccessLayer.Repositories
 
 		public TelegramUser Get(long id)
 		{
+			var userDb = _context.TelegramUsers
+					.Include(t => t.Permissions)
+					.ThenInclude(p => p.Chat)
+					.AsNoTracking()
+					.FirstOrDefault(u => u.UserId.Equals(id));
+
+			return new TelegramUser
+			{
+				UserId = userDb.UserId,
+				Name = userDb.Name,
+				CreateDate = userDb.CreateDate,
+				Permissions = userDb.Permissions
+					.Select(p => new TelegramPermissions()
+					{
+						Id = p.Id,
+						UserId = p.UserId,
+						ChatId = p.ChatId,
+						SendLinks = p.SendLinks,
+						Chanel = new Chanel()
+						{
+							TelegramChatId = p.Chat.Id,
+							Title = p.Chat.Title
+						}
+					}).ToList()
+			};
+		}
+
+		public TelegramUser GetFromLocal(long id)
+		{
 			var user = LocalUserStorage.FirstOrDefault(user => user.UserId == id);
-			if(user == null)
+			if (user == null)
 			{
 				var userDb = _context.TelegramUsers
 					.Include(t => t.Permissions)
 					.ThenInclude(p => p.Chat)
+					.AsNoTracking()
 					.FirstOrDefault(u => u.UserId.Equals(id));
 
 				user = new TelegramUser
@@ -69,26 +98,24 @@ namespace DataAccessLayer.Repositories
 
 		public async Task<bool> TryAddUserExteranl(TelegramUser userInfo)
 		{
-			if (LocalUserStorage.Exists(u => u.UserId == userInfo.UserId))
+			var userLocal = LocalUserStorage.FirstOrDefault(u => u.UserId == userInfo.UserId);
+			if (userLocal is not null)
 			{
-				Console.WriteLine("Пользователь уже существует в локльном хранилище");
-			}
-			else
-			{
-				Console.WriteLine("Пользователь Не существует в локльном хранилище");
-				LocalUserStorage.Add(userInfo);
+				Console.WriteLine("Пользователь уже существует в локльном хранилище - Удалим");
+				//var indexUser = LocalUserStorage.IndexOf(userLocal);
+				LocalUserStorage.Clear();
 			}
 
 			var user = await _context.TelegramUsers.FirstOrDefaultAsync(u => u.UserId.Equals(userInfo.UserId));
 			if (user is not null)
 			{
-				user.UserSiteId =  userInfo.UserSiteId;
+				user.UserSiteId = userInfo.UserSiteId;
 
 				var userChats = _context.UserChannelMembership
 					.Where(m => m.UserId == userInfo.UserId);
 
 				var usersChatPErmisions = _context.TelegramPermissions
-					.Where(p => userChats.Any(c => c.ChannelId.Equals(p.ChatId)))					;
+					.Where(p => userChats.Any(c => c.ChannelId.Equals(p.ChatId)));
 
 				foreach (var per in usersChatPErmisions)
 				{
@@ -101,6 +128,8 @@ namespace DataAccessLayer.Repositories
 				return false;
 			}
 
+			Console.WriteLine("TryAddUserExteranl");
+			Console.WriteLine(userInfo);
 			await AddUser(userInfo.UserId, userInfo.Name, userInfo.UserSiteId);
 			await _context.SaveChangesAsync();
 
@@ -132,7 +161,9 @@ namespace DataAccessLayer.Repositories
 				{
 					await UpdateChatAdmins(userInfo);
 				}
+
 				// есть в БД но нету в этом чате
+				await AddOrUpdateTelegrammPermission(userInfo.UserId, userInfo.Chanel.TelegramChatId);
 				await _context.SaveChangesAsync();
 				return false;
 			}
@@ -156,9 +187,10 @@ namespace DataAccessLayer.Repositories
 		{
 			if (!_context.TelegramChanel.Any(u => u.Id.Equals(userInfo.Chanel.TelegramChatId)))
 			{
-				var creator = _context.TelegramUsers.FirstOrDefault(u => u.UserId.Equals(userInfo.Chanel.Creator.UserId));
+				var creator = _context.TelegramUsers.AsNoTracking().FirstOrDefault(u => u.UserId.Equals(userInfo.Chanel.Creator.UserId));
 				if (creator is null && userInfo.Chanel.CreatorId != userInfo.UserId)
 				{
+					Console.WriteLine("Begin AddUserWithPErmissions");
 					await AddUserWithPErmissions(userInfo.Chanel.Creator.UserId, userInfo.Chanel.Creator.Name, userInfo.Chanel.TelegramChatId);
 				}
 
@@ -193,12 +225,25 @@ namespace DataAccessLayer.Repositories
 		private async Task AddUserWithPErmissions(long userId, string userName, long chatId)
 		{
 			await AddUser(userId, userName);
-			await _context.TelegramPermissions.AddAsync(new TelegramPermissionsEntity
+			await AddOrUpdateTelegrammPermission(userId, chatId);
+		}
+
+		private async Task AddOrUpdateTelegrammPermission(long userId, long chatId)
+		{
+			Console.WriteLine("AddOrUpdateTelegrammPermission");
+			var pers = _context.TelegramPermissions
+				.AsNoTracking()
+				.FirstOrDefault(p => p.UserId.Equals(userId) && p.ChatId.Equals(chatId));
+
+			if (pers is null)
 			{
-				UserId = userId,
-				ChatId = chatId,
-				SendLinks = false
-			});
+				await _context.TelegramPermissions.AddAsync(new TelegramPermissionsEntity
+				{
+					UserId = userId,
+					ChatId = chatId,
+					SendLinks = false
+				});
+			}
 		}
 
 		private async Task AddUser(long userId, string userName, Guid? userSiteId = null)
@@ -297,7 +342,12 @@ namespace DataAccessLayer.Repositories
 				.ThenInclude(c => c.User)
 				.Include(c => c.Admins)
 				.ThenInclude(m => m.User)
+				//.AsNoTracking()
 				.First(m => m.Id.Equals(id));
+
+			Console.WriteLine($"chat.Creator={chat.Creator}");
+			Console.WriteLine($"chat.Admins={chat.Admins}");
+			Console.WriteLine($"chat.Members={chat.Members}");
 
 			return new Chanel
 			{
@@ -349,10 +399,10 @@ namespace DataAccessLayer.Repositories
 
 		public List<TelegramBannedUsersEntity> GetAllBanedUsers()
 		{
-			return _context.BanedUsers.ToList();
+			return _context.BanedUsers
+				.AsNoTracking()
+				.ToList();
 		}
-
-
 
 		public List<TelegramUserEntity> GetAllTelegramUsers()
 		{
@@ -446,7 +496,7 @@ namespace DataAccessLayer.Repositories
 					ChatId = p.ChatId,
 					SendLinks = p.SendLinks
 				}).ToList();
-				
+
 
 			await _context.SaveChangesAsync();
 		}

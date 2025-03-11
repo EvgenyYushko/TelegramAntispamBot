@@ -177,7 +177,7 @@ namespace BuisinessLogic.Handlers
 				allowsMultipleAnswers: false  // Только один вариант ответа
 			);
 
-			var userInfo = _telegramUserService.Get(user.Id);
+			var userInfo = _telegramUserService.GetFromLocal(user.Id);
 
 			userInfo.PullModel.PullTimer = new Timer(OnTimerElapsed, user.Id, TimeSpan.FromSeconds(20), Timeout.InfiniteTimeSpan);
 			userInfo.PullModel.Message = update.Message;
@@ -188,7 +188,7 @@ namespace BuisinessLogic.Handlers
 		private void OnTimerElapsed(object state)
 		{
 			var userId = (long)state;
-			var user = _telegramUserService.Get(userId);
+			var user = _telegramUserService.GetFromLocal(userId);
 
 			var chatId = user.PullModel.Message.Chat.Id;
 			var messageId = user.PullModel.PollMessageId;

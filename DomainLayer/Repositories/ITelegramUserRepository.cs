@@ -10,6 +10,7 @@ namespace DomainLayer.Repositories
 	public interface ITelegramUserRepository
 	{
 		public TelegramUser Get(long id);
+		public TelegramUser GetFromLocal(long id);
 
 		public Task<bool> TryAdd(TelegramUser userInfo);
 		public Task<bool> TryAddUserExteranl(TelegramUser userInfo);
