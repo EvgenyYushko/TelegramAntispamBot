@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Infrastructure.Enumerations;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -12,7 +13,7 @@ namespace ServiceLayer.Services.Authorization
 
 		Task<SignInResult> Login(string userName, string password);
 
-		Task<IdentityResult> Update(Guid id, string role);
+		Task<IdentityResult> UpdateRole(Guid id, Role role);
 
 		Task<IdentityResult> Delete(Guid id);
 

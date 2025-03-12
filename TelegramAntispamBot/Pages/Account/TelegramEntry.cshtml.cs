@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using ServiceLayer.Services.Authorization;
@@ -90,7 +91,7 @@ namespace TelegramAntispamBot.Pages.Account
 						if (userChats.Any(c => c.AdminsIds.Contains(id) || c.CreatorId.Equals(id)))
 						{
 							Console.WriteLine("User was make admin chat!");
-							await _userService.Update(UserId, "Tutor");
+							await _userService.UpdateRole(UserId, Role.Tutor);
 						}
 					}
 				}

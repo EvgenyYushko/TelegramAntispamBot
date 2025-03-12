@@ -2,10 +2,13 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BuisinessLogic.Services.Telegram;
 using Infrastructure.Common;
+using Infrastructure.Enumerations;
 using Infrastructure.Extentions;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models;
+using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -20,14 +23,18 @@ namespace BuisinessLogic.Handlers
 		private readonly IDeleteMessageService _deleteMessageService;
 		private readonly IProfanityCheckerService _profanityCheckerService;
 		private readonly ITelegramUserService _telegramUserService;
+		private readonly IUserService _userService;
 		TelegramBotClient _telegramClient;
 
-		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService, ITelegramUserService telegramUserService)
+		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService
+			, ITelegramUserService telegramUserService
+			, IUserService userService
+			)
 		{
 			_deleteMessageService = deleteMessageService;
 			_profanityCheckerService = profanityCheckerService;
 			_telegramUserService = telegramUserService;
-
+			_userService = userService;
 		}
 
 		private static bool _firstRunBot = true;
@@ -55,7 +62,7 @@ namespace BuisinessLogic.Handlers
 				.Select(a => new TelegramUser()
 				{
 					UserId = a.User.Id,
-					Name = a.User.Username
+					Name = a.User.Username ?? (string.IsNullOrWhiteSpace(a.User.FirstName) ? "" : a.User.FirstName + " " + (string.IsNullOrWhiteSpace(a.User.LastName) ? "" : a.User.LastName))
 				}).ToList();
 
 			if (update.Message is not null)
@@ -77,6 +84,15 @@ namespace BuisinessLogic.Handlers
 						ChatMember = chatMember
 					}
 				});
+			}
+
+			foreach (var admin in admins.Where(a => a is ChatMember adm && !adm.User.IsBot))
+			{
+				var adminEntity = _telegramUserService.Get(admin.User.Id);
+				if (adminEntity != null && adminEntity.UserSiteId != default)
+				{
+					await _userService.UpdateRole(adminEntity.UserSiteId, Role.Tutor);
+				}
 			}
 
 			//var chats = _telegramUserService.GetChatsByUser(update.Message.From.Id);

@@ -36,7 +36,7 @@ namespace BuisinessLogic.Services.Authorization
 			return result;
 		}
 
-		public async Task<IdentityResult> Update(Guid id, string role)
+		public async Task<IdentityResult> UpdateRole(Guid id, Role role)
 		{
 			var user = await _userManager.FindByIdAsync(id.ToString());
 			if (user is null)
@@ -49,7 +49,7 @@ namespace BuisinessLogic.Services.Authorization
 
 			if (result.Succeeded)
 			{
-				await _userManager.AddToRoleAsync(user, role);
+				await _userManager.AddToRoleAsync(user, role.ToString());
 			}
 
 			return result;

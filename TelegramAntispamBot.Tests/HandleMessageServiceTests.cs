@@ -4,7 +4,7 @@ using Infrastructure.Common;
 using Infrastructure.InjectSettings;
 using Moq;
 using NUnit.Framework;
-using ServiceLayer.Services;
+using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -18,6 +18,7 @@ namespace TelegramAntispamBot.Tests
 		private Mock<TelegramInject> _botClient;
 		private Mock<IProfanityCheckerService> _profanityCheckerService;
 		private Mock<ITelegramUserService> _userInfoService;
+		private Mock<IUserService> _userSerivce;
 
 		private CancellationToken _cancellationToken;
 		private IHandleMessageService _service;
@@ -30,7 +31,8 @@ namespace TelegramAntispamBot.Tests
 			_profanityCheckerService = new();
 			_cancellationToken = new();
 			_userInfoService = new();
-			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, _userInfoService.Object);
+			_userSerivce = new();
+			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, _userInfoService.Object, _userSerivce.Object);
 		}
 
 		[Test]

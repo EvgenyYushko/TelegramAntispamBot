@@ -250,11 +250,13 @@ namespace TelegramAntispamBot
 				var scope = app.ApplicationServices.CreateScope();
 				{
 					var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+					var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
 					var testController = new BotController(new HandleMessageService
 						(new DeleteMessageService()
 						, new ProfanityCheckerService(new ProfanityCheckerRepository())
-						, new TelegramUserService(new TelegramUserRepository(dbContext)))
+						, new TelegramUserService(new TelegramUserRepository(dbContext))
+						, userService)
 						, _telegram);
 					testController.RunLocalTest();
 				}
@@ -421,9 +423,9 @@ namespace TelegramAntispamBot
 		{
 			service.AddAuthorization(options =>
 			{
-				options.AddPolicy("Admin", policy => policy.AddRequirements(new PermissionRequirement(Permission.Delete)));
-				options.AddPolicy("User", policy => policy.AddRequirements(new PermissionRequirement(Permission.Read)));
-				options.AddPolicy("Tutor", policy => policy.AddRequirements(new PermissionRequirement(Permission.Update)));
+				options.AddPolicy(nameof(Role.Admin), policy => policy.AddRequirements(new PermissionRequirement(Permission.Delete)));
+				options.AddPolicy(nameof(Role.User), policy => policy.AddRequirements(new PermissionRequirement(Permission.Read)));
+				options.AddPolicy(nameof(Role.Tutor), policy => policy.AddRequirements(new PermissionRequirement(Permission.Update)));
 			});
 		}
 	}

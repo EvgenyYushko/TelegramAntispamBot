@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Models;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
+using static DataAccessLayer.Helpers.UserRepositoryHelper;
+using DataAccessLayer.Helpers;
 
 namespace DataAccessLayer.Repositories
 {
@@ -49,7 +51,8 @@ namespace DataAccessLayer.Repositories
 							TelegramChatId = p.Chat.Id,
 							Title = p.Chat.Title
 						}
-					}).ToList()
+					}).ToList(),
+				UserSiteId = userDb.UserSiteId ?? default
 			};
 		}
 
@@ -81,7 +84,8 @@ namespace DataAccessLayer.Repositories
 								TelegramChatId = p.Chat.Id,
 								Title = p.Chat.Title
 							}
-						}).ToList()
+						}).ToList(),
+					UserSiteId = userDb.UserSiteId ?? default
 				};
 				LocalUserStorage.Add(user);
 			}
@@ -92,8 +96,7 @@ namespace DataAccessLayer.Repositories
 		public TelegramUserEntity GetByUserSiteId(Guid id)
 		{
 			var allTgusers = GetAllTelegramUsers();
-			var user = allTgusers.FirstOrDefault(u => u.UserSiteId.Equals(id));
-			return user;
+			return allTgusers.FirstOrDefault(u => u.UserSiteId.Equals(id));
 		}
 
 		public async Task<bool> TryAddUserExteranl(TelegramUser userInfo)
@@ -106,7 +109,7 @@ namespace DataAccessLayer.Repositories
 				LocalUserStorage.Clear();
 			}
 
-			var user = await _context.TelegramUsers.FirstOrDefaultAsync(u => u.UserId.Equals(userInfo.UserId));
+			var user = await _context.GetUser(userInfo.UserId);
 			if (user is not null)
 			{
 				user.UserSiteId = userInfo.UserSiteId;
@@ -115,12 +118,9 @@ namespace DataAccessLayer.Repositories
 					.Where(m => m.UserId == userInfo.UserId);
 
 				var usersChatPErmisions = _context.TelegramPermissions
-					.Where(p => userChats.Any(c => c.ChannelId.Equals(p.ChatId)));
+					.Where(p => userChats.Any(c => c.ChannelId.Equals(p.ChatId) && c.UserId.Equals(p.UserId)));
 
-				foreach (var per in usersChatPErmisions)
-				{
-					per.SendLinks = true;
-				}
+				await usersChatPErmisions.ForEachAsync(p => p.SendLinks = true);
 
 				Console.WriteLine($"Данный пользователь уже существует в БД");
 				await _context.SaveChangesAsync();
@@ -148,11 +148,12 @@ namespace DataAccessLayer.Repositories
 				LocalUserStorage.Add(userInfo);
 			}
 
-			if (_context.TelegramUsers.Any(u => u.UserId.Equals(userInfo.UserId)))
+			if (await _context.GetUser(userInfo.UserId) is not null)
 			{
 				Console.WriteLine($"Данный пользователь уже существует в БД");
 
-				if (!_context.UserChannelMembership.Any(u => u.UserId.Equals(userInfo.UserId) && u.ChannelId.Equals(userInfo.Chanel.TelegramChatId)))
+				// Пользака нету в текущем канале
+				if (!_context.UserInChanel(userInfo.UserId, userInfo.Chanel.TelegramChatId))
 				{
 					//Console.WriteLine($"Данный пользователь уже существует в канале {userInfo.Chanel.TelegramChatId}");
 					await TryAddChanel(userInfo);
@@ -169,7 +170,7 @@ namespace DataAccessLayer.Repositories
 			}
 
 			// пользака нету в БД - создадим
-			await AddUserWithPErmissions(userInfo.User.Id, userInfo.User.Username, userInfo.Chanel.TelegramChatId);
+			await AddUserWithPermissions(userInfo.User.Id, userInfo.User.Username, userInfo.Chanel.TelegramChatId);
 			await TryAddChanel(userInfo);
 
 			await _context.SaveChangesAsync();
@@ -185,45 +186,53 @@ namespace DataAccessLayer.Repositories
 
 		private async Task AddChanel(TelegramUser userInfo)
 		{
-			if (!_context.TelegramChanel.Any(u => u.Id.Equals(userInfo.Chanel.TelegramChatId)))
+			var chat = userInfo.Chanel;
+			var creator = chat.Creator;
+
+			if (!_context.ExistsChanel(chat.TelegramChatId))
 			{
-				var creator = _context.TelegramUsers.AsNoTracking().FirstOrDefault(u => u.UserId.Equals(userInfo.Chanel.Creator.UserId));
-				if (creator is null && userInfo.Chanel.CreatorId != userInfo.UserId)
+				var creatorUser = await _context.GetUser(creator.UserId);
+				if (creatorUser is null && chat.CreatorId != userInfo.UserId)
 				{
 					Console.WriteLine("Begin AddUserWithPErmissions");
-					await AddUserWithPErmissions(userInfo.Chanel.Creator.UserId, userInfo.Chanel.Creator.Name, userInfo.Chanel.TelegramChatId);
+					await AddUserWithPermissions(creator.UserId, creator.Name, chat.TelegramChatId);
 				}
 
 				var chanel = new TelegramChannel
 				{
-					Id = userInfo.Chanel.TelegramChatId,
-					Title = userInfo.Chanel.Title,
-					ChatType = userInfo.Chanel.ChatType,
-					CreatorId = userInfo.Chanel.CreatorId
+					Id = chat.TelegramChatId,
+					Title = chat.Title,
+					ChatType = chat.ChatType,
+					CreatorId = chat.CreatorId
 				};
 				await _context.TelegramChanel.AddAsync(chanel);
 
-				if (userInfo.Chanel.AdminsMembers.Count > 0)
+				if (chat.AdminsMembers.Count > 0)
 				{
-					foreach (var admin in userInfo.Chanel.AdminsMembers)
+					foreach (var admin in chat.AdminsMembers)
 					{
-						var adm = _context.TelegramUsers.FirstOrDefault(u => u.UserId.Equals(admin.UserId));
-						if (adm is null)
+						var adm = await _context.GetUser(admin.UserId);
+						if (adm is null && admin.UserId != userInfo.UserId)
 						{
-							await AddUserWithPErmissions(admin.UserId, admin.Name, userInfo.Chanel.TelegramChatId);
+							await AddUserWithPermissions(admin.UserId, admin.Name, chat.TelegramChatId);
 						}
-						await UpdateMemberShip(admin.UserId, userInfo.Chanel.TelegramChatId);
-						await _context.TelegramChannelAdmin.AddAsync(new TelegramChannelAdmin
-						{
-							ChannelId = userInfo.Chanel.TelegramChatId,
-							UserId = admin.UserId
-						});
+						await UpdateMemberShip(admin.UserId, chat.TelegramChatId);
+						await AddAdmin(userInfo, admin);
 					}
 				}
 			}
 		}
 
-		private async Task AddUserWithPErmissions(long userId, string userName, long chatId)
+		private async Task AddAdmin(TelegramUser userInfo, TelegramUser admin)
+		{
+			await _context.TelegramChannelAdmin.AddAsync(new TelegramChannelAdmin
+			{
+				ChannelId = userInfo.Chanel.TelegramChatId,
+				UserId = admin.UserId
+			});
+		}
+
+		private async Task AddUserWithPermissions(long userId, string userName, long chatId)
 		{
 			await AddUser(userId, userName);
 			await AddOrUpdateTelegrammPermission(userId, chatId);
