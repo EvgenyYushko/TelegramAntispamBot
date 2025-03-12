@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -25,6 +26,7 @@ namespace TelegramAntispamBot.Pages
 			if (User.Identity.IsAuthenticated)
 			{
 				Chat = _telegramUserService.GetChatById(chatId);
+				Console.WriteLine(Chat);
 				return Page();
 			}
 
