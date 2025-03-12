@@ -158,31 +158,29 @@ namespace TelegramAntispamBot
 			{
 				connectionString = Configuration.GetConnectionString("DefaultConnection");
 			}
-
 			services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseNpgsql(connectionString, options => options.MigrationsAssembly("DataAccessLayer")));
-
+			options.UseNpgsql(connectionString, options => options.MigrationsAssembly("DataAccessLayer")));
 			services.AddIdentity<UserEntity, RoleEntity>(options =>
-				{
-					options.User.RequireUniqueEmail = true;
+			{
+				options.User.RequireUniqueEmail = true;
 
-					options.SignIn.RequireConfirmedAccount = false;
-					options.SignIn.RequireConfirmedPhoneNumber = false;
-					options.SignIn.RequireConfirmedEmail = false;
+				options.SignIn.RequireConfirmedAccount = false;
+				options.SignIn.RequireConfirmedPhoneNumber = false;
+				options.SignIn.RequireConfirmedEmail = false;
 
-					// временно отключим требования к паролю
-					options.Password.RequireDigit = false;
-					options.Password.RequiredLength = 6;
-					options.Password.RequireNonAlphanumeric = false;
-					options.Password.RequireUppercase = false;
-					options.Password.RequireLowercase = false;
+				// временно отключим требования к паролю
+				options.Password.RequireDigit = false;
+				options.Password.RequiredLength = 6;
+				options.Password.RequireNonAlphanumeric = false;
+				options.Password.RequireUppercase = false;
+				options.Password.RequireLowercase = false;
 
-					// отключим требования к логину
-					options.User.AllowedUserNameCharacters = null;
+				// отключим требования к логину
+				options.User.AllowedUserNameCharacters = null;
 
-				})
-				.AddEntityFrameworkStores<ApplicationDbContext>()
-				.AddDefaultTokenProviders();
+			})
+			.AddEntityFrameworkStores<ApplicationDbContext>()
+			.AddDefaultTokenProviders();
 
 			services.Configure<IdentityOptions>(options =>
 			{

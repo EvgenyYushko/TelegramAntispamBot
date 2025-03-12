@@ -26,18 +26,17 @@ namespace Infrastructure.Common
 		public static readonly string InfoMessage =	$"Отправлять сслыки могут только авторизированные пользователи бота в своём аккаунте";
 
 		public static InlineKeyboardMarkup LinkButton = new InlineKeyboardMarkup(new[]
+		{
+			new[]
 			{
-				new[]
-				{
-					InlineKeyboardButton.WithUrl(
-						text: "Авторизоваться",
-						url: LINK
-					)
-				}
-			});
+				InlineKeyboardButton.WithUrl(
+					text: "Авторизоваться",
+					url: LINK
+				)
+			}
+		});
 
-		public static readonly string InfoMessageProfanityChecker =
-			"Ваше сообщение содержит нецензурное выражение и было удалено";
+		public static readonly string InfoMessageProfanityChecker =	"Ваше сообщение содержит нецензурное выражение и было удалено";
 
 		public static string GetWelcomeMessage(User user) =>
 			$"Добро пожаловать, {user.FirstName}!\n\n" +

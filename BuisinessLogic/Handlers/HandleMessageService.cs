@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BuisinessLogic.Services.Telegram;
 using Infrastructure.Common;
 using Infrastructure.Enumerations;
 using Infrastructure.Extentions;
@@ -13,6 +13,7 @@ using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
 
@@ -20,6 +21,9 @@ namespace BuisinessLogic.Handlers
 {
 	public class HandleMessageService : IHandleMessageService
 	{
+		const string botUsername = "YN_AntispamBot"; // Замените на ваш username без @
+		static string inviteLink = $"https://t.me/{botUsername}?startgroup=true";
+
 		private readonly IDeleteMessageService _deleteMessageService;
 		private readonly IProfanityCheckerService _profanityCheckerService;
 		private readonly ITelegramUserService _telegramUserService;
@@ -48,50 +52,56 @@ namespace BuisinessLogic.Handlers
 				await _telegramUserService.UpdateLocalStorage();
 				_firstRunBot = false;
 			}
+		
+			//var me = await _telegramClient.GetMeAsync();
+			//var test = await _telegramClient.GetChatMenuButtonAsync(update.Message.Chat.Id);
 
-			//var s = await _telegramClient.GetChatAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
-			var chatMember = await _telegramClient.GetChatMemberAsync(new ChatId(update.Message.Chat.Id), update.Message.From.Id, cancellationToken);
-			var admins = await _telegramClient.GetChatAdministratorsAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
-			var creator = admins.Where(a => a is ChatMemberOwner)
-				.Select(c => new TelegramUser()
-				{
-					UserId = c.User.Id,
-					Name = c.User.Username
-				}).First();
-			var adminsMember = admins.Where(a => a is ChatMemberAdministrator adm && !adm.User.IsBot)
-				.Select(a => new TelegramUser()
-				{
-					UserId = a.User.Id,
-					Name = a.User.Username ?? (string.IsNullOrWhiteSpace(a.User.FirstName) ? "" : a.User.FirstName + " " + (string.IsNullOrWhiteSpace(a.User.LastName) ? "" : a.User.LastName))
-				}).ToList();
-
-			if (update.Message is not null)
+			if (update.Message != null && update.Message.Chat.Type.Equals(ChatType.Supergroup) && type is not UpdateType.InlineQuery and not UpdateType.MyChatMember)
 			{
-				await _telegramUserService.TryAdd(new()
-				{
-					UserId = update.Message.From.Id,
-					Name = update.Message.From.Username,
-					CreateDate = DateTimeNow,
-					User = update.Message.From,
-					Chanel = new Chanel()
+				//var s = await _telegramClient.GetChatAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
+				var chatMember = await _telegramClient.GetChatMemberAsync(new ChatId(update.Message.Chat.Id), update.Message.From.Id, cancellationToken);
+				var admins = await _telegramClient.GetChatAdministratorsAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
+				var creator = admins?.Where(a => a is ChatMemberOwner)
+					.Select(c => new TelegramUser()
 					{
-						TelegramChatId = update.Message.Chat.Id,
-						ChatType = update.Message.Chat.Type.ToString(),
-						Title = update.Message.Chat.Title,
-						Creator = creator,
-						CreatorId = creator.UserId,
-						AdminsMembers = adminsMember,
-						ChatMember = chatMember
-					}
-				});
-			}
+						UserId = c.User.Id,
+						Name = c.User.Username
+					}).First();
+				var adminsMember = admins?.Where(a => a is ChatMemberAdministrator adm && !adm.User.IsBot)
+					.Select(a => new TelegramUser()
+					{
+						UserId = a.User.Id,
+						Name = a.User.Username ?? (string.IsNullOrWhiteSpace(a.User.FirstName) ? "" : a.User.FirstName + " " + (string.IsNullOrWhiteSpace(a.User.LastName) ? "" : a.User.LastName))
+					}).ToList();
 
-			foreach (var admin in admins.Where(a => a is ChatMember adm && !adm.User.IsBot))
-			{
-				var adminEntity = _telegramUserService.Get(admin.User.Id);
-				if (adminEntity != null && adminEntity.UserSiteId != default)
+				if (update.Message is not null)
 				{
-					await _userService.UpdateRole(adminEntity.UserSiteId, Role.Tutor);
+					await _telegramUserService.TryAdd(new()
+					{
+						UserId = update.Message.From.Id,
+						Name = update.Message.From.Username,
+						CreateDate = DateTimeNow,
+						User = update.Message.From,
+						Chanel = new Chanel()
+						{
+							TelegramChatId = update.Message.Chat.Id,
+							ChatType = update.Message.Chat.Type.ToString(),
+							Title = update.Message.Chat.Title,
+							Creator = creator,
+							CreatorId = creator.UserId,
+							AdminsMembers = adminsMember,
+							ChatMember = chatMember
+						}
+					});
+				}
+
+				foreach (var admin in admins.Where(a => a is ChatMember adm && !adm.User.IsBot))
+				{
+					var adminEntity = _telegramUserService.Get(admin.User.Id);
+					if (adminEntity != null && adminEntity.UserSiteId != default)
+					{
+						await _userService.UpdateRole(adminEntity.UserSiteId, Role.Tutor);
+					}
 				}
 			}
 
@@ -134,6 +144,9 @@ namespace BuisinessLogic.Handlers
 				case UpdateType.Message when update.Message.Text.Equals("/banrequest") || update.Message.Text.Equals("/banrequest@YN_AntispamBot"):
 					await SendPull(botClient, update, update.Message.From);
 					break;
+				case UpdateType.Message when update.Message.Text.Equals("/start"):
+					await SendChoseChats(_telegramClient, update, cancellationToken, update.Message.From);
+					break;
 				//case UpdateType.PollAnswer:
 				//	SavePull(botClient, update);
 				//	break;
@@ -153,6 +166,56 @@ namespace BuisinessLogic.Handlers
 												   !update.EditedMessage.SenderChat.InChannelsWhitelist():
 					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.EditedMessage, cancellationToken, BotSettings.InfoMessage, BotSettings.LinkButton);
 					break;
+				case UpdateType.CallbackQuery:
+					{
+						var callbackQuery = update.CallbackQuery;
+						var userId = callbackQuery.From.Id;
+						if (callbackQuery.Data == "open_list")
+						{
+							var userChats = _telegramUserService.GetChatsByUser(userId);
+							var buttons = new List<InlineKeyboardButton[]>();
+							if (userChats is not null)
+							{
+								foreach (var chat in userChats)
+								{
+									if (chat.AdminsIds.Contains(userId) || chat.CreatorId.Equals(userId))
+									{
+										buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"{chat.Title}", $"chat_{chat.TelegramChatId}") });
+									}
+								}
+							}
+
+							// Добавляем кнопку "Назад" в отдельную строку в самом конце
+							buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("🔙 Назад", "back") });
+
+							var newKeyboard = new InlineKeyboardMarkup(buttons);
+
+							await _telegramClient.EditMessageTextAsync(
+								 userId,
+								 callbackQuery.Message.MessageId,
+								 "Выберите один из вариантов:",
+								 replyMarkup: newKeyboard);
+						}
+						else if (callbackQuery.Data == "back")
+						{
+							var mainKeyboard = new InlineKeyboardMarkup(new[]
+							{
+								new[]
+								{
+									InlineKeyboardButton.WithUrl("Добавить бота в чат", inviteLink)
+								},
+								new[] { InlineKeyboardButton.WithCallbackData("📂 Чаты где добавлен бот", "open_list") }
+							});
+
+							await _telegramClient.EditMessageTextAsync(
+								userId,
+								 callbackQuery.Message.MessageId,
+								"Нажмите кнопку ниже, чтобы открыть список.",
+								replyMarkup: mainKeyboard
+							);
+						}
+						break;
+					}
 				default:
 					return;
 			}
@@ -166,6 +229,24 @@ namespace BuisinessLogic.Handlers
 			{
 				await SendWelcomeMessage(botClient, update, cancellationToken, newMember);
 			}
+		}
+
+		private static async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
+		{
+			var keyboard = new InlineKeyboardMarkup(new[]
+			{
+				new[]
+				{
+					InlineKeyboardButton.WithUrl("Добавить бота в чат", inviteLink)
+				},
+				new[]
+				{
+					InlineKeyboardButton.WithCallbackData("📂 Чаты где добавлен бот", "open_list")
+				}
+			});
+						
+			await botClient.SendTextMessageAsync(update.Message.From.Id, "Нажмите кнопку, чтобы добавить бота в чат:",
+				cancellationToken: token, replyMarkup: keyboard);
 		}
 
 		private static async Task SendWelcomeMessage(ITelegramBotClient botClient, Update update, CancellationToken token, User user)

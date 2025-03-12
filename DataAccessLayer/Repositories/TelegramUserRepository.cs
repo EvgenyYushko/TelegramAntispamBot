@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataAccessLayer.Helpers;
 using DomainLayer.Models;
 using DomainLayer.Repositories;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Models;
+using static DataAccessLayer.Helpers.UserRepositoryHelper;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
-using static DataAccessLayer.Helpers.UserRepositoryHelper;
-using DataAccessLayer.Helpers;
 
 namespace DataAccessLayer.Repositories
 {
@@ -269,23 +269,23 @@ namespace DataAccessLayer.Repositories
 
 		private async Task UpdateChatAdmins(TelegramUser userInfo)
 		{
-			var admins = GetAdmins(userInfo);
-			if (admins.Count > 0)
+			var chat = userInfo.Chanel;
+			if (chat.AdminsMembers.Count > 0)
 			{
 				var oldAdmins = _context.TelegramChannelAdmin.Where(a => a.ChannelId.Equals(userInfo.Chanel.TelegramChatId)).ToList();
 				_context.TelegramChannelAdmin.RemoveRange(oldAdmins);
 
-				await _context.TelegramChannelAdmin.AddRangeAsync(admins);
+				foreach (var admin in chat.AdminsMembers)
+				{
+					var adm = await _context.GetUser(admin.UserId);
+					if (adm is null && admin.UserId != userInfo.UserId)
+					{
+						await AddUserWithPermissions(admin.UserId, admin.Name, chat.TelegramChatId);
+						await UpdateMemberShip(admin.UserId, chat.TelegramChatId);
+					}
+					await AddAdmin(userInfo, admin);
+				}
 			}
-		}
-
-		private static List<TelegramChannelAdmin> GetAdmins(TelegramUser userInfo)
-		{
-			return userInfo.Chanel.AdminsMembers.Select(admin => new TelegramChannelAdmin
-			{
-				ChannelId = userInfo.Chanel.TelegramChatId,
-				UserId = admin.UserId
-			}).ToList();
 		}
 
 		private async Task UpdateMemberShip(long userId, long chatId)
