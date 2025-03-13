@@ -95,8 +95,7 @@ namespace DataAccessLayer.Repositories
 
 		public TelegramUserEntity GetByUserSiteId(Guid id)
 		{
-			var allTgusers = GetAllTelegramUsers();
-			return allTgusers.FirstOrDefault(u => u.UserSiteId.Equals(id));
+			return GetAllTelegramUsers().FirstOrDefault(u => u.UserSiteId.Equals(id));
 		}
 
 		public async Task<bool> TryAddUserExteranl(TelegramUser userInfo)
@@ -198,28 +197,50 @@ namespace DataAccessLayer.Repositories
 					await AddUserWithPermissions(creator.UserId, creator.Name, chat.TelegramChatId);
 				}
 
-				var chanel = new TelegramChannel
-				{
-					Id = chat.TelegramChatId,
-					Title = chat.Title,
-					ChatType = chat.ChatType,
-					CreatorId = chat.CreatorId
-				};
-				await _context.TelegramChanel.AddAsync(chanel);
+				await AddTelegramChannel(chat);
 
 				if (chat.AdminsMembers.Count > 0)
 				{
-					foreach (var admin in chat.AdminsMembers)
-					{
-						var adm = await _context.GetUser(admin.UserId);
-						if (adm is null && admin.UserId != userInfo.UserId)
-						{
-							await AddUserWithPermissions(admin.UserId, admin.Name, chat.TelegramChatId);
-						}
-						await UpdateMemberShip(admin.UserId, chat.TelegramChatId);
-						await AddAdmin(userInfo, admin);
-					}
+					await AddAdminsToChat(userInfo);
 				}
+			}
+		}
+
+		private async Task AddUserWithPermissions(long userId, string userName, long chatId)
+		{
+			await AddUser(userId, userName);
+			await AddOrUpdateTelegrammPermission(userId, chatId);
+		}
+
+		private async Task UpdateChatAdmins(TelegramUser userInfo)
+		{
+			var chat = userInfo.Chanel;
+			if (chat.AdminsMembers.Count > 0)
+			{
+				DropChatAdmins(userInfo.Chanel.TelegramChatId);
+				await AddAdminsToChat(userInfo);
+			}
+		}
+
+		private void DropChatAdmins(long chatId)
+		{
+			var oldAdmins = _context.TelegramChannelAdmin.Where(a => a.ChannelId.Equals(chatId)).ToList();
+			_context.TelegramChannelAdmin.RemoveRange(oldAdmins);
+		}
+
+		private async Task AddAdminsToChat(TelegramUser userInfo)
+		{
+			var chat = userInfo.Chanel;
+
+			foreach (var admin in chat.AdminsMembers)
+			{
+				var adm = await _context.GetUser(admin.UserId);
+				if (adm is null && admin.UserId != userInfo.UserId)
+				{
+					await AddUserWithPermissions(admin.UserId, admin.Name, chat.TelegramChatId);
+					await UpdateMemberShip(admin.UserId, chat.TelegramChatId);
+				}
+				await AddAdmin(userInfo, admin);
 			}
 		}
 
@@ -232,10 +253,16 @@ namespace DataAccessLayer.Repositories
 			});
 		}
 
-		private async Task AddUserWithPermissions(long userId, string userName, long chatId)
+		private async Task AddTelegramChannel(Chanel chat)
 		{
-			await AddUser(userId, userName);
-			await AddOrUpdateTelegrammPermission(userId, chatId);
+			var chanel = new TelegramChannel
+			{
+				Id = chat.TelegramChatId,
+				Title = chat.Title,
+				ChatType = chat.ChatType,
+				CreatorId = chat.CreatorId
+			};
+			await _context.TelegramChanel.AddAsync(chanel);
 		}
 
 		private async Task AddOrUpdateTelegrammPermission(long userId, long chatId)
@@ -265,27 +292,6 @@ namespace DataAccessLayer.Repositories
 				CreateDate = DateTimeNow,
 				UserSiteId = userSiteId
 			});
-		}
-
-		private async Task UpdateChatAdmins(TelegramUser userInfo)
-		{
-			var chat = userInfo.Chanel;
-			if (chat.AdminsMembers.Count > 0)
-			{
-				var oldAdmins = _context.TelegramChannelAdmin.Where(a => a.ChannelId.Equals(userInfo.Chanel.TelegramChatId)).ToList();
-				_context.TelegramChannelAdmin.RemoveRange(oldAdmins);
-
-				foreach (var admin in chat.AdminsMembers)
-				{
-					var adm = await _context.GetUser(admin.UserId);
-					if (adm is null && admin.UserId != userInfo.UserId)
-					{
-						await AddUserWithPermissions(admin.UserId, admin.Name, chat.TelegramChatId);
-						await UpdateMemberShip(admin.UserId, chat.TelegramChatId);
-					}
-					await AddAdmin(userInfo, admin);
-				}
-			}
 		}
 
 		private async Task UpdateMemberShip(long userId, long chatId)
@@ -377,7 +383,7 @@ namespace DataAccessLayer.Repositories
 					{
 						UserId = m.UserId,
 						Name = m.Name,
-						CreateDate = DateTime.Now
+						CreateDate = m.CreateDate
 					}).ToList(),
 				Members = chat.Members
 					.Select(m => m.User)
@@ -385,7 +391,7 @@ namespace DataAccessLayer.Repositories
 					{
 						UserId = m.UserId,
 						Name = m.Name,
-						CreateDate = DateTime.Now
+						CreateDate = m.CreateDate
 					}).ToList()
 			};
 		}
@@ -421,39 +427,6 @@ namespace DataAccessLayer.Repositories
 				.AsNoTracking()
 				.ToList();
 		}
-
-		//public TelegramUser GetTelegramUser(long id)
-		//{
-		//	var user = _context.TelegramUsers
-		//		.Include(t => t.Permissions)
-		//		.AsNoTracking()
-		//		.FirstOrDefault(u => u.UserId == id);
-
-		//	var userDto = new TelegramUser
-		//	{
-		//		UserId = user.UserId,
-		//		Name = user.Name,
-		//		CreateDate = user.CreateDate,
-		//		Permissions = new TelegramPermissions()
-		//		{
-		//			UserId = user.UserId,
-		//			Id = user.Permissions.Id,
-		//			SendLinks = user.Permissions.SendLinks
-		//		}
-		//	};
-
-		//	if (LocalUserStorage.Contains(userDto))
-		//	{
-		//		var telegramUser = LocalUserStorage.Find(u => u.UserId == userDto.UserId);
-		//		telegramUser.Permissions.SendLinks = userDto.Permissions.SendLinks;
-		//	}
-		//	else
-		//	{
-		//		LocalUserStorage.Add(userDto);
-		//	}
-
-		//	return userDto;
-		//}
 
 		public Task UpdateLocalStorage()
 		{
