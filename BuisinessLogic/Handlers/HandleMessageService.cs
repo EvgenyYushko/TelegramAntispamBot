@@ -44,7 +44,7 @@ namespace BuisinessLogic.Handlers
 			_telegramUserService = telegramUserService;
 			_userService = userService;
 		}
-
+			
 		private static bool _firstRunBot = true;
 		/// <inheritdoc />
 		public async Task HandleUpdateAsync(TelegramInject botClient, Update update, UpdateType type, CancellationToken cancellationToken)
@@ -127,6 +127,9 @@ namespace BuisinessLogic.Handlers
 				case UpdateType.Message when update.Message.Text.Equals("/start"):
 					await SendChoseChats(_telegramClient, update, cancellationToken, update.Message.From);
 					break;
+				case UpdateType.Message when BotSettings.IsFlooding(update.Message.From.Id):
+					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
+					break;
 				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
 					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken, BotSettings.InfoMessageProfanityChecker);
 					if (!await _telegramUserService.CheckReputation(update.Message))
@@ -202,8 +205,7 @@ namespace BuisinessLogic.Handlers
 						}
 						else if (callbackQuery.Data == BACK)
 						{
-							await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId, BotSettings.StartInfo, parseMode: ParseMode.Html, disableWebPagePreview: true,
-								replyMarkup: GetMainMenuBoard());
+							await SendChoseChats(_telegramClient, update, cancellationToken, update.Message.From);
 						}
 
 						break;
@@ -235,9 +237,13 @@ namespace BuisinessLogic.Handlers
 			}
 		}
 
-		private static async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
+		private async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
 		{
-			await botClient.SendTextMessageAsync(update.Message.From.Id, BotSettings.StartInfo, parseMode: ParseMode.Html, disableWebPagePreview: true,
+			var allTgUsers = _telegramUserService.GetAllTelegramUsers();
+			var allChars = _telegramUserService.GetAllChats();
+			var allTgBannedUsers = _telegramUserService.GetAllBanedUsers();
+
+			await botClient.SendTextMessageAsync(update.Message.From.Id, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count), parseMode: ParseMode.Html, disableWebPagePreview: true,
 				cancellationToken: token, replyMarkup: GetMainMenuBoard());
 		}
 
@@ -377,4 +383,6 @@ namespace BuisinessLogic.Handlers
 			}
 		}
 	}
+
+		
 }

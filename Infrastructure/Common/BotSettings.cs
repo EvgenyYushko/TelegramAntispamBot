@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -10,6 +11,7 @@ namespace Infrastructure.Common
 		private static string LINK = "https://telegramantispambot.onrender.com/User/Profile";
 		const string botUsername = "YN_AntispamBot"; // Замените на ваш username без @
 		public static string inviteLink = $"https://t.me/{botUsername}?startgroup=true";
+		private static Dictionary<long, Queue<DateTime>> _userActivity = new();
 
 		//Add your telegram nickname here
 		public static readonly List<string> WhiteList = new()
@@ -25,14 +27,12 @@ namespace Infrastructure.Common
 			"test"
 		};
 
-
-
-		public static readonly string StartInfo = 
+		public static string StartInfo(long countUser, long countChats, long bannedUsers) => 
 			$"<b>Добро пожаловать!</b> \r\n  \r\n" +
 			$"🤖 Я — бот, который поможет сделать твои чаты чище и безопаснее. Без капчи и лишних сложностей — только умные алгоритмы и магия нейросетей.\r\n\r\n" +
-			$"⚔️ Заблокировано [] спамеров\r\n" +
+			$"⚔️ Заблокировано <b>{bannedUsers}</b> спамеров\r\n" +
 			$"🕵️‍ Выявлено [] мошенников\r\n\r\n" +
-			$"📖 Я уже обработал информацию о [] пользователе в [] группах. Добавь меня в группу или канал, и я начну автоматически удалять <b>рекламные сообщения</b> и блокировать <b>мошенников</b>.\r\n\r\n" +
+			$"📖 Я уже обработал информацию о <b>{countUser}</b> пользователе в <b>{countChats}</b> группах. Добавь меня в группу или канал, и я начну автоматически удалять <b>рекламные сообщения</b> и блокировать <b>мошенников</b>.\r\n\r\n" +
 			$"С чего начнём?";
 
 		public static readonly string ChatSettingsInfo = 
@@ -78,5 +78,23 @@ namespace Infrastructure.Common
 			"\u2705 Не удалять комментарии со ссылками от пользователей из белого списка  \r\n" +
 			"\u2705 Не удалять комментарии со ссылками от каналов из белого списка  \r\n" +
 			"\u2705 Отключать возможность комментирования определенных постов";
+
+		public static bool IsFlooding(long userId)
+		{
+			const int maxMessages = 5;
+			const int timeWindowSeconds = 10;
+
+			if (!_userActivity.ContainsKey(userId))
+				_userActivity[userId] = new Queue<DateTime>();
+
+			var now = DateTime.Now;
+			var timestamps = _userActivity[userId];
+
+			while (timestamps.Count > 0 && (now - timestamps.Peek()).TotalSeconds > timeWindowSeconds)
+				timestamps.Dequeue();
+
+			timestamps.Enqueue(now);
+			return timestamps.Count > maxMessages;
+		}
 	}
 }
