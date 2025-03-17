@@ -11,6 +11,9 @@ using DataAccessLayer;
 using DataAccessLayer.Repositories;
 using DomainLayer.Models.Authorization;
 using DomainLayer.Repositories;
+using GoogleServices.Drive;
+using GoogleServices.Gemini;
+using GoogleServices.Interfaces;
 using Infrastructure.Enumerations;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models;
@@ -32,6 +35,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using ML_SpamClassifier;
+using ML_SpamClassifier.Interfaces;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
@@ -133,6 +138,26 @@ namespace TelegramAntispamBot
 			services.AddScoped<IJwtProvider, JwtProvider>();
 			services.AddScoped<IPasswordHasher, PasswordHasher>();
 			services.AddScoped<ILogRepository, LogRepository>();
+			services.AddScoped<ISpamDetector, SpamDetector>();
+
+			//var googleFoldrId = Configuration.GetValue<string>(GOOGLE_SPAM_ML_FOLDER_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_SPAM_ML_FOLDER_ID);
+			//services.AddSingleton<ISpamDetector>(provider =>
+			//{
+			//	return new SpamDetector(googleFoldrId);
+			//});
+
+			var serviceAccountJson = Configuration.GetValue<string>(GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON) ?? Environment.GetEnvironmentVariable(GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON);
+			services.AddSingleton<IGoogleDriveUploader>(provider =>
+			{
+				return new GoogleDriveUploader(serviceAccountJson);
+			});
+
+			var geminiApiKey = Configuration.GetValue<string>(GEMINI_API_KEY) ?? Environment.GetEnvironmentVariable(GEMINI_API_KEY);
+			services.AddSingleton<IGenerativeLanguageModel>(provider =>
+			{
+				return new GenerativeLanguageModel(geminiApiKey);
+			});
+
 			services.AddSingleton<NbrbCurrencyParser>();
 			services.AddSingleton<HabrParser>();
 			services.AddSingleton<OnlinerParser>();
@@ -249,12 +274,15 @@ namespace TelegramAntispamBot
 				{
 					var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 					var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+					var googleDriveUploader = scope.ServiceProvider.GetRequiredService<IGoogleDriveUploader>();
+					var generativeLanguageModel = scope.ServiceProvider.GetRequiredService<IGenerativeLanguageModel>();
 
 					var testController = new BotController(new HandleMessageService
 						(new DeleteMessageService()
 						, new ProfanityCheckerService(new ProfanityCheckerRepository())
 						, new TelegramUserService(new TelegramUserRepository(dbContext))
-						, userService)
+						, userService
+						, new SpamDetector(googleDriveUploader, generativeLanguageModel))
 						, _telegram);
 					testController.RunLocalTest();
 				}

@@ -8,6 +8,7 @@ using Infrastructure.Enumerations;
 using Infrastructure.Extentions;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models;
+using ML_SpamClassifier.Interfaces;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
@@ -32,17 +33,21 @@ namespace BuisinessLogic.Handlers
 		private readonly IProfanityCheckerService _profanityCheckerService;
 		private readonly ITelegramUserService _telegramUserService;
 		private readonly IUserService _userService;
+		private readonly ISpamDetector _spamDetector;
 		TelegramBotClient _telegramClient;
 
 		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService
 			, ITelegramUserService telegramUserService
 			, IUserService userService
+			, ISpamDetector spamDetector
 			)
 		{
 			_deleteMessageService = deleteMessageService;
 			_profanityCheckerService = profanityCheckerService;
 			_telegramUserService = telegramUserService;
 			_userService = userService;
+			_spamDetector = spamDetector;
+			_spamDetector.LoadOrTrainModel();
 		}
 			
 		private static bool _firstRunBot = true;
@@ -55,6 +60,24 @@ namespace BuisinessLogic.Handlers
 			{
 				await _telegramUserService.UpdateLocalStorage();
 				_firstRunBot = false;
+			}
+
+			if (update.Message?.Text is not null)
+			{
+				string comment = null;
+				var isSpam = _spamDetector.IsSpam(update.Message.Text, ref comment);
+				if (isSpam && comment is not null)
+				{
+					//await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
+					await _telegramClient.SendTextMessageAsync(
+					chatId: update.Message.Chat.Id,
+					text: comment,
+					replyToMessageId: update.Message.MessageId, // Цитируем сообщение пользователя
+					cancellationToken: cancellationToken);
+				
+					return;
+				}
+				//todo
 			}
 
 			//var me = await _telegramClient.GetMeAsync();
@@ -125,7 +148,7 @@ namespace BuisinessLogic.Handlers
 			switch (type)
 			{
 				case UpdateType.Message when update.Message.Text.Equals("/start"):
-					await SendChoseChats(_telegramClient, update, cancellationToken, update.Message.From);
+					await SendChoseChats(_telegramClient, update, cancellationToken);
 					break;
 				case UpdateType.Message when BotSettings.IsFlooding(update.Message.From.Id):
 					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
@@ -205,7 +228,7 @@ namespace BuisinessLogic.Handlers
 						}
 						else if (callbackQuery.Data == BACK)
 						{
-							await SendChoseChats(_telegramClient, update, cancellationToken, update.Message.From);
+							await SendChoseChats(_telegramClient, update, cancellationToken);
 						}
 
 						break;
@@ -237,13 +260,15 @@ namespace BuisinessLogic.Handlers
 			}
 		}
 
-		private async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
+		private async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token)
 		{
 			var allTgUsers = _telegramUserService.GetAllTelegramUsers();
 			var allChars = _telegramUserService.GetAllChats();
 			var allTgBannedUsers = _telegramUserService.GetAllBanedUsers();
 
-			await botClient.SendTextMessageAsync(update.Message.From.Id, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count), parseMode: ParseMode.Html, disableWebPagePreview: true,
+			var chatId = update.Message?.From.Id ?? update.CallbackQuery.From.Id;
+
+			await botClient.SendTextMessageAsync(chatId, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count), parseMode: ParseMode.Html, disableWebPagePreview: true,
 				cancellationToken: token, replyMarkup: GetMainMenuBoard());
 		}
 

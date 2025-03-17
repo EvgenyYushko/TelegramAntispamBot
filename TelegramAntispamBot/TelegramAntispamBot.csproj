@@ -28,8 +28,10 @@
     <ProjectReference Include="..\BuisinessLogic\BuisinessLogic.csproj" />
     <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj" />
     <ProjectReference Include="..\DomainLayer\DomainLayer.csproj" />
+    <ProjectReference Include="..\GoogleServices\GoogleServices.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\MailSenderService\MailSenderService.csproj" />
+    <ProjectReference Include="..\ML-SpamClassifier\ML-SpamClassifier.csproj" />
     <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj" />
   </ItemGroup>
 

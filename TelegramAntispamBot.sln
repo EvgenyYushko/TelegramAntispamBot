@@ -27,6 +27,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		scripts\refresh-db.sh = scripts\refresh-db.sh
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML-SpamClassifier", "ML-SpamClassifier\ML-SpamClassifier.csproj", "{565EB115-B7D4-48F6-AEFE-F2174FA80CF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleServices", "GoogleServices\GoogleServices.csproj", "{9DC62EA2-69D9-4FAD-BF76-B02D2E9D23D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,12 +69,20 @@ Global
 		{2AFFF4D0-42F8-4D49-94BC-DCBB9C8A0EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AFFF4D0-42F8-4D49-94BC-DCBB9C8A0EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AFFF4D0-42F8-4D49-94BC-DCBB9C8A0EF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{565EB115-B7D4-48F6-AEFE-F2174FA80CF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{565EB115-B7D4-48F6-AEFE-F2174FA80CF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{565EB115-B7D4-48F6-AEFE-F2174FA80CF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{565EB115-B7D4-48F6-AEFE-F2174FA80CF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DC62EA2-69D9-4FAD-BF76-B02D2E9D23D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DC62EA2-69D9-4FAD-BF76-B02D2E9D23D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DC62EA2-69D9-4FAD-BF76-B02D2E9D23D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DC62EA2-69D9-4FAD-BF76-B02D2E9D23D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_PrefixTranslations = True
 		SolutionGuid = {5ED0B53F-EC65-4E5A-B247-39C188F8D8F9}
+		RESX_PrefixTranslations = True
 	EndGlobalSection
 EndGlobal
