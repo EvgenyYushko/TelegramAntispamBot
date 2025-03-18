@@ -96,8 +96,7 @@ namespace ML_SpamClassifier
 				var isSpamByGemini = Task.Run(async () => await CheckWithGeminiAsync(text)).Result;
 				if (isSpamByGemini)
 				{
-					var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}\n" +
-						$"Ответ дай в формате HTML")).Result;
+					var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}")).Result;
 					comment = geminiResponse;
 
 					return true;
@@ -128,8 +127,13 @@ namespace ML_SpamClassifier
 
 		private async Task<bool> CheckWithGeminiAsync(string messageText)
 		{
-			var geminiResponse = await _generativeLanguageModel.AskGemini($"Является ли это сообщение спамом? Ответь только 'да' или 'нет': {messageText}\n" +
-				$"");
+			var geminiResponse = await _generativeLanguageModel.AskGemini($"Определи, является ли сообщение спамом. \r\n" +
+				$"Критерии спама:\r\n" +
+				$"- Коммерческое предложение\r\n" +
+				$"- Призыв к действию ('Срочно')\r\n" +
+				$"- Подозрительные ссылки\r\n" +
+				$"- Избыточная эмоциональность\r\n" +
+				$"Ответь только 'да' или 'нет': {messageText}");
 
 			return geminiResponse.ToLower().Contains("да");
 		}

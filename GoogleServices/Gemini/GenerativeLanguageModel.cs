@@ -47,8 +47,10 @@ namespace GoogleServices.Gemini
 					},
 						generationConfig = new
 						{
-							temperature = 0.9,
-							topK = 40
+							temperature = 0.1,
+							topK = 1,
+							topP = 0,
+							//maxOutputTokens = 10
 						}
 					};
 
