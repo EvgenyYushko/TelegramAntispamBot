@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DomainLayer.Models;
 using DomainLayer.Repositories;
 using Infrastructure.Models;
 using ServiceLayer.Models;
@@ -17,6 +18,52 @@ namespace BuisinessLogic.Services.Telegram
 		public TelegramUserService(ITelegramUserRepository usersRepository)
 		{
 			_usersRepository = usersRepository;
+		}
+
+		public Task UpdateSuspiciousMessages(SuspiciousMessageDto message)
+		{
+			return _usersRepository.UpdateSuspiciousMessages(new SuspiciousMessage()
+			{
+				Id = message.Id,
+				Text = message.Text,
+				CreatedAt = message.CreatedAt,
+				IsSpamByGemini = message.IsSpamByGemini,
+				IsSpamByMl = message.IsSpamByMl,
+				IsSpamByUser = message.IsSpamByUser,
+				NeedsManualReview = message.NeedsManualReview,
+				Probability = message.Probability
+			});
+		}
+
+		public Task AddSuspiciousMessages(SuspiciousMessageDto message)
+		{
+			return _usersRepository.AddSuspiciousMessages(new SuspiciousMessage()
+			{
+				Text = message.Text,
+				CreatedAt = message.CreatedAt,
+				IsSpamByGemini = message.IsSpamByGemini,
+				IsSpamByMl = message.IsSpamByMl,
+				IsSpamByUser = message.IsSpamByUser,
+				NeedsManualReview = message.NeedsManualReview,
+				Probability = message.Probability
+			});
+		}
+
+		public List<SuspiciousMessageDto> GetAllSuspiciousMessages()
+		{
+			var msgs = _usersRepository.GetAllSuspiciousMessages();
+
+			return msgs.Select(m => new SuspiciousMessageDto()
+			{
+				Text = m.Text,
+				IsSpamByUser = m.IsSpamByUser,
+				NeedsManualReview = m.NeedsManualReview,
+				Probability = m.Probability,
+				CreatedAt = m.CreatedAt,
+				Id = m.Id,
+				IsSpamByGemini = m.IsSpamByGemini,
+				IsSpamByMl = m.IsSpamByMl
+			}).ToList();	
 		}
 
 		public TelegramUser Get(long id)

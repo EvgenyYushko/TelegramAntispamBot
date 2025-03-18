@@ -117,6 +117,7 @@ namespace TelegramAntispamBot
 				services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddSingleton<ITelegramUserService, TelegramUserService>();
 				services.AddSingleton<ExternalAuthManager>();
+				services.AddSingleton<ISpamDetector, SpamDetector>();
 
 				services.AddHostedService<SendMailBackgroundService>();
 				services.AddHostedService<CurrencyBackgroundService>();
@@ -128,6 +129,7 @@ namespace TelegramAntispamBot
 				services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddScoped<ITelegramUserService, TelegramUserService>();
 				services.AddScoped<ExternalAuthManager>();
+				services.AddScoped<ISpamDetector, SpamDetector>();
 			}
 			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
@@ -138,7 +140,6 @@ namespace TelegramAntispamBot
 			services.AddScoped<IJwtProvider, JwtProvider>();
 			services.AddScoped<IPasswordHasher, PasswordHasher>();
 			services.AddScoped<ILogRepository, LogRepository>();
-			services.AddScoped<ISpamDetector, SpamDetector>();
 
 			//var googleFoldrId = Configuration.GetValue<string>(GOOGLE_SPAM_ML_FOLDER_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_SPAM_ML_FOLDER_ID);
 			//services.AddSingleton<ISpamDetector>(provider =>
@@ -276,13 +277,14 @@ namespace TelegramAntispamBot
 					var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 					var googleDriveUploader = scope.ServiceProvider.GetRequiredService<IGoogleDriveUploader>();
 					var generativeLanguageModel = scope.ServiceProvider.GetRequiredService<IGenerativeLanguageModel>();
+					var telegreamUserService = new TelegramUserService(new TelegramUserRepository(dbContext));
 
 					var testController = new BotController(new HandleMessageService
 						(new DeleteMessageService()
 						, new ProfanityCheckerService(new ProfanityCheckerRepository())
-						, new TelegramUserService(new TelegramUserRepository(dbContext))
+						, telegreamUserService
 						, userService
-						, new SpamDetector(googleDriveUploader, generativeLanguageModel))
+						, new SpamDetector(googleDriveUploader, generativeLanguageModel, telegreamUserService))
 						, _telegram);
 					testController.RunLocalTest();
 				}

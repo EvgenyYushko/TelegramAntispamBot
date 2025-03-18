@@ -9,6 +9,9 @@ namespace DomainLayer.Repositories
 {
 	public interface ITelegramUserRepository
 	{
+		Task UpdateSuspiciousMessages(SuspiciousMessage message);
+		public List<SuspiciousMessage> GetAllSuspiciousMessages();
+		Task AddSuspiciousMessages(SuspiciousMessage message);
 		public TelegramUser Get(long id);
 		public TelegramUser GetFromLocal(long id);
 

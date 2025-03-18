@@ -2,6 +2,7 @@ using System.Threading;
 using BuisinessLogic.Handlers;
 using Infrastructure.Common;
 using Infrastructure.InjectSettings;
+using ML_SpamClassifier.Interfaces;
 using Moq;
 using NUnit.Framework;
 using ServiceLayer.Services.Authorization;
@@ -19,6 +20,7 @@ namespace TelegramAntispamBot.Tests
 		private Mock<IProfanityCheckerService> _profanityCheckerService;
 		private Mock<ITelegramUserService> _userInfoService;
 		private Mock<IUserService> _userSerivce;
+		private Mock<ISpamDetector> _spamDetector;
 
 		private CancellationToken _cancellationToken;
 		private IHandleMessageService _service;
@@ -32,7 +34,10 @@ namespace TelegramAntispamBot.Tests
 			_cancellationToken = new();
 			_userInfoService = new();
 			_userSerivce = new();
-			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, _userInfoService.Object, _userSerivce.Object);
+			_spamDetector = new();
+			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, _userInfoService.Object
+				, _userSerivce.Object
+				, _spamDetector.Object);
 		}
 
 		[Test]

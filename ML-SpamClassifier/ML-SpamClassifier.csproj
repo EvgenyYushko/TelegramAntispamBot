@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GoogleServices\GoogleServices.csproj" />
+    <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj" />
   </ItemGroup>
 
 </Project>

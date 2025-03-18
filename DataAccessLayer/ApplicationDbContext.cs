@@ -120,5 +120,7 @@ namespace DataAccessLayer
 		public DbSet<TelegramChannelAdmin> TelegramChannelAdmin { get; set; }
 
 		public DbSet<UserChannelMembership> UserChannelMembership { get; set; }
+
+		public DbSet<SuspiciousMessage> SuspiciousMessages { get; set; } // Таблица для хранения сообщений
 	}
 }

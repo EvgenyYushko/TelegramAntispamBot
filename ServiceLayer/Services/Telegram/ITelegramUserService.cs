@@ -9,6 +9,9 @@ namespace ServiceLayer.Services.Telegram
 {
 	public interface ITelegramUserService
 	{
+		Task UpdateSuspiciousMessages(SuspiciousMessageDto message);
+		public List<SuspiciousMessageDto> GetAllSuspiciousMessages();
+		public Task AddSuspiciousMessages(SuspiciousMessageDto message);
 		public TelegramUser Get(long id);
 
 		public TelegramUser GetFromLocal(long id);

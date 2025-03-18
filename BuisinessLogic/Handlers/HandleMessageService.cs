@@ -25,9 +25,14 @@ namespace BuisinessLogic.Handlers
 		private const string OPEN_CHATS = "open_chats";
 		private const string OPEN_SETTINGS = "open_settngs";
 		private const string BACK = "back";
+		private const string HELP_CHAT = "help_chat";
+
+		private const string SPAM = "spam";
+		private const string HUM = "hum";
 
 		private static InlineKeyboardButton[] myChatsButton = new[] { InlineKeyboardButton.WithCallbackData("📂 Мои чаты", OPEN_CHATS) };
 		private static InlineKeyboardButton[] connectSettingButton = new[] { InlineKeyboardButton.WithCallbackData("Подключить защиту", OPEN_SETTINGS) };
+		private static InlineKeyboardButton[] helpChatButton = new[] { InlineKeyboardButton.WithCallbackData("Помощь боту", HELP_CHAT) };
 
 		private readonly IDeleteMessageService _deleteMessageService;
 		private readonly IProfanityCheckerService _profanityCheckerService;
@@ -47,9 +52,8 @@ namespace BuisinessLogic.Handlers
 			_telegramUserService = telegramUserService;
 			_userService = userService;
 			_spamDetector = spamDetector;
-			_spamDetector.LoadOrTrainModel();
 		}
-			
+
 		private static bool _firstRunBot = true;
 		/// <inheritdoc />
 		public async Task HandleUpdateAsync(TelegramInject botClient, Update update, UpdateType type, CancellationToken cancellationToken)
@@ -58,11 +62,12 @@ namespace BuisinessLogic.Handlers
 
 			if (_firstRunBot)
 			{
+				_spamDetector.LoadOrTrainModel();
 				await _telegramUserService.UpdateLocalStorage();
 				_firstRunBot = false;
 			}
 
-			if (update.Message?.Text is not null)
+			if (update.Message?.Text is not null && !update.Message.Text.StartsWith("/"))
 			{
 				string comment = null;
 				var isSpam = _spamDetector.IsSpam(update.Message.Text, ref comment);
@@ -74,7 +79,7 @@ namespace BuisinessLogic.Handlers
 					text: comment,
 					replyToMessageId: update.Message.MessageId, // Цитируем сообщение пользователя
 					cancellationToken: cancellationToken);
-				
+
 					return;
 				}
 				//todo
@@ -148,7 +153,7 @@ namespace BuisinessLogic.Handlers
 			switch (type)
 			{
 				case UpdateType.Message when update.Message.Text.Equals("/start"):
-					await SendChoseChats(_telegramClient, update, cancellationToken);
+					await SendChoseChats(_telegramClient, update, cancellationToken, false);
 					break;
 				case UpdateType.Message when BotSettings.IsFlooding(update.Message.From.Id):
 					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
@@ -228,7 +233,15 @@ namespace BuisinessLogic.Handlers
 						}
 						else if (callbackQuery.Data == BACK)
 						{
-							await SendChoseChats(_telegramClient, update, cancellationToken);
+							await SendChoseChats(_telegramClient, update, cancellationToken, true);
+						}
+						else if (callbackQuery.Data == HELP_CHAT)
+						{
+							await SendHelpChats(_telegramClient, update, cancellationToken);
+						}
+						else if (callbackQuery.Data.StartsWith(SPAM) || callbackQuery.Data.StartsWith(HUM))
+						{
+							await ChekedSpamMsg(callbackQuery.Data.StartsWith(SPAM), update, callbackQuery, cancellationToken);
 						}
 
 						break;
@@ -250,6 +263,20 @@ namespace BuisinessLogic.Handlers
 			}
 		}
 
+		private async Task ChekedSpamMsg(bool isSpam, Update update, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+		{
+			var parts = callbackQuery.Data.Split('_');
+			var messageId = Guid.Parse(parts[1]); // Получаем msg.Id
+
+			await _telegramUserService.UpdateSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto()
+			{
+				Id = messageId,
+				IsSpamByUser = isSpam,
+				NeedsManualReview = false
+			});
+			await SendHelpChats(_telegramClient, update, cancellationToken);
+		}
+
 		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
 		{
 			var newMember = update.Message.NewChatMembers?.FirstOrDefault();
@@ -260,7 +287,7 @@ namespace BuisinessLogic.Handlers
 			}
 		}
 
-		private async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token)
+		private async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token, bool edit)
 		{
 			var allTgUsers = _telegramUserService.GetAllTelegramUsers();
 			var allChars = _telegramUserService.GetAllChats();
@@ -268,8 +295,54 @@ namespace BuisinessLogic.Handlers
 
 			var chatId = update.Message?.From.Id ?? update.CallbackQuery.From.Id;
 
-			await botClient.SendTextMessageAsync(chatId, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count), parseMode: ParseMode.Html, disableWebPagePreview: true,
-				cancellationToken: token, replyMarkup: GetMainMenuBoard());
+			if (edit)
+			{
+				await _telegramClient.EditMessageTextAsync(chatId, update.CallbackQuery.Message.MessageId,
+							BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count),
+							replyMarkup: GetMainMenuBoard(),
+							parseMode: ParseMode.Html,
+							disableWebPagePreview: true);
+			}
+			else
+			{
+				await botClient.SendTextMessageAsync(chatId, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count)
+					, parseMode: ParseMode.Html, disableWebPagePreview: true,
+					cancellationToken: token, replyMarkup: GetMainMenuBoard());
+			}
+		}
+
+		private async Task SendHelpChats(ITelegramBotClient botClient, Update update, CancellationToken token)
+		{
+			var callbackQuery = update.CallbackQuery;
+			var userId = callbackQuery.From.Id;
+			var msgs = _telegramUserService.GetAllSuspiciousMessages();
+			var msg = msgs.FirstOrDefault(m => m.IsSpamByUser is null && m.NeedsManualReview);
+			//var msg = msgs.FirstOrDefault();
+			if (msg is null)
+			{
+				await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
+						"Сообщений для анализа пока нету.",
+						replyMarkup: InlineKeyboardButton.WithCallbackData("🔙 Назад", BACK),
+						parseMode: ParseMode.Html,
+						disableWebPagePreview: true);
+
+				return;
+			}
+			var text = $"Вероятность спама = {msg.Probability}:\n\n" + msg.Text;
+			//var chatId = update.Message?.From.Id ?? update.CallbackQuery.From.Id;
+			Console.WriteLine(text);
+
+			if (callbackQuery.Message.Text != text)
+{
+				await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
+						text,
+						replyMarkup: GetSpamHumBoards(msg.Id),
+						parseMode: ParseMode.Html,
+						disableWebPagePreview: true);
+			}
+
+			//await botClient.SendTextMessageAsync(chatId, msg.Text, parseMode: ParseMode.Html, disableWebPagePreview: true,
+			//	cancellationToken: token, replyMarkup: GetSpamHumBoards());
 		}
 
 		private static InlineKeyboardMarkup GetMainMenuBoard()
@@ -277,8 +350,32 @@ namespace BuisinessLogic.Handlers
 			return new InlineKeyboardMarkup(new[]
 			{
 				connectSettingButton,
-				myChatsButton
+				myChatsButton,
+				helpChatButton
 			});
+		}
+
+		private static InlineKeyboardButton[] CreateSpamHamButtons(Guid id)
+		{
+			return new[]
+			{
+				InlineKeyboardButton.WithCallbackData("Спам!", SPAM + $"_{id}"),
+				InlineKeyboardButton.WithCallbackData("Не спам", HUM + $"_{id}")
+			};
+		}
+
+		private static InlineKeyboardMarkup GetSpamHumBoards(Guid id)
+		{
+			// Создаём массив массивов кнопок
+			var buttons = new[]
+			{
+				// Первый ряд: кнопки "Спам" и "Не спам"
+				CreateSpamHamButtons(id),
+				// Второй ряд: кнопка "Назад"
+				new[] { InlineKeyboardButton.WithCallbackData("🔙 Назад", BACK) }
+			};
+
+			return new InlineKeyboardMarkup(buttons);
 		}
 
 		private InlineKeyboardMarkup GetChatsBoard(long userId)
@@ -409,5 +506,5 @@ namespace BuisinessLogic.Handlers
 		}
 	}
 
-		
+
 }

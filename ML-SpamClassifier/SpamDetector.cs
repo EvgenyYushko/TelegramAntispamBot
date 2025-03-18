@@ -7,6 +7,8 @@ using GoogleServices.Interfaces;
 using Microsoft.ML;
 using ML_SpamClassifier.Interfaces;
 using ML_SpamClassifier.Models;
+using ServiceLayer.Services.Telegram;
+using static Infrastructure.Common.TimeZoneHelper;
 
 namespace ML_SpamClassifier
 {
@@ -21,13 +23,17 @@ namespace ML_SpamClassifier
 		private readonly MLContext _mlContext = new();
 		private readonly IGoogleDriveUploader _googleDriveUploader;
 		private readonly IGenerativeLanguageModel _generativeLanguageModel;
+		private readonly ITelegramUserService _telegramUserService;
 		private ITransformer _model;
 		private PredictionEngine<MessageData, PredictionResult> _predictor;
 
-		public SpamDetector(IGoogleDriveUploader googleDriveUploader, IGenerativeLanguageModel generativeLanguageModel)
+		public SpamDetector(IGoogleDriveUploader googleDriveUploader
+			, IGenerativeLanguageModel generativeLanguageModel
+			, ITelegramUserService telegramUserService)
 		{
 			_googleDriveUploader = googleDriveUploader;
 			_generativeLanguageModel = generativeLanguageModel;
+			_telegramUserService = telegramUserService;
 		}
 
 		public void LoadOrTrainModel()
@@ -51,6 +57,8 @@ namespace ML_SpamClassifier
 				TrainModel();
 			}
 			_predictor = _mlContext.Model.CreatePredictionEngine<MessageData, PredictionResult>(_model);
+
+			Console.WriteLine(GetModelStatus());
 		}
 
 		public async Task RetrainModelAsync()
@@ -85,18 +93,28 @@ namespace ML_SpamClassifier
 			{
 				Console.WriteLine($"IsSpam? prediction.Probability = {prediction.Probability}");
 
-				var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Является ли это сообщение спамом? Ответь только 'да' или 'нет': {text}\n" +
-					$"Ответь ТОЛЬКО текстом сообщения без пояснений")).Result;
-				//var geminiResponse2 = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Является ли это сообщение спамом?: {text}")).Result;
-
-				if (geminiResponse.ToLower().Contains("да"))
+				var isSpamByGemini = Task.Run(async () => await CheckWithGeminiAsync(text)).Result;
+				if (isSpamByGemini)
 				{
-					var geminiResponse2 = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}")).Result;
-					comment = geminiResponse2;
+					var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}\n" +
+						$"Ответ дай в формате HTML")).Result;
+					comment = geminiResponse;
 
 					return true;
 				}
-				return geminiResponse.ToLower().Contains("да");
+
+				Task.Run(async () => await _telegramUserService.AddSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto
+				{
+					Text = text,
+					IsSpamByMl = true,
+					IsSpamByGemini = false,
+					IsSpamByUser = null,
+					Probability = prediction.Probability,
+					NeedsManualReview = true,
+					CreatedAt = DateTimeNow
+				})).Wait();
+
+				return false;
 			}
 
 			//if (prediction.IsSpam)
@@ -106,6 +124,14 @@ namespace ML_SpamClassifier
 			//}
 
 			return false;
+		}
+
+		private async Task<bool> CheckWithGeminiAsync(string messageText)
+		{
+			var geminiResponse = await _generativeLanguageModel.AskGemini($"Является ли это сообщение спамом? Ответь только 'да' или 'нет': {messageText}\n" +
+				$"");
+
+			return geminiResponse.ToLower().Contains("да");
 		}
 
 		public void AddSpamSample(string text) => AddSample(text, true);

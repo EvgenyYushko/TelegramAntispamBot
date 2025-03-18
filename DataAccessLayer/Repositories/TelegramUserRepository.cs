@@ -26,6 +26,32 @@ namespace DataAccessLayer.Repositories
 
 		private List<TelegramUser> LocalUserStorage { get; set; }
 
+		public List<SuspiciousMessage> GetAllSuspiciousMessages()
+		{
+			return _context.SuspiciousMessages
+				.AsNoTracking()
+				.ToList();
+		}
+
+		public async Task AddSuspiciousMessages(SuspiciousMessage message)
+		{
+			await _context.SuspiciousMessages.AddAsync(message);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task UpdateSuspiciousMessages(SuspiciousMessage message)
+		{
+			var msg = await _context.SuspiciousMessages
+				.FirstOrDefaultAsync(m => m.Id.Equals(message.Id));
+			
+			msg.IsSpamByUser = message.IsSpamByUser;
+			msg.NeedsManualReview = message.NeedsManualReview;
+
+			Console.WriteLine($"UpdateSuspiciousMessages => msg.Id = {msg.Id}, msg.IsSpamByUser={msg.IsSpamByUser}");
+
+			await _context.SaveChangesAsync();
+		}
+
 		public TelegramUser Get(long id)
 		{
 			var userDb = _context.TelegramUsers
