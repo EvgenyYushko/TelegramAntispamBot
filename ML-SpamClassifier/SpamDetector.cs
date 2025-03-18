@@ -81,20 +81,31 @@ namespace ML_SpamClassifier
 			var input = new MessageData { Text = text };
 			var prediction = _predictor.Predict(input);
 
-			if (prediction.Probability > 0.45 && prediction.Probability < 0.55)
+			if (prediction.Probability > 0.75)
 			{
 				Console.WriteLine($"IsSpam? prediction.Probability = {prediction.Probability}");
-				var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Является ли это сообщение спамом? Ответь только 'да' или 'нет': {text}\nОтветь ТОЛЬКО текстом сообщения без пояснений")).Result;
+
+				var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Является ли это сообщение спамом? Ответь только 'да' или 'нет': {text}\n" +
+					$"Ответь ТОЛЬКО текстом сообщения без пояснений")).Result;
+				//var geminiResponse2 = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Является ли это сообщение спамом?: {text}")).Result;
+
+				if (geminiResponse.ToLower().Contains("да"))
+				{
+					var geminiResponse2 = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}")).Result;
+					comment = geminiResponse2;
+
+					return true;
+				}
 				return geminiResponse.ToLower().Contains("да");
 			}
 
-			if (prediction.IsSpam)
-			{
-				var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}")).Result;
-				comment = geminiResponse;
-			}
+			//if (prediction.IsSpam)
+			//{
+			//	var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}")).Result;
+			//	comment = geminiResponse;
+			//}
 
-			return prediction.IsSpam;
+			return false;
 		}
 
 		public void AddSpamSample(string text) => AddSample(text, true);
