@@ -4,8 +4,8 @@ namespace ML_SpamClassifier.Interfaces
 {
 	public interface ISpamDetector
 	{
-		void LoadOrTrainModel();
-		Task RetrainModelAsync();
+		Task LoadModel();
+		Task TrainModelAsync();
 		bool IsSpam(string text, ref string comment);
 		public void AddSpamSample(string text);
 		public void AddHamSample(string text);

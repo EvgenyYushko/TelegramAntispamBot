@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -67,14 +68,15 @@ namespace GoogleServices.Drive
 		{
 			// Создаем запрос для поиска файла по имени
 			var listRequest = _driveService.Files.List();
-			listRequest.Q = $"name = '{fileName}'";
+			var escapedName = fileName.Replace("'", @"\'");
+			var query = $"name = '{escapedName}' and trashed = false";
 
-			// Если указана папка, ищем файл только в этой папке
 			if (!string.IsNullOrEmpty(folderId))
 			{
-				listRequest.Q += $" and '{folderId}' in parents";
+				query += $" and '{folderId}' in parents";
 			}
 
+			listRequest.Q = query;
 			listRequest.Fields = "files(id, name, mimeType, size, createdTime)";
 
 			// Выполняем запрос
@@ -82,6 +84,32 @@ namespace GoogleServices.Drive
 
 			// Возвращаем первый найденный файл (или null, если файл не найден)
 			return result.Files.FirstOrDefault();
+		}
+
+		public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetAllFilesInFolderAsync(string folderId)
+		{
+			var listRequest = _driveService.Files.List();
+
+			// Формируем запрос
+			listRequest.Q = $"'{folderId}' in parents and trashed = false";
+
+			// Указываем необходимые поля
+			listRequest.Fields = "files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)";
+
+			// Важно для работы с общими дисками
+			listRequest.IncludeItemsFromAllDrives = true;
+			listRequest.SupportsAllDrives = true;
+
+			// Выполняем запрос
+			var result = await listRequest.ExecuteAsync();
+
+			// Для отладки: выводим найденные файлы
+			foreach (var file in result.Files)
+			{
+				Console.WriteLine($"Found: {file.Name} ({file.Id})");
+			}
+
+			return result.Files;
 		}
 
 		public async Task DownloadFileAsync(string fileId, string localFilePath)
