@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,11 +14,29 @@ namespace GoogleServices.Gemini
 	public class GenerativeLanguageModel : IGenerativeLanguageModel
 	{
 		private string _geminiApiKey;
-		static readonly HttpClient httpClient = new HttpClient();
+		private static readonly HttpClient httpClient = new HttpClient();
+		private static Stack<string> modelsStack = new Stack<string>();
 
 		public GenerativeLanguageModel(string geminiApiKey)
 		{
 			_geminiApiKey = geminiApiKey;
+			InitGeminiModels();
+			SwitchToNextModel();
+		}
+		public static string GeminiModel {get;set;}
+
+		private static void SwitchToNextModel()
+		{
+			GeminiModel = modelsStack.Pop();
+			Console.WriteLine($"USE MODEL: {GeminiModel}");
+		}
+
+		private static void InitGeminiModels()
+		{
+			modelsStack.Push("gemini-1.5-pro-latest");
+			modelsStack.Push("gemini-2.0-pro-exp-02-05");
+			modelsStack.Push("gemini-2.0-flash-lite");
+			modelsStack.Push("gemini-2.0-flash");
 		}
 
 		public async Task<string> AskGemini(string prompt)
@@ -29,9 +48,7 @@ namespace GoogleServices.Gemini
 			{
 				try
 				{
-					//gemini-2.0-flash
-					//gemini-1.5-pro-latest
-					var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_geminiApiKey}";
+					var url = $"https://generativelanguage.googleapis.com/v1beta/models/{GeminiModel}:generateContent?key={_geminiApiKey}";
 
 					var request = new
 					{
@@ -90,7 +107,13 @@ namespace GoogleServices.Gemini
 					attempt++;
 					if (attempt >= maxRetries)
 					{
-						throw; // Если попытки закончились, выбрасываем исключение
+						if (modelsStack.Count == 0)
+						{
+							throw; // Если попытки закончились, выбрасываем исключение
+						}
+						SwitchToNextModel();
+						attempt = 0;
+						continue;
 					}
 
 					// Экспоненциальная задержка: 2^attempt секунд
