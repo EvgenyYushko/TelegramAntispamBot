@@ -103,38 +103,25 @@ namespace ML_SpamClassifier
 			var input = new MessageData { Text = text };
 			var prediction = _predictor.Predict(input);
 
-			if (prediction.Probability > 0.75)
-			{
-				Console.WriteLine($"IsSpam? prediction.Probability = {prediction.Probability}");
+			Console.WriteLine($"IsSpam? prediction.Probability = {prediction.Probability}");
 
-				var isSpamByGemini = Task.Run(async () => await CheckWithGeminiAsync(text)).Result;
-				if (isSpamByGemini)
-				{
-					var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}")).Result;
-					comment = geminiResponse;
-
-					return true;
-				}
-
-				Task.Run(async () => await _telegramUserService.AddSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto
-				{
-					Text = text,
-					IsSpamByMl = true,
-					IsSpamByGemini = false,
-					IsSpamByUser = null,
-					Probability = prediction.Probability,
-					NeedsManualReview = true,
-					CreatedAt = DateTimeNow
-				})).Wait();
-
-				return false;
-			}
-
-			//if (prediction.IsSpam)
+			var isSpamByGemini = Task.Run(async () => await CheckWithGeminiAsync(text)).Result;
+			//if (isSpamByGemini)
 			//{
 			//	var geminiResponse = Task.Run(async () => await _generativeLanguageModel.AskGemini($"Почему это сообщение является спамом?: {text}")).Result;
 			//	comment = geminiResponse;
 			//}
+
+			Task.Run(async () => await _telegramUserService.AddSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto
+			{
+				Text = text,
+				IsSpamByMl = true,
+				IsSpamByGemini = isSpamByGemini,
+				IsSpamByUser = prediction.IsSpam,
+				Probability = prediction.Probability,
+				NeedsManualReview = true,
+				CreatedAt = DateTimeNow
+			})).Wait();
 
 			return false;
 		}

@@ -33,8 +33,12 @@ namespace GoogleServices.Gemini
 
 		private static void InitGeminiModels()
 		{
-			modelsStack.Push("gemini-1.5-pro-latest");
-			modelsStack.Push("gemini-2.0-pro-exp-02-05");
+			modelsStack.Push("gemma-3-27b-it");
+			modelsStack.Push("gemini-1.5-flash-8b");
+			modelsStack.Push("learnlm-1.5-pro-experimental");
+			modelsStack.Push("gemini-1.5-flash");
+			modelsStack.Push("gemini-2.0-flash-exp-image-generation");
+			modelsStack.Push("gemini-2.0-flash-thinking-exp-01-21");
 			modelsStack.Push("gemini-2.0-flash-lite");
 			modelsStack.Push("gemini-2.0-flash");
 		}

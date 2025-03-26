@@ -83,7 +83,6 @@ namespace BuisinessLogic.Handlers
 
 					return;
 				}
-				//todo
 			}
 
 			//var me = await _telegramClient.GetMeAsync();
