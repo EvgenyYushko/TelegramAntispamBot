@@ -44,7 +44,7 @@ namespace BuisinessLogic.Handlers
 					});
 
 					await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
-						 BotSettings.ChatSettingsInfo,
+						 ChatSettingsInfo,
 						 replyMarkup: settingsBoard,
 						 parseMode: ParseMode.Html,
 						 disableWebPagePreview: true);
@@ -53,7 +53,7 @@ namespace BuisinessLogic.Handlers
 			if (callbackQuery.Data == OPEN_CHATS)
 			{
 				await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
-					 BotSettings.ChatSettingsInfo,
+					 ChatSettingsInfo,
 					 replyMarkup: GetChatsBoard(userId),
 					 parseMode: ParseMode.Html,
 					 disableWebPagePreview: true);
@@ -170,8 +170,8 @@ namespace BuisinessLogic.Handlers
 				return;
 			}
 
-			var percent = (msg.Probability * 100).ToString("0.00%").Replace(".", ",");
-			var text = $"Модель: {(msg.IsSpamByMl ? "Спам" : "Не спам")}, вероятность = {percent}:\n" +
+			var percent = Math.Round(msg.Probability * 100, 2).ToString().Replace(".", ",");
+			var text = $"Модель: {(msg.IsSpamByMl ? "Спам" : "Не спам")}, вероятность = {percent}%\n" +
 					   $"Gemini: {(msg.IsSpamByGemini.Value ? "Спам" : "Не спам")}" +
 					   $"\n\n" + msg.Text;
 
@@ -255,15 +255,16 @@ namespace BuisinessLogic.Handlers
 				{
 					if (chat.AdminsIds.Contains(userId) || chat.CreatorId.Equals(userId))
 					{
-						buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"{chat.Title}", $"chat_{chat.TelegramChatId}") });
+						var chatLink = $"https://telegramantispambot.onrender.com/ChatProfile?chatId={chat.TelegramChatId}";
+						buttons.Add(new[] { InlineKeyboardButton.WithUrl($"{chat.Title}", chatLink) });
 					}
 				}
 			}
 
 			buttons.Add(new InlineKeyboardButton[]
 			{
-				InlineKeyboardButton.WithUrl("Добавить бота в чат", BotSettings.inviteLink),
-				InlineKeyboardButton.WithUrl("Добавить бота в канал", BotSettings.inviteLink)
+				InlineKeyboardButton.WithUrl("Добавить бота в чат", inviteLink),
+				InlineKeyboardButton.WithUrl("Добавить бота в канал", inviteLink)
 			});
 
 			buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("🔙 Назад", BACK) });
