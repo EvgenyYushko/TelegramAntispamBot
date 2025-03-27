@@ -21,6 +21,7 @@ namespace TelegramAntispamBot.Tests
 		private Mock<ITelegramUserService> _userInfoService;
 		private Mock<IUserService> _userSerivce;
 		private Mock<ISpamDetector> _spamDetector;
+		private Mock<IMLService> _mlService;
 
 		private CancellationToken _cancellationToken;
 		private IHandleMessageService _service;
@@ -35,9 +36,11 @@ namespace TelegramAntispamBot.Tests
 			_userInfoService = new();
 			_userSerivce = new();
 			_spamDetector = new();
+			_mlService = new();
 			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, _userInfoService.Object
 				, _userSerivce.Object
-				, _spamDetector.Object);
+				, _spamDetector.Object
+				, _mlService.Object);
 		}
 
 		[Test]

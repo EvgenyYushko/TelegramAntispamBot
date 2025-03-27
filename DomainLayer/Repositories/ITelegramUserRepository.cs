@@ -34,5 +34,7 @@ namespace DomainLayer.Repositories
 
 		public Task UpdateLocalStorage();
 
+		public List<TelegramChannelAdmin> GetAllAdmins();	
+
 	}
 }

@@ -20,52 +20,6 @@ namespace BuisinessLogic.Services.Telegram
 			_usersRepository = usersRepository;
 		}
 
-		public Task UpdateSuspiciousMessages(SuspiciousMessageDto message)
-		{
-			return _usersRepository.UpdateSuspiciousMessages(new SuspiciousMessage()
-			{
-				Id = message.Id,
-				Text = message.Text,
-				CreatedAt = message.CreatedAt,
-				IsSpamByGemini = message.IsSpamByGemini,
-				IsSpamByMl = message.IsSpamByMl,
-				IsSpamByUser = message.IsSpamByUser,
-				NeedsManualReview = message.NeedsManualReview,
-				Probability = message.Probability
-			});
-		}
-
-		public Task AddSuspiciousMessages(SuspiciousMessageDto message)
-		{
-			return _usersRepository.AddSuspiciousMessages(new SuspiciousMessage()
-			{
-				Text = message.Text,
-				CreatedAt = message.CreatedAt,
-				IsSpamByGemini = message.IsSpamByGemini,
-				IsSpamByMl = message.IsSpamByMl,
-				IsSpamByUser = message.IsSpamByUser,
-				NeedsManualReview = message.NeedsManualReview,
-				Probability = message.Probability
-			});
-		}
-
-		public List<SuspiciousMessageDto> GetAllSuspiciousMessages()
-		{
-			var msgs = _usersRepository.GetAllSuspiciousMessages();
-
-			return msgs.Select(m => new SuspiciousMessageDto()
-			{
-				Text = m.Text,
-				IsSpamByUser = m.IsSpamByUser,
-				NeedsManualReview = m.NeedsManualReview,
-				Probability = m.Probability,
-				CreatedAt = m.CreatedAt,
-				Id = m.Id,
-				IsSpamByGemini = m.IsSpamByGemini,
-				IsSpamByMl = m.IsSpamByMl
-			}).ToList();	
-		}
-
 		public TelegramUser Get(long id)
 		{
 			return _usersRepository.Get(id);
@@ -202,6 +156,16 @@ namespace BuisinessLogic.Services.Telegram
 			}
 
 			return true;
-		}		
+		}
+
+		public List<TelegramUser> GetAllAdmins()
+		{
+			var admins = _usersRepository.GetAllAdmins();
+
+			return admins.Select(a => new TelegramUser
+			{
+				UserId = a.UserId
+			}).ToList();
+		}
 	}
 }

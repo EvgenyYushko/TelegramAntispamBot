@@ -7,8 +7,5 @@ namespace ML_SpamClassifier.Interfaces
 		Task LoadModel();
 		Task TrainModelAsync();
 		bool IsSpam(string text, ref string comment);
-		public void AddSpamSample(string text);
-		public void AddHamSample(string text);
-		string GetModelStatus();
 	}
 }

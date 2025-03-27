@@ -116,6 +116,7 @@ namespace TelegramAntispamBot
 			{
 				services.AddSingleton<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddSingleton<ITelegramUserService, TelegramUserService>();
+				services.AddSingleton<IMLService, MLService>();
 				services.AddSingleton<ExternalAuthManager>();
 				services.AddSingleton<ISpamDetector, SpamDetector>();
 
@@ -128,6 +129,7 @@ namespace TelegramAntispamBot
 			{
 				services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				services.AddScoped<ITelegramUserService, TelegramUserService>();
+				services.AddScoped<IMLService, MLService>();
 				services.AddScoped<ExternalAuthManager>();
 				services.AddScoped<ISpamDetector, SpamDetector>();
 			}
@@ -277,15 +279,22 @@ namespace TelegramAntispamBot
 					var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 					var googleDriveUploader = scope.ServiceProvider.GetRequiredService<IGoogleDriveUploader>();
 					var generativeLanguageModel = scope.ServiceProvider.GetRequiredService<IGenerativeLanguageModel>();
+					var mlService = scope.ServiceProvider.GetRequiredService<IMLService>();
 					var telegreamUserService = new TelegramUserService(new TelegramUserRepository(dbContext));
 
-					var testController = new BotController(new HandleMessageService
-						(new DeleteMessageService()
-						, new ProfanityCheckerService(new ProfanityCheckerRepository())
-						, telegreamUserService
-						, userService
-						, new SpamDetector(googleDriveUploader, generativeLanguageModel, telegreamUserService))
-						, _telegram);
+					var testController = new BotController
+						(
+							new HandleMessageService
+							(
+								new DeleteMessageService()
+								, new ProfanityCheckerService(new ProfanityCheckerRepository())
+								, telegreamUserService
+								, userService
+								, new SpamDetector(generativeLanguageModel, mlService)
+								, mlService
+							)
+							, _telegram
+						);
 					testController.RunLocalTest();
 				}
 			}

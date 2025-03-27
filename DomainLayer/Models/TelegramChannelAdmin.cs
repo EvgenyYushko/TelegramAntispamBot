@@ -1,7 +1,4 @@
-﻿using System.Threading.Channels;
-using Telegram.Bot.Types;
-
-namespace DomainLayer.Models
+﻿namespace DomainLayer.Models
 {
 	public class TelegramChannelAdmin
 	{

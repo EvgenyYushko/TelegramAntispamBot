@@ -26,6 +26,7 @@ namespace BuisinessLogic.Handlers
 		private const string OPEN_SETTINGS = "open_settngs";
 		private const string BACK = "back";
 		private const string HELP_CHAT = "help_chat";
+		private const string RE_TRAIN_MODEL= "re_train_model";
 
 		private const string SPAM = "spam";
 		private const string HUM = "hum";
@@ -33,18 +34,21 @@ namespace BuisinessLogic.Handlers
 		private static InlineKeyboardButton[] myChatsButton = new[] { InlineKeyboardButton.WithCallbackData("📂 Мои чаты", OPEN_CHATS) };
 		private static InlineKeyboardButton[] connectSettingButton = new[] { InlineKeyboardButton.WithCallbackData("Подключить защиту", OPEN_SETTINGS) };
 		private static InlineKeyboardButton[] helpChatButton = new[] { InlineKeyboardButton.WithCallbackData("Помощь боту", HELP_CHAT) };
+		private static InlineKeyboardButton[] reTrainModelButton = new[] { InlineKeyboardButton.WithCallbackData("Переобучить модель", RE_TRAIN_MODEL) };
 
 		private readonly IDeleteMessageService _deleteMessageService;
 		private readonly IProfanityCheckerService _profanityCheckerService;
 		private readonly ITelegramUserService _telegramUserService;
 		private readonly IUserService _userService;
 		private readonly ISpamDetector _spamDetector;
+		private readonly IMLService _mLService;
 		TelegramBotClient _telegramClient;
 
 		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService
 			, ITelegramUserService telegramUserService
 			, IUserService userService
 			, ISpamDetector spamDetector
+			, IMLService mLService
 			)
 		{
 			_deleteMessageService = deleteMessageService;
@@ -52,6 +56,7 @@ namespace BuisinessLogic.Handlers
 			_telegramUserService = telegramUserService;
 			_userService = userService;
 			_spamDetector = spamDetector;
+			_mLService = mLService;
 		}
 
 		private static bool _firstRunBot = true;
@@ -62,8 +67,8 @@ namespace BuisinessLogic.Handlers
 
 			if (_firstRunBot)
 			{
-				//await _spamDetector.LoadModel();
-				await _spamDetector.TrainModelAsync();
+				await _mLService.DownloadModel();
+				await _spamDetector.LoadModel();
 				await _telegramUserService.UpdateLocalStorage();
 				_firstRunBot = false;
 			}
@@ -243,6 +248,24 @@ namespace BuisinessLogic.Handlers
 						{
 							await ChekedSpamMsg(callbackQuery.Data.StartsWith(SPAM), update, callbackQuery, cancellationToken);
 						}
+						else if (callbackQuery.Data == RE_TRAIN_MODEL)
+						{
+							var msg = "Сообщений для обновления датасета нету.";
+							var isUpdated = await _mLService.UpdateDataSet();
+							if (isUpdated)
+							{
+								await _spamDetector.TrainModelAsync();
+								await _mLService.UploadModelAndDataSetToDrive();
+								msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
+								return;
+							}
+
+							await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
+									msg,
+									replyMarkup: InlineKeyboardButton.WithCallbackData("🔙 Назад", BACK),
+									parseMode: ParseMode.Html,
+									disableWebPagePreview: true);
+						}
 
 						break;
 					}
@@ -268,7 +291,7 @@ namespace BuisinessLogic.Handlers
 			var parts = callbackQuery.Data.Split('_');
 			var messageId = Guid.Parse(parts[1]); // Получаем msg.Id
 
-			await _telegramUserService.UpdateSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto()
+			await _mLService.UpdateSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto()
 			{
 				Id = messageId,
 				IsSpamByUser = isSpam,
@@ -293,21 +316,21 @@ namespace BuisinessLogic.Handlers
 			var allChars = _telegramUserService.GetAllChats();
 			var allTgBannedUsers = _telegramUserService.GetAllBanedUsers();
 
-			var chatId = update.Message?.From.Id ?? update.CallbackQuery.From.Id;
+			var userId = update.Message?.From.Id ?? update.CallbackQuery.From.Id;
 
 			if (edit)
 			{
-				await _telegramClient.EditMessageTextAsync(chatId, update.CallbackQuery.Message.MessageId,
+				await _telegramClient.EditMessageTextAsync(userId, update.CallbackQuery.Message.MessageId,
 							BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count),
-							replyMarkup: GetMainMenuBoard(),
+							replyMarkup: GetMainMenuBoard(userId),
 							parseMode: ParseMode.Html,
 							disableWebPagePreview: true);
 			}
 			else
 			{
-				await botClient.SendTextMessageAsync(chatId, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count)
+				await botClient.SendTextMessageAsync(userId, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count)
 					, parseMode: ParseMode.Html, disableWebPagePreview: true,
-					cancellationToken: token, replyMarkup: GetMainMenuBoard());
+					cancellationToken: token, replyMarkup: GetMainMenuBoard(userId));
 			}
 		}
 
@@ -315,9 +338,8 @@ namespace BuisinessLogic.Handlers
 		{
 			var callbackQuery = update.CallbackQuery;
 			var userId = callbackQuery.From.Id;
-			var msgs = _telegramUserService.GetAllSuspiciousMessages();
+			var msgs = _mLService.GetAllSuspiciousMessages();
 			var msg = msgs.FirstOrDefault(m => m.IsSpamByUser is null && m.NeedsManualReview);
-			//var msg = msgs.FirstOrDefault();
 			if (msg is null)
 			{
 				await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
@@ -329,11 +351,11 @@ namespace BuisinessLogic.Handlers
 				return;
 			}
 			var text = $"Вероятность спама = {msg.Probability}:\n\n" + msg.Text;
-			//var chatId = update.Message?.From.Id ?? update.CallbackQuery.From.Id;
+			//var userId = update.Message?.From.Id ?? update.CallbackQuery.From.Id;
 			Console.WriteLine(text);
 
 			if (callbackQuery.Message.Text != text)
-{
+			{
 				await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
 						text,
 						replyMarkup: GetSpamHumBoards(msg.Id),
@@ -341,17 +363,39 @@ namespace BuisinessLogic.Handlers
 						disableWebPagePreview: true);
 			}
 
-			//await botClient.SendTextMessageAsync(chatId, msg.Text, parseMode: ParseMode.Html, disableWebPagePreview: true,
+			//await botClient.SendTextMessageAsync(userId, msg.Text, parseMode: ParseMode.Html, disableWebPagePreview: true,
 			//	cancellationToken: token, replyMarkup: GetSpamHumBoards());
 		}
 
-		private static InlineKeyboardMarkup GetMainMenuBoard()
+		private InlineKeyboardMarkup GetMainMenuBoard(long userId)
 		{
+			var userChats = _telegramUserService.GetChatsByUser(userId);
+
+			if (userId == 1231047171)
+			{
+				return new InlineKeyboardMarkup(new[]
+				{
+					connectSettingButton,
+					myChatsButton,
+					helpChatButton,
+					reTrainModelButton
+				});
+			}
+
+			if (userChats is not null && userChats.Any(c => c.AdminsIds.Contains(userId) || c.CreatorId.Equals(userId)))
+			{
+				return new InlineKeyboardMarkup(new[]
+				{
+					connectSettingButton,
+					myChatsButton,
+					helpChatButton
+				});
+			}
+
 			return new InlineKeyboardMarkup(new[]
 			{
 				connectSettingButton,
-				myChatsButton,
-				helpChatButton
+				myChatsButton
 			});
 		}
 

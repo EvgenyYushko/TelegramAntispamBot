@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GoogleServices.Interfaces;
 using Microsoft.ML;
@@ -9,72 +8,39 @@ using ML_SpamClassifier.Interfaces;
 using ML_SpamClassifier.Models;
 using ServiceLayer.Services.Telegram;
 using static Infrastructure.Common.TimeZoneHelper;
+using static ML_SpamClassifier.Helpers.MLHelpers;
 
 namespace ML_SpamClassifier
 {
 	public class SpamDetector : ISpamDetector
 	{
-		public string _googleFolderId = "1CoUNOXOUgq9S2jv1YkJXfcUf-oIVstC8";
-
-		private static string _modelFileName = "model.zip";
-		private static string _dataSetFileName = "spam_dataset.csv";
-
-		private readonly string _modelPath = Path.Combine(AppContext.BaseDirectory, _modelFileName);
-		private readonly string _dataSetPath = Path.Combine(AppContext.BaseDirectory, _dataSetFileName);
 		private readonly MLContext _mlContext = new();
-		private readonly IGoogleDriveUploader _googleDriveUploader;
 		private readonly IGenerativeLanguageModel _generativeLanguageModel;
-		private readonly ITelegramUserService _telegramUserService;
+		private readonly IMLService _msService;
 		private ITransformer _model;
 		private PredictionEngine<MessageData, PredictionResult> _predictor;
 
-		public SpamDetector(IGoogleDriveUploader googleDriveUploader
-			, IGenerativeLanguageModel generativeLanguageModel
-			, ITelegramUserService telegramUserService)
+		public SpamDetector(IGenerativeLanguageModel generativeLanguageModel, IMLService msService)
 		{
-			_googleDriveUploader = googleDriveUploader;
 			_generativeLanguageModel = generativeLanguageModel;
-			_telegramUserService = telegramUserService;
+			_msService = msService;
 		}
 
 		public async Task LoadModel()
 		{
-			// Загрузка сохраненной модели
-			var modelFile = await _googleDriveUploader.GetFileByNameAsync(_modelFileName, _googleFolderId);
-			if (modelFile != null)
+			if (!File.Exists(_modelPath))
 			{
-				// Загрузка файла с Google Диска
-				await _googleDriveUploader.DownloadFileAsync(modelFile.Id, _modelPath);
-
-				// Загрузка модели с локального диска
-				_model = _mlContext.Model.Load(_modelPath, out _);
+				throw new FileNotFoundException($"Файл {_modelPath} с данными не найден");
 			}
-			
-			CreatePredictor();
 
-			Console.WriteLine(GetModelStatus());
+			// Загрузка модели с локального диска
+			_model = _mlContext.Model.Load(_modelPath, out _);
+
+			CreatePredictor();
 		}
 
 		public async Task TrainModelAsync()
 		{
-			await TrainModel();
-			Console.WriteLine(GetModelStatus());
-		}
-
-		private void CreatePredictor()
-		{
-			_predictor = _mlContext.Model.CreatePredictionEngine<MessageData, PredictionResult>(_model);
-		}
-
-		private async Task TrainModel()
-		{
-			//var allFIles = Task.Run(async () => await _googleDriveUploader.GetAllFilesInFolderAsync(_googleFolderId)).Result;
-			var dataSetFile = await _googleDriveUploader.GetFileByNameAsync(_dataSetFileName, _googleFolderId);
-			if (dataSetFile is not null)
-			{
-				await _googleDriveUploader.DownloadFileAsync(dataSetFile.Id, _dataSetPath);
-			}
-
 			if (!File.Exists(_dataSetPath))
 				throw new FileNotFoundException($"Файл {_dataSetPath} с данными не найден");
 
@@ -90,21 +56,22 @@ namespace ML_SpamClassifier
 			_mlContext.Model.Save(_model, data.Schema, _modelPath);
 
 			CreatePredictor();
-			UploadModelToDrive();
+			Console.WriteLine(GetModelStatus());
 		}
 
-		private async void UploadModelToDrive()
+		private void CreatePredictor()
 		{
-			await _googleDriveUploader.UploadFileAsync(_modelPath, _googleFolderId, true);
+			_predictor = _mlContext.Model.CreatePredictionEngine<MessageData, PredictionResult>(_model);
 		}
 
 		public bool IsSpam(string text, ref string comment)
 		{
-			var input = new MessageData { Text = text };
-			var prediction = _predictor.Predict(input);
+			var prediction = _predictor.Predict(new MessageData { Text = text });
 
-			Console.WriteLine($"IsSpam? prediction.Probability = {prediction.Probability}");
+			Console.WriteLine($"IsSpam = {prediction.IsSpam}, Probability = {prediction.Probability}");
 
+			//if (0.10 < prediction.Probability && prediction.Probability < 0.90) // сохраним для анализа
+			//{
 			var isSpamByGemini = Task.Run(async () => await CheckWithGeminiAsync(text)).Result;
 			//if (isSpamByGemini)
 			//{
@@ -112,18 +79,21 @@ namespace ML_SpamClassifier
 			//	comment = geminiResponse;
 			//}
 
-			Task.Run(async () => await _telegramUserService.AddSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto
+			Task.Run(async () => await _msService.AddSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto
 			{
 				Text = text,
-				IsSpamByMl = true,
+				IsSpamByMl = prediction.IsSpam,
 				IsSpamByGemini = isSpamByGemini,
-				IsSpamByUser = prediction.IsSpam,
+				IsSpamByUser = null,
 				Probability = prediction.Probability,
 				NeedsManualReview = true,
 				CreatedAt = DateTimeNow
 			})).Wait();
 
 			return false;
+			//}
+
+			//return prediction.IsSpam;
 		}
 
 		private async Task<bool> CheckWithGeminiAsync(string messageText)
@@ -137,26 +107,6 @@ namespace ML_SpamClassifier
 				$"Ответь только 'да' или 'нет': {messageText}");
 
 			return geminiResponse.ToLower().Contains("да");
-		}
-
-		public void AddSpamSample(string text) => AddSample(text, true);
-		public void AddHamSample(string text) => AddSample(text, false);
-
-		private void AddSample(string text, bool isSpam)
-		{
-			var line = $"{isSpam},\"{text.Replace("\"", "\"\"")}\"{Environment.NewLine}";
-			using (var writer = new StreamWriter(_dataSetFileName, true, Encoding.UTF8))
-			{
-				writer.Write(line);
-			}
-		}
-
-		public string GetModelStatus()
-		{
-			var info = new FileInfo(_modelPath);
-			return $"Модель обучена: {info.Exists}\n" +
-				   $"Размер модели: {info.Length / 1024} KB\n" +
-				   $"Последнее обновление: {info.LastWriteTime}";
 		}
 	}
 }

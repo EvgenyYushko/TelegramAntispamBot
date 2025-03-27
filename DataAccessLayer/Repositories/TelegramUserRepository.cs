@@ -509,5 +509,12 @@ namespace DataAccessLayer.Repositories
 
 			await _context.SaveChangesAsync();
 		}
+
+		public List<TelegramChannelAdmin> GetAllAdmins()
+		{
+			return _context.TelegramChannelAdmin
+				.AsNoTracking()
+				.ToList();
+		}
 	}
 }
