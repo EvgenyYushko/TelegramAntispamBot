@@ -28,10 +28,11 @@ namespace TelegramAntispamBot.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Post([FromBody] Update update)
 		{
-			Console.WriteLine("Invike method Post()");
-
 			try
 			{
+				Console.WriteLine("Invike method Post()");
+				Console.WriteLine($"{update.Message?.Text}");
+
 				var token = new CancellationToken();
 				await _messageService.HandleUpdateAsync(_botClient, update, update.Type, token);
 			}

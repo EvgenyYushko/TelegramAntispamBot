@@ -34,12 +34,7 @@ namespace GoogleServices.Drive
 			// Если включена перезапись, ищем существующий файл
 			if (overwrite)
 			{
-				var existingFile = await GetFileByNameAsync(fileName, driveFolderId);
-				if (existingFile != null)
-				{
-					// Удаляем существующий файл
-					await _driveService.Files.Delete(existingFile.Id).ExecuteAsync();
-				}
+				await DeleteFileAcync(fileName, driveFolderId);
 			}
 
 			// Загружаем новый файл
@@ -62,6 +57,16 @@ namespace GoogleServices.Drive
 				throw new Exception("Upload failed: " + result.Exception);
 
 			return request.ResponseBody.Id;
+		}
+
+		public async Task DeleteFileAcync(string fileName, string driveFolderId)
+		{
+			var existingFile = await GetFileByNameAsync(fileName, driveFolderId);
+			if (existingFile != null)
+			{
+				// Удаляем существующий файл
+				await _driveService.Files.Delete(existingFile.Id).ExecuteAsync();
+			}
 		}
 
 		public async Task<Google.Apis.Drive.v3.Data.File> GetFileByNameAsync(string fileName, string folderId = null)

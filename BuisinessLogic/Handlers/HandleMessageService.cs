@@ -27,7 +27,7 @@ namespace BuisinessLogic.Handlers
 		private const string OPEN_SETTINGS = "open_settngs";
 		private const string BACK = "back";
 		private const string HELP_CHAT = "help_chat";
-		private const string RE_TRAIN_MODEL= "re_train_model";
+		private const string RE_TRAIN_MODEL = "re_train_model";
 
 		private const string SPAM = "spam";
 		private const string HUM = "hum";
@@ -61,6 +61,8 @@ namespace BuisinessLogic.Handlers
 		}
 
 		private static bool _firstRunBot = true;
+		private static bool _updateMLProcess;
+
 		/// <inheritdoc />
 		public async Task HandleUpdateAsync(TelegramInject botClient, Update update, UpdateType type, CancellationToken cancellationToken)
 		{
@@ -159,7 +161,12 @@ namespace BuisinessLogic.Handlers
 			switch (type)
 			{
 				case UpdateType.Message when update.Message.Text.Equals("/start"):
-					await SendChoseChats(_telegramClient, update, cancellationToken, false);
+					{
+						using (new WaitDialg(_telegramClient, update.Message.From.Id).Show())
+						{
+							await SendChoseChats(_telegramClient, update, cancellationToken, false);
+						}
+					}
 					break;
 				case UpdateType.Message when BotSettings.IsFlooding(update.Message.From.Id):
 					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
@@ -218,16 +225,19 @@ namespace BuisinessLogic.Handlers
 						var userId = callbackQuery.From.Id;
 						if (callbackQuery.Data == OPEN_SETTINGS)
 						{
-							var settingsBoard = new InlineKeyboardMarkup(new[]
+							using (new WaitDialg(_telegramClient, userId).Show())
 							{
-								myChatsButton
-							});
+								var settingsBoard = new InlineKeyboardMarkup(new[]
+								{
+									myChatsButton
+								});
 
-							await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
-								 BotSettings.ChatSettingsInfo,
-								 replyMarkup: settingsBoard,
-								 parseMode: ParseMode.Html,
-								 disableWebPagePreview: true);
+								await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
+									 BotSettings.ChatSettingsInfo,
+									 replyMarkup: settingsBoard,
+									 parseMode: ParseMode.Html,
+									 disableWebPagePreview: true);
+							}
 						}
 						if (callbackQuery.Data == OPEN_CHATS)
 						{
@@ -239,36 +249,61 @@ namespace BuisinessLogic.Handlers
 						}
 						else if (callbackQuery.Data == BACK)
 						{
-							await SendChoseChats(_telegramClient, update, cancellationToken, true);
+							using (new WaitDialg(_telegramClient, userId).Show())
+							{
+								await SendChoseChats(_telegramClient, update, cancellationToken, true);
+							}
 						}
 						else if (callbackQuery.Data == HELP_CHAT)
 						{
-							await SendHelpChats(_telegramClient, update, cancellationToken);
+							using (new WaitDialg(_telegramClient, userId).Show())
+							{
+								await SendHelpChats(_telegramClient, update, cancellationToken);
+							}
 						}
 						else if (callbackQuery.Data.StartsWith(SPAM) || callbackQuery.Data.StartsWith(HUM))
 						{
-							await ChekedSpamMsg(callbackQuery.Data.StartsWith(SPAM), update, callbackQuery, cancellationToken);
+							using (new WaitDialg(_telegramClient, userId).Show())
+							{
+								await ChekedSpamMsg(callbackQuery.Data.StartsWith(SPAM), update, callbackQuery, cancellationToken);
+							}
 						}
 						else if (callbackQuery.Data == RE_TRAIN_MODEL)
 						{
-							var msg = "Сообщений для обновления датасета нету.";
-							using(new WaitDialg(_telegramClient, userId).Show())
+							Console.WriteLine($"Start._updateMLProcess = {_updateMLProcess}");
+							if (_updateMLProcess)
 							{
-								var isUpdated = await _mLService.UpdateDataSet();
-								if (isUpdated)
-								{
-									await _spamDetector.TrainModelAsync();
-									await _mLService.UploadModelAndDataSetToDrive();
-
-									msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
-								}
+								return;
 							}
 
-							await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
-									msg,
-									replyMarkup: InlineKeyboardButton.WithCallbackData("🔙 Назад", BACK),
-									parseMode: ParseMode.Html,
-									disableWebPagePreview: true);
+							try
+							{
+								_updateMLProcess = true;
+								var msg = "Сообщений для обновления датасета нету.";
+								using (new WaitDialg(_telegramClient, userId).Show())
+								{
+									var isUpdated = await _mLService.UpdateDataSet();
+									if (isUpdated)
+									{
+										//await Task.Delay(120000);
+										await _spamDetector.TrainModelAsync();
+										await _mLService.UploadModelAndDataSetToDrive();
+										// todo удалить все данные для обучения
+										msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
+									}
+								}
+
+								await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
+											msg,
+											replyMarkup: InlineKeyboardButton.WithCallbackData("🔙 Назад", BACK),
+											parseMode: ParseMode.Html,
+											disableWebPagePreview: true);
+							}
+							finally
+							{
+								_updateMLProcess = false;
+								Console.WriteLine($"finally._updateMLProcess = {_updateMLProcess}");
+							}
 						}
 
 						break;
