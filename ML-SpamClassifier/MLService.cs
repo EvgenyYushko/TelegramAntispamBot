@@ -71,6 +71,11 @@ namespace ML_SpamClassifier
 			}).ToList();
 		}
 
+		public Task DeleteAllSuspiciousMessages()
+		{
+			return _telegramUserRepository.DeleteAllSuspiciousMessages();
+		}
+
 		public async Task DownloadModel()
 		{
 			// Загрузка сохраненной модели
@@ -85,21 +90,12 @@ namespace ML_SpamClassifier
 
 		public async Task UploadModelAndDataSetToDrive()
 		{
-			Console.WriteLine("UploadModelAndDataSetToDrive - Start");
-
 			await _googleDriveUploader.UploadFileAsync(_modelPath, _googleFolderId, true);
-
-			Console.WriteLine("UploadModelAndDataSetToDrive - Proc1");
-
 			await _googleDriveUploader.UploadFileAsync(_dataSetPath, _googleFolderId, true);
-
-			Console.WriteLine("UploadModelAndDataSetToDrive - End");
 		}
 
 		public async Task<bool> UpdateDataSet()
 		{
-			Console.WriteLine("UpdateDataSet - Start");
-
 			var msgs = _telegramUserRepository.GetAllSuspiciousMessages();
 			var msgToUpdate = msgs.Where(m => !m.NeedsManualReview && m.IsSpamByUser is not null);
 			if (!msgToUpdate.Any())
@@ -121,8 +117,6 @@ namespace ML_SpamClassifier
 				var cleanText = CleanResponse(msg.Text);
 				SaveToCsv(cleanText, msg.IsSpamByUser.Value ? 1 : 0);
 			}
-
-			Console.WriteLine("UpdateDataSet - End");
 
 			return true;
 		}

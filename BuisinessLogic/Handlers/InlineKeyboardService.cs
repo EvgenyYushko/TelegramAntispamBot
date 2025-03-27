@@ -1,17 +1,16 @@
-﻿using System.Threading.Tasks;
-using System.Threading;
-using System;
-using ServiceLayer.Services.Telegram;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using Infrastructure.Common;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using BuisinessLogic.Services;
+using Infrastructure.Common;
+using ServiceLayer.Services.Telegram;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using static Infrastructure.Common.BotSettings;
-using Newtonsoft.Json.Linq;
 
 namespace BuisinessLogic.Handlers
 {
@@ -99,12 +98,12 @@ namespace BuisinessLogic.Handlers
 							//await Task.Delay(120000);
 							await _spamDetector.TrainModelAsync();
 							await _mLService.UploadModelAndDataSetToDrive();
-							// todo удалить все данные для обучения
+							await _mLService.DeleteAllSuspiciousMessages();
 							msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
 						}
 					}
 
-					await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,msg,
+					await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId, msg,
 						replyMarkup: InlineKeyboardButton.WithCallbackData("🔙 Назад", BACK),
 						parseMode: ParseMode.Html,
 						disableWebPagePreview: true);
@@ -172,8 +171,8 @@ namespace BuisinessLogic.Handlers
 			}
 
 			var percent = (msg.Probability * 100).ToString("0.00%").Replace(".", ",");
-			var text = $"Модель: {(msg.IsSpamByMl? "Спам" : "Не спам")}, вероятность = {percent}:\n" +
-					   $"Gemini: {(msg.IsSpamByGemini.Value? "Спам" : "Не спам")}" +
+			var text = $"Модель: {(msg.IsSpamByMl ? "Спам" : "Не спам")}, вероятность = {percent}:\n" +
+					   $"Gemini: {(msg.IsSpamByGemini.Value ? "Спам" : "Не спам")}" +
 					   $"\n\n" + msg.Text;
 
 			Console.WriteLine(text);
