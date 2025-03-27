@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BuisinessLogic.Services;
 using Infrastructure.Common;
 using Infrastructure.Enumerations;
 using Infrastructure.Extentions;
@@ -251,13 +252,16 @@ namespace BuisinessLogic.Handlers
 						else if (callbackQuery.Data == RE_TRAIN_MODEL)
 						{
 							var msg = "Сообщений для обновления датасета нету.";
-							var isUpdated = await _mLService.UpdateDataSet();
-							if (isUpdated)
+							using(new WaitDialg(_telegramClient, userId).Show())
 							{
-								await _spamDetector.TrainModelAsync();
-								await _mLService.UploadModelAndDataSetToDrive();
-								msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
-								return;
+								var isUpdated = await _mLService.UpdateDataSet();
+								if (isUpdated)
+								{
+									await _spamDetector.TrainModelAsync();
+									await _mLService.UploadModelAndDataSetToDrive();
+
+									msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
+								}
 							}
 
 							await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
