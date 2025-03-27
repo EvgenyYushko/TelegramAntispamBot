@@ -9,8 +9,9 @@ namespace Infrastructure.Common
 	{
 		public static string NoCommentWord = "лох";
 		private static string LINK = "https://telegramantispambot.onrender.com/User/Profile";
-		const string botUsername = "YN_AntispamBot"; // Замените на ваш username без @
-		public static string inviteLink = $"https://t.me/{botUsername}?startgroup=true";
+		public const string BOT_USER_NAME = "YN_AntispamBot"; 
+		public const long ADMIN_ID = 1231047171; 
+		public static string inviteLink = $"https://t.me/{BOT_USER_NAME}?startgroup=true";
 		private static Dictionary<long, Queue<DateTime>> _userActivity = new();
 
 		//Add your telegram nickname here
@@ -37,7 +38,7 @@ namespace Infrastructure.Common
 
 		public static readonly string ChatSettingsInfo = 
 			$"📝 <b>Инструкция по подключению защиты</b>\r\n\r\n" +
-			$"1️⃣  Добавьте <a href=\"{inviteLink}\">@{botUsername}</a> в администраторы группы или канала. Можно через ссылку: <a href=\"{inviteLink}\">для группы</a> и для канала.\r\n\r\n" +
+			$"1️⃣  Добавьте <a href=\"{inviteLink}\">@{BOT_USER_NAME}</a> в администраторы группы или канала. Можно через ссылку: <a href=\"{inviteLink}\">для группы</a> и для канала.\r\n\r\n" +
 			$"2️⃣  Выдайте права <b>Удаление сообщений</b> и <b>Блокировка пользователей</b>\r\n\r\n" +
 			$"⚠️ Обратите внимание:\r\n\r\n" +
 			$"— Бот совместим с другими ботами защитниками;\r\n" +

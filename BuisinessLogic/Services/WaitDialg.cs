@@ -18,8 +18,6 @@ namespace BuisinessLogic.Services
 		{
 			_telegramClient = telegramClient;
 			_userId = userId;
-
-			Console.WriteLine("WaitDialg Create");
 		}
 
 		public WaitDialg Show()
@@ -30,8 +28,6 @@ namespace BuisinessLogic.Services
 
 		private async Task ShowWaitDialog()
 		{
-			Console.WriteLine("ShowWaitDialog Start");
-
 			_cts = new CancellationTokenSource();
 
 			// Отправляем начальное сообщение СНАЧАЛА
@@ -63,7 +59,6 @@ namespace BuisinessLogic.Services
 				}
 				catch (OperationCanceledException)
 				{
-					Console.WriteLine("ShowWaitDialog OperationCanceledException");
 					// Ожидаемое прерывание при отмене
 				}
 				catch (Exception ex)
@@ -72,33 +67,23 @@ namespace BuisinessLogic.Services
 					Console.WriteLine($"Animation error: {ex.Message}");
 				}
 			});
-
-			Console.WriteLine("ShowWaitDialog End");
 		}
 
 		public void Dispose()
 		{
-			Console.WriteLine("ShowWaitDialog.Dispose Start");
-
 			// Останавливаем анимацию в любом случае
 			_cts.Cancel();
 			Task.Run(async () => await Close()).Wait();
-
-			Console.WriteLine("ShowWaitDialog.Dispose End");
 		}
 
 		private async Task Close()
 		{
-			Console.WriteLine("ShowWaitDialog.Close Start");
-
 			await _animationTask;
 
 			await _telegramClient.DeleteMessageAsync(
 				chatId: _userId,
 				messageId: _msgProgress.MessageId
 			);
-
-			Console.WriteLine("ShowWaitDialog.Close End");
 		}
 	}
 }

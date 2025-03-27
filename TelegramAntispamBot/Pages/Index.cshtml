@@ -1,9 +1,10 @@
 ﻿@page
 @model IndexModel
+@using static Infrastructure.Common.BotSettings
 @{
-
+    
     var botName = Loc["Header"];
-    var botLink = "https://t.me/YN_AntispamBot";
+    var botLink = $"https://t.me/{BOT_USER_NAME}";
     var botOwner = "https://t.me/EvgenyYushko";
 
     ViewData["Title"] = botName;
