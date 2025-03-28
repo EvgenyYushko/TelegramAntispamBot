@@ -314,7 +314,7 @@ namespace DataAccessLayer.Repositories
 				{
 					UserId = userId,
 					ChatId = chatId,
-					SendLinks = false
+					SendLinks = true
 				});
 			}
 		}
