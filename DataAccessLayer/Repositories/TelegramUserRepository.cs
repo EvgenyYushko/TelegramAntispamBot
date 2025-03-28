@@ -41,9 +41,11 @@ namespace DataAccessLayer.Repositories
 
 		public async Task DeleteAllSuspiciousMessages()
 		{
-			var all = _context.SuspiciousMessages;
-			IEnumerable<SuspiciousMessage> dell = all.Select(s => s);
-			_context.SuspiciousMessages.RemoveRange(dell);
+			var all = await _context.SuspiciousMessages
+				.AsNoTracking()
+				.ToListAsync();
+        
+			_context.SuspiciousMessages.RemoveRange(all);
 			await _context.SaveChangesAsync();
 		}
 
@@ -54,8 +56,6 @@ namespace DataAccessLayer.Repositories
 
 			msg.IsSpamByUser = message.IsSpamByUser;
 			msg.NeedsManualReview = message.NeedsManualReview;
-
-			Console.WriteLine($"UpdateSuspiciousMessages => msg.Id = {msg.Id}, msg.IsSpamByUser={msg.IsSpamByUser}");
 
 			await _context.SaveChangesAsync();
 		}
