@@ -1,6 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Manage Connected Accounts";
-    const string REDIREC_URL = "/User/Profile";
+    var returnUrl = Context.Request.Query.TryGetValue("ReturnUrl", out var returnUrlParam)
+        ? returnUrlParam.ToString()
+        : "/User/Profile";
 }
 
 <style>
@@ -41,7 +43,7 @@
         </div>
         <div class="social-buttons-container">
         <form method="post" asp-page-handler="ExternalLogin" class="w-100">
-            <input type="hidden" name="returnUrl" value=@REDIREC_URL />
+            <input type="hidden" name="returnUrl" value=@returnUrl />
             <button type="submit"
                     name="provider"
                     value="Google"
@@ -55,7 +57,7 @@
             </button>
         </form>
             <form method="post" asp-page-handler="ExternalLogin" class="w-100">
-                <input type="hidden" name="returnUrl" value=@REDIREC_URL />
+            <input type="hidden" name="returnUrl" value=@returnUrl />
                 <button type="submit"
                         name="provider"
                         value="Vkontakte"
@@ -68,7 +70,7 @@
             </form>
 
             <form method="post" asp-page-handler="ExternalLogin" class="w-100">
-                <input type="hidden" name="returnUrl" value=@REDIREC_URL />
+            <input type="hidden" name="returnUrl" value=@returnUrl />
                 <button type="submit"
                         name="provider"
                         value="GitHub"
@@ -81,7 +83,7 @@
             </form>
 
             <form method="post" asp-page-handler="ExternalLogin" class="w-100">
-                <input type="hidden" name="returnUrl" value=@REDIREC_URL />
+            <input type="hidden" name="returnUrl" value=@returnUrl />
                 <button type="submit"
                         name="provider"
                         value="MailRu"
@@ -95,7 +97,7 @@
 
         <form method="post" asp-page-handler="ExternalLogin" class="w-100">
             <!-- Добавлен класс w-100 -->
-            <input type="hidden" name="returnUrl" value="@REDIREC_URL" />
+            <input type="hidden" name="returnUrl" value=@returnUrl />
             <button type="submit"
                     name="provider"
                     value="Microsoft"
