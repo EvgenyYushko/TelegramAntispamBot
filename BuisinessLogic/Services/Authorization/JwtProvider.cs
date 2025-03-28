@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using DomainLayer.Models.Authorization;
 using Infrastructure.Models;
@@ -22,7 +21,7 @@ namespace BuisinessLogic.Services.Authorization
 
 		public string GenerateToken(UserAccount user)
 		{
-			Claim[] claims = GetClaims(user);
+			var claims = GetClaims(user);
 
 			var signingCredentials = new SigningCredentials(
 				new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey)),

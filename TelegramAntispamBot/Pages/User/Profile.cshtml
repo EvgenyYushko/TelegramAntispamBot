@@ -1,14 +1,12 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.User.ProfileModel
-@{ 
+@using Microsoft.AspNetCore.Mvc.Localization
+@model ProfileModel
+@{
     Layout = "~/Pages/Shared/_Layout.cshtml";
     var user = Model.CurrentUser;
     var telegramUser = Model.TelegramUser;
 }
-
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 
 <style>
@@ -152,10 +150,10 @@
     {
         @if (telegramUser.UserId != 0)
         {
-            <div class="card-section" 
-                 onclick="goToUser(@telegramUser.UserId, null)" 
+            <div class="card-section"
+                 onclick="goToUser(@telegramUser.UserId, null)"
                  style="cursor: pointer; transition: background-color 0.3s;"
-                 onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                 onmouseover="this.style.backgroundColor='#f8f9fa'"
                  onmouseout="this.style.backgroundColor='#fff'">
                 <h3 class="section-title">Telegram Профиль</h3>
                 <div class="profile-item">
@@ -229,7 +227,7 @@
                     @Loc["Log_Out"]
                 </button>
                 <button onclick="if (confirmDelete()) { location.href='@Url.Page("/User/Delete")'; }"
-                        class="action-button danger-button" >
+                        class="action-button danger-button">
                     Удалить аккаунт
                 </button>
             </div>

@@ -11,7 +11,7 @@ namespace MailSenderService.BuisinessLogic.Services
 	public class MailService : IMailService
 	{
 		private readonly MailOptions _mailOptions;
-		
+
 		public MailService(MailOptions mailOptions)
 		{
 			_mailOptions = mailOptions;
@@ -29,7 +29,7 @@ namespace MailSenderService.BuisinessLogic.Services
 				smtpClient.Credentials = new NetworkCredential(_mailOptions.SenderEmail, _mailOptions.SenderPassword);
 				smtpClient.EnableSsl = _mailOptions.EnableSsl;
 
-				using (MailMessage mailMessage = new MailMessage())
+				using (var mailMessage = new MailMessage())
 				{
 					mailMessage.From = new MailAddress(_mailOptions.SenderEmail);
 					mailMessage.To.Add(toAddress);

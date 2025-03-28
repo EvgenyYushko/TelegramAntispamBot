@@ -12,10 +12,11 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 {
 	public class ManageExternalLoginsModel : AuthModelModel
 	{
-		private readonly UserManager<UserEntity> _userManager;
 		private readonly SignInManager<UserEntity> _signInManager;
+		private readonly UserManager<UserEntity> _userManager;
 
-		public ManageExternalLoginsModel(UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
+		public ManageExternalLoginsModel(UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager,
+			ExternalAuthManager externalAuthManager)
 			: base(signInManager, externalAuthManager)
 		{
 			_userManager = userManager;
@@ -23,6 +24,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 		}
 
 		public IList<ExternalLoginEntity> ExternalLogins { get; set; }
+
 		public IList<AuthenticationScheme> OtherLogins { get; set; }
 
 		public async Task OnGetAsync()

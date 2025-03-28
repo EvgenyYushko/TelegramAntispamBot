@@ -1,8 +1,8 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.Admin.AnalyticsModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@model AnalyticsModel
 @{
 }
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 
 <!DOCTYPE html>
@@ -101,31 +101,31 @@
     </style>
 </head>
 <body>
-    <h1>@Loc["Analytics_Dashboard"]</h1>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>@Loc["Date_Time"]</th>
-                    <th>@Loc["Type"]</th>
-                    <th>@Loc["Message"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var log in Model.Logs)
-                {
-                    <tr>
-                        <td>@log.DateTime</td>
-                        <td>@log.Type</td>
-                        <td>@log.Message</td>
-                    </tr>
-   }
-            </tbody>
-        </table>
-    </div>
-    <div class="button-container">
-        <button onclick="window.location.href='/export-logs'">@Loc["Export_Log"]</button>
-        <button onclick="window.location.href='/clear-logs'">@Loc["Clear Log"]</button>
-    </div>
+<h1>@Loc["Analytics_Dashboard"]</h1>
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>@Loc["Date_Time"]</th>
+            <th>@Loc["Type"]</th>
+            <th>@Loc["Message"]</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var log in Model.Logs)
+        {
+            <tr>
+                <td>@log.DateTime</td>
+                <td>@log.Type</td>
+                <td>@log.Message</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+<div class="button-container">
+    <button onclick="window.location.href='/export-logs'">@Loc["Export_Log"]</button>
+    <button onclick="window.location.href='/clear-logs'">@Loc["Clear Log"]</button>
+</div>
 </body>
 </html>

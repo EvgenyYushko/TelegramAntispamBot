@@ -10,8 +10,8 @@ namespace TelegramAntispamBot.Pages.User
 {
 	public class DeleteModel : PageModelBase
 	{
-		private readonly IUserService _userService;
 		private readonly SignInManager<UserEntity> _signInManager;
+		private readonly IUserService _userService;
 
 		public DeleteModel(IUserService userService, SignInManager<UserEntity> signInManager)
 		{
@@ -32,7 +32,7 @@ namespace TelegramAntispamBot.Pages.User
 					foreach (var err in res.Errors)
 					{
 						ModelState.AddModelError("", err.Description);
-						return Page();// TODO переделать!
+						return Page(); // TODO переделать!
 					}
 				}
 			}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,9 +14,9 @@ namespace GoogleServices.Gemini
 {
 	public class GenerativeLanguageModel : IGenerativeLanguageModel
 	{
-		private string _geminiApiKey;
-		private static readonly HttpClient httpClient = new HttpClient();
-		private static Stack<string> modelsStack = new Stack<string>();
+		private static readonly HttpClient httpClient = new();
+		private static readonly Stack<string> modelsStack = new();
+		private readonly string _geminiApiKey;
 
 		public GenerativeLanguageModel(string geminiApiKey)
 		{
@@ -23,7 +24,8 @@ namespace GoogleServices.Gemini
 			InitGeminiModels();
 			SwitchToNextModel();
 		}
-		public static string GeminiModel {get;set;}
+
+		public static string GeminiModel { get; set; }
 
 		private static void SwitchToNextModel()
 		{
@@ -46,31 +48,32 @@ namespace GoogleServices.Gemini
 		public async Task<string> AskGemini(string prompt)
 		{
 			const int maxRetries = 5; // Максимальное количество попыток
-			int attempt = 0;
+			var attempt = 0;
 
 			while (attempt < maxRetries)
 			{
 				try
 				{
-					var url = $"https://generativelanguage.googleapis.com/v1beta/models/{GeminiModel}:generateContent?key={_geminiApiKey}";
+					var url =
+						$"https://generativelanguage.googleapis.com/v1beta/models/{GeminiModel}:generateContent?key={_geminiApiKey}";
 
 					var request = new
 					{
 						contents = new[]
 						{
-					new
-					{
-						parts = new[]
-						{
-							new { text = $"{prompt}" }
-						}
-						}
-					},
+							new
+							{
+								parts = new[]
+								{
+									new { text = $"{prompt}" }
+								}
+							}
+						},
 						generationConfig = new
 						{
 							temperature = 0.1,
 							topK = 1,
-							topP = 0,
+							topP = 0
 							//maxOutputTokens = 10
 						}
 					};
@@ -88,10 +91,11 @@ namespace GoogleServices.Gemini
 					if (!response.IsSuccessStatusCode)
 					{
 						var errorContent = await response.Content.ReadAsStringAsync();
-						if (response.StatusCode == (System.Net.HttpStatusCode)429) // 429 TooManyRequests
+						if (response.StatusCode == (HttpStatusCode)429) // 429 TooManyRequests
 						{
 							throw new HttpRequestException("Rate limit exceeded", null, response.StatusCode);
 						}
+
 						throw new HttpRequestException($"API Error: {response.StatusCode} - {errorContent}");
 					}
 
@@ -106,7 +110,7 @@ namespace GoogleServices.Gemini
 
 					throw new InvalidDataException("Invalid API response structure");
 				}
-				catch (HttpRequestException ex) when (ex.StatusCode == (System.Net.HttpStatusCode)429)
+				catch (HttpRequestException ex) when (ex.StatusCode == (HttpStatusCode)429)
 				{
 					attempt++;
 					if (attempt >= maxRetries)
@@ -115,13 +119,14 @@ namespace GoogleServices.Gemini
 						{
 							throw; // Если попытки закончились, выбрасываем исключение
 						}
+
 						SwitchToNextModel();
 						attempt = 0;
 						continue;
 					}
 
 					// Экспоненциальная задержка: 2^attempt секунд
-					int delaySeconds = (int)Math.Pow(2, attempt);
+					var delaySeconds = (int)Math.Pow(2, attempt);
 					Console.WriteLine($"Rate limit exceeded. Retrying in {delaySeconds} seconds...");
 					await Task.Delay(delaySeconds * 1000);
 				}

@@ -1,15 +1,14 @@
-﻿@{
+﻿@using System.Threading
+@using Microsoft.AspNetCore.Mvc.Localization
+@{
     var currentCulture = Thread.CurrentThread.CurrentCulture.Name;
 }
-
-@using System.Threading
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="~/images/Bot.jpg" type="image/png" />
+    <link rel="icon" href="~/images/Bot.jpg" type="image/png"/>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-S7W8HPXKEK"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -17,12 +16,12 @@
         gtag('js', new Date());
         gtag('config', 'G-S7W8HPXKEK');
     </script>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"]</title>
     @* <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"> *@
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     @* <link rel="stylesheet" href="~/css/site.css" /> *@
     <style>
         /* Основной контейнер для страницы */
@@ -66,55 +65,55 @@
     </style>
 </head>
 <body>
-    <div class="page-container">
-        <header>            
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#">@Loc["BotName"]</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/">@Loc["Main"]</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/privacy">@Loc["Privacy_Policy"]</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Account/Login">@Loc["Account"]</a>
-                            </li>
-                        </ul>
-                    </div>
+<div class="page-container">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">@Loc["BotName"]</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/">@Loc["Main"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy">@Loc["Privacy_Policy"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Account/Login">@Loc["Account"]</a>
+                        </li>
+                    </ul>
                 </div>
-            </nav>
-        </header>
-
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-
-        <footer class="border-top footer text-muted">
-            <div class="container d-flex justify-content-center align-items-center gap-3">
-                <span>
-                    &copy; 2025 - @Loc["BotName"] - <a asp-area="" asp-page="/Privacy">@Loc["Privacy_Policy"]</a>
-                </span>
-                <form method="post" asp-page="/SetLanguageModel" class="d-inline">
-                    <select name="language" onchange="this.form.submit()" class="form-select form-select-sm d-inline-block w-auto">
-                        <option value="ru" selected="@(currentCulture == "ru")">🏳 Русский</option>
-                        <option value="en" selected="@(currentCulture == "en")">🏳‍🌈 English</option>
-                    </select>
-                </form>
             </div>
-        </footer>
-    </div>
+        </nav>
+    </header>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script> *@
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    <footer class="border-top footer text-muted">
+        <div class="container d-flex justify-content-center align-items-center gap-3">
+            <span>
+                &copy; 2025 - @Loc["BotName"] - <a asp-area="" asp-page="/Privacy">@Loc["Privacy_Policy"]</a>
+            </span>
+            <form method="post" asp-page="/SetLanguageModel" class="d-inline">
+                <select name="language" onchange="this.form.submit()" class="form-select form-select-sm d-inline-block w-auto">
+                    <option value="ru" selected="@(currentCulture == "ru")">🏳 Русский</option>
+                    <option value="en" selected="@(currentCulture == "en")">🏳‍🌈 English</option>
+                </select>
+            </form>
+        </div>
+    </footer>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script> *@
+
+@await RenderSectionAsync("Scripts", false)
 </body>
 </html>

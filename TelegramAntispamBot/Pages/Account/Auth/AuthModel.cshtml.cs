@@ -13,8 +13,8 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 {
 	public class AuthModelModel : PageModelBase
 	{
-		protected readonly SignInManager<UserEntity> _signInManager;
 		protected readonly ExternalAuthManager _externalAuthManager;
+		protected readonly SignInManager<UserEntity> _signInManager;
 
 		public AuthModelModel(SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
 		{
@@ -24,7 +24,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 
 		public IActionResult OnPostExternalLogin(string provider, string returnUrl)
 		{
-			var redirectUrl = Url.Page("/Account/Auth/AuthModel", pageHandler: "Callback");
+			var redirectUrl = Url.Page("/Account/Auth/AuthModel", "Callback");
 			var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
 			properties.Items["ReturnUrl"] = returnUrl;
 
@@ -81,57 +81,56 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 				await _signInManager.RefreshSignInAsync(currentUser);
 				return LocalRedirect(redirectUrl);
 			}
-			else
+
+			// Логика для неавторизованного пользователя (вход/регистрация)
+			var existingUser =
+				await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
+			if (existingUser != null)
 			{
-				// Логика для неавторизованного пользователя (вход/регистрация)
-				var existingUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
-				if (existingUser != null)
-				{
-					await _signInManager.SignInAsync(existingUser, isPersistent: false);
-					return LocalRedirect(redirectUrl);
-				}
-
-				var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-				if (string.IsNullOrEmpty(email))
-				{
-					return RedirectToPage("/Account/Register");
-				}
-
-				// Поиск пользователя по email
-				var user = await _externalAuthManager.FindUserByEmail(email);
-				if (user != null)
-				{
-					// Проверяем, не связан ли уже провайдер
-					var existingLogin = await _externalAuthManager.ExistsExternalLoginAsync(user.Id, info.LoginProvider);
-					if (existingLogin == null)
-					{
-						await _externalAuthManager.LinkExternalLoginAsync(user, info.LoginProvider, info.ProviderKey);
-					}
-
-					await _signInManager.SignInAsync(user, isPersistent: false);
-					return LocalRedirect(redirectUrl);
-				}
-
-				// Регистрация нового пользователя
-				var regModel = GetRegisterModel(info.Principal);
-				var registrationResult = await _externalAuthManager.RegisterExternalUserAsync(regModel.Username, regModel.Email, Role.User.ToString());
-
-				if (!registrationResult.Succeeded)
-				{
-					foreach (var error in registrationResult.Errors)
-					{
-						ModelState.AddModelError(string.Empty, error.Description);
-					}
-
-					return LocalRedirect(redirectUrl);
-				}
-
-				var newUser = await _externalAuthManager.FindUserByEmail(email);
-				await _externalAuthManager.LinkExternalLoginAsync(newUser, info.LoginProvider, info.ProviderKey);
-
-				await _signInManager.SignInAsync(newUser, isPersistent: false);
+				await _signInManager.SignInAsync(existingUser, false);
 				return LocalRedirect(redirectUrl);
 			}
+
+			var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+			if (string.IsNullOrEmpty(email))
+			{
+				return RedirectToPage("/Account/Register");
+			}
+
+			// Поиск пользователя по email
+			var user = await _externalAuthManager.FindUserByEmail(email);
+			if (user != null)
+			{
+				// Проверяем, не связан ли уже провайдер
+				var existingLogin = await _externalAuthManager.ExistsExternalLoginAsync(user.Id, info.LoginProvider);
+				if (existingLogin == null)
+				{
+					await _externalAuthManager.LinkExternalLoginAsync(user, info.LoginProvider, info.ProviderKey);
+				}
+
+				await _signInManager.SignInAsync(user, false);
+				return LocalRedirect(redirectUrl);
+			}
+
+			// Регистрация нового пользователя
+			var regModel = GetRegisterModel(info.Principal);
+			var registrationResult = await _externalAuthManager.RegisterExternalUserAsync(regModel.Username, regModel.Email, Role.User.ToString());
+
+			if (!registrationResult.Succeeded)
+			{
+				foreach (var error in registrationResult.Errors)
+				{
+					ModelState.AddModelError(string.Empty, error.Description);
+				}
+
+				return LocalRedirect(redirectUrl);
+			}
+
+			var newUser = await _externalAuthManager.FindUserByEmail(email);
+			await _externalAuthManager.LinkExternalLoginAsync(newUser, info.LoginProvider, info.ProviderKey);
+
+			await _signInManager.SignInAsync(newUser, false);
+			return LocalRedirect(redirectUrl);
 		}
 
 		private EntryModel GetRegisterModel(ClaimsPrincipal claimsPrincipal)

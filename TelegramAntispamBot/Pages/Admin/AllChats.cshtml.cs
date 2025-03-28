@@ -32,7 +32,6 @@ namespace TelegramAntispamBot.Pages.Admin
 			}
 
 			return RedirectToPage("/Account/Register");
-
 		}
 	}
 }

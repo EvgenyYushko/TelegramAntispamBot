@@ -2,6 +2,6 @@
 {
 	public enum LogType
 	{
-		Visit = 0,
+		Visit = 0
 	}
 }

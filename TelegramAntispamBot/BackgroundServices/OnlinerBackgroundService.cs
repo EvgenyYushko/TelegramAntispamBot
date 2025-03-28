@@ -11,15 +11,16 @@ namespace TelegramAntispamBot.BackgroundServices
 	{
 		private readonly OnlinerParser _onlinerParser;
 
-		public OnlinerBackgroundService(TelegramInject botClient, OnlinerParser onlinerParser, ITelegramUserService telegramUserService)
+		public OnlinerBackgroundService(TelegramInject botClient, OnlinerParser onlinerParser,
+			ITelegramUserService telegramUserService)
 			: base(botClient, new BackgroundSiteSetting
-			{
-				ScheduledTimes = new[]
 				{
-					new TimeSpan(13, 0, 0), // 13:00
-				}
-			},
-			telegramUserService)
+					ScheduledTimes = new[]
+					{
+						new TimeSpan(13, 0, 0) // 13:00
+					}
+				},
+				telegramUserService)
 		{
 			_onlinerParser = onlinerParser;
 		}

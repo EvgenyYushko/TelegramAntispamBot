@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DomainLayer.Models;
 using DomainLayer.Repositories;
 using Infrastructure.Models;
 using ServiceLayer.Models;
@@ -40,7 +39,7 @@ namespace BuisinessLogic.Services.Telegram
 
 			return res;
 		}
-		
+
 		public Task<bool> TryAddUserExteranl(TelegramUser userInfo)
 		{
 			return _usersRepository.TryAddUserExteranl(userInfo);
@@ -83,18 +82,19 @@ namespace BuisinessLogic.Services.Telegram
 			{
 				return null;
 			}
+
 			return new TelegramUser
 			{
 				UserId = tgUser.UserId,
 				Name = tgUser.Name,
 				CreateDate = tgUser.CreateDate,
-				Permissions = tgUser.Permissions?.Select(p => new TelegramPermissions()
-				{
-					Id = p.Id,
-					UserId = p.UserId,
-					SendLinks = p.SendLinks
-				})
-				.ToList(),
+				Permissions = tgUser.Permissions?.Select(p => new TelegramPermissions
+					{
+						Id = p.Id,
+						UserId = p.UserId,
+						SendLinks = p.SendLinks
+					})
+					.ToList(),
 				UserSiteId = id
 			};
 		}
@@ -108,13 +108,13 @@ namespace BuisinessLogic.Services.Telegram
 					UserId = u.UserId,
 					Name = u.Name,
 					CreateDate = u.CreateDate,
-					Permissions = u.Permissions.Select(p => new TelegramPermissions()
-					{
-						Id = p.Id,
-						UserId = p.UserId,
-						SendLinks = p.SendLinks
-					})
-					.ToList()
+					Permissions = u.Permissions.Select(p => new TelegramPermissions
+						{
+							Id = p.Id,
+							UserId = p.UserId,
+							SendLinks = p.SendLinks
+						})
+						.ToList()
 				})
 				.ToList();
 		}
@@ -141,7 +141,7 @@ namespace BuisinessLogic.Services.Telegram
 			var user = _usersRepository.GetFromLocal(message.From.Id);
 			if (user == null)
 			{
-				user = new()
+				user = new TelegramUser
 				{
 					User = message.From
 				};

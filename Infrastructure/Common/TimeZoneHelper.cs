@@ -4,6 +4,9 @@ namespace Infrastructure.Common
 {
 	public static class TimeZoneHelper
 	{
+		public static DateTime DateTimeNow =>
+			TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo).ToUniversalTime();
+
 		private static TimeZoneInfo _timeZoneInfo
 		{
 			get
@@ -12,13 +15,11 @@ namespace Infrastructure.Common
 				{
 					return TimeZoneInfo.FindSystemTimeZoneById("Europe/Minsk");
 				}
-				catch 
+				catch
 				{
 					return TimeZoneInfo.Local;
 				}
 			}
 		}
-
-		public static DateTime DateTimeNow => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo).ToUniversalTime();
 	}
 }

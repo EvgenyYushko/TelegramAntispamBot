@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DomainLayer.Repositories;
@@ -13,10 +12,10 @@ namespace TelegramAntispamBot.Filters
 {
 	public class LogPageFilter : Attribute, IAsyncResourceFilter
 	{
-		private readonly ILogRepository _logRepository;
 		private readonly IMemoryCache _cache;
+		private readonly ILogRepository _logRepository;
 
-		public LogPageFilter(ILogRepository logRepository, IMemoryCache cache) 
+		public LogPageFilter(ILogRepository logRepository, IMemoryCache cache)
 		{
 			_logRepository = logRepository;
 			_cache = cache;
@@ -27,12 +26,12 @@ namespace TelegramAntispamBot.Filters
 			var url = context.HttpContext.Request.GetDisplayUrl();
 			var ip = GetRealIp(context.HttpContext.Request.Headers["X-Forwarded-For"].ToString());
 
-			if (!_cache.TryGetValue(ip, out object? value))
+			if (!_cache.TryGetValue(ip, out var value))
 			{
-				await _logRepository.Log(new Log()
+				await _logRepository.Log(new Log
 				{
 					Type = LogType.Visit,
-					Message = $"URL: {url}, IP: {ip}",
+					Message = $"URL: {url}, IP: {ip}"
 				});
 
 				_cache.Set(ip, true, TimeSpan.FromMinutes(5));

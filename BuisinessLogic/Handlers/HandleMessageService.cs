@@ -21,20 +21,23 @@ namespace BuisinessLogic.Handlers
 {
 	public partial class HandleMessageService : IHandleMessageService
 	{
+		private static bool _firstRunBot = true;
+		private static bool _updateMLProcess;
 		private readonly IDeleteMessageService _deleteMessageService;
+		private readonly IMLService _mLService;
 		private readonly IProfanityCheckerService _profanityCheckerService;
+		private readonly ISpamDetector _spamDetector;
 		private readonly ITelegramUserService _telegramUserService;
 		private readonly IUserService _userService;
-		private readonly ISpamDetector _spamDetector;
-		private readonly IMLService _mLService;
-		TelegramBotClient _telegramClient;
+		private TelegramBotClient _telegramClient;
 
-		public HandleMessageService(IDeleteMessageService deleteMessageService, IProfanityCheckerService profanityCheckerService
+		public HandleMessageService(IDeleteMessageService deleteMessageService,
+			IProfanityCheckerService profanityCheckerService
 			, ITelegramUserService telegramUserService
 			, IUserService userService
 			, ISpamDetector spamDetector
 			, IMLService mLService
-			)
+		)
 		{
 			_deleteMessageService = deleteMessageService;
 			_profanityCheckerService = profanityCheckerService;
@@ -44,11 +47,9 @@ namespace BuisinessLogic.Handlers
 			_mLService = mLService;
 		}
 
-		private static bool _firstRunBot = true;
-		private static bool _updateMLProcess;
-
 		/// <inheritdoc />
-		public async Task HandleUpdateAsync(TelegramInject botClient, Update update, UpdateType type, CancellationToken cancellationToken)
+		public async Task HandleUpdateAsync(TelegramInject botClient, Update update, UpdateType type,
+			CancellationToken cancellationToken)
 		{
 			_telegramClient = botClient.TelegramClient;
 
@@ -68,10 +69,10 @@ namespace BuisinessLogic.Handlers
 				{
 					//await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
 					await _telegramClient.SendTextMessageAsync(
-					chatId: update.Message.Chat.Id,
-					text: comment,
-					replyToMessageId: update.Message.MessageId, // Цитируем сообщение пользователя
-					cancellationToken: cancellationToken);
+						update.Message.Chat.Id,
+						comment,
+						replyToMessageId: update.Message.MessageId, // Цитируем сообщение пользователя
+						cancellationToken: cancellationToken);
 
 					return;
 				}
@@ -80,33 +81,41 @@ namespace BuisinessLogic.Handlers
 			//var me = await _telegramClient.GetMeAsync();
 			//var test = await _telegramClient.GetChatMenuButtonAsync(update.Message.Chat.Id);
 
-			if (update.Message != null && !update.Message.Type.Equals(MessageType.ChatMembersAdded) && update.Message.Chat.Type.Equals(ChatType.Supergroup) && type is not UpdateType.InlineQuery and not UpdateType.MyChatMember)
+			if (update.Message != null && !update.Message.Type.Equals(MessageType.ChatMembersAdded) &&
+				update.Message.Chat.Type.Equals(ChatType.Supergroup) &&
+				type is not UpdateType.InlineQuery and not UpdateType.MyChatMember)
 			{
 				//var s = await _telegramClient.GetChatAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
-				var chatMember = await _telegramClient.GetChatMemberAsync(new ChatId(update.Message.Chat.Id), update.Message.From.Id, cancellationToken);
-				var admins = await _telegramClient.GetChatAdministratorsAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
+				var chatMember = await _telegramClient.GetChatMemberAsync(new ChatId(update.Message.Chat.Id),
+					update.Message.From.Id, cancellationToken);
+				var admins =
+					await _telegramClient.GetChatAdministratorsAsync(new ChatId(update.Message.Chat.Id),
+						cancellationToken);
 				var creator = admins?.Where(a => a is ChatMemberOwner)
-					.Select(c => new TelegramUser()
+					.Select(c => new TelegramUser
 					{
 						UserId = c.User.Id,
 						Name = c.User.Username
 					}).First();
 				var adminsMember = admins?.Where(a => a is ChatMemberAdministrator adm && !adm.User.IsBot)
-					.Select(a => new TelegramUser()
+					.Select(a => new TelegramUser
 					{
 						UserId = a.User.Id,
-						Name = a.User.Username ?? (string.IsNullOrWhiteSpace(a.User.FirstName) ? "" : a.User.FirstName + " " + (string.IsNullOrWhiteSpace(a.User.LastName) ? "" : a.User.LastName))
+						Name = a.User.Username ?? (string.IsNullOrWhiteSpace(a.User.FirstName)
+							? ""
+							: a.User.FirstName + " " +
+							(string.IsNullOrWhiteSpace(a.User.LastName) ? "" : a.User.LastName))
 					}).ToList();
 
 				if (update.Message is not null)
 				{
-					await _telegramUserService.TryAdd(new()
+					await _telegramUserService.TryAdd(new ()
 					{
 						UserId = update.Message.From.Id,
 						Name = update.Message.From.Username,
 						CreateDate = DateTimeNow,
 						User = update.Message.From,
-						Chanel = new Chanel()
+						Chanel = new Chanel
 						{
 							TelegramChatId = update.Message.Chat.Id,
 							ChatType = update.Message.Chat.Type.ToString(),
@@ -131,9 +140,11 @@ namespace BuisinessLogic.Handlers
 
 			//var chats = _telegramUserService.GetChatsByUser(update.Message.From.Id);
 
-			if (update.Message is not null && update.Message.Type is MessageType.ChatMembersAdded or MessageType.ChatMemberLeft)
+			if (update.Message is not null &&
+				update.Message.Type is MessageType.ChatMembersAdded or MessageType.ChatMemberLeft)
 			{
-				await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
+				await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId,
+					cancellationToken);
 			}
 
 			if (update.HasEmptyMessage())
@@ -145,43 +156,50 @@ namespace BuisinessLogic.Handlers
 			switch (type)
 			{
 				case UpdateType.Message when update.Message.Text.Equals("/start"):
+				{
+					using (new WaitDialog(_telegramClient, update.Message.From.Id).Show())
 					{
-						using (new WaitDialog(_telegramClient, update.Message.From.Id).Show())
-						{
-							await SendChoseChats(_telegramClient, update, cancellationToken, false);
-						}
+						await SendChoseChats(_telegramClient, update, cancellationToken, false);
 					}
+				}
 					break;
 				case UpdateType.Message when IsFlooding(update.Message.From.Id):
-					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
+					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId,
+						cancellationToken);
 					break;
 				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
-					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken, msg: InfoMessageProfanityChecker);
+					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken,
+						InfoMessageProfanityChecker);
 					if (!await _telegramUserService.CheckReputation(update.Message))
 					{
 						await SendPull(botClient, update, update.Message.From);
 					}
+
 					break;
 				// Disable comments if new post contains no-comment word
 				case UpdateType.Message when update.Message.From.IsChannel() &&
-											 update.Message.Text.Contains(NoCommentWord):
+											update.Message.Text.Contains(NoCommentWord):
 				// Delete new comment with link if user not in white-list
 				case UpdateType.Message when update.Message.ContainsUrls() &&
-											 !update.Message.From.IsBot &&
-											 !update.Message.From.IsChannel() &&
-											 !await _telegramUserService.InWhitelist(update.Message.From.Id):
+											!update.Message.From.IsBot &&
+											!update.Message.From.IsChannel() &&
+											!await _telegramUserService.InWhitelist(update.Message.From.Id):
 				// Delete new community-comment if user not in white-list
 				case UpdateType.Message when update.Message.From.IsBot &&
-											 !update.Message.SenderChat.InChannelsWhitelist():
-					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken, InfoMessage, LinkButton);
+											!update.Message.SenderChat.InChannelsWhitelist():
+					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken,
+						InfoMessage, LinkButton);
 					break;
-				case UpdateType.Message when update.Message.Text.Equals("/help") || update.Message.Text.Equals($"/help@{BOT_USER_NAME}"):
+				case UpdateType.Message when update.Message.Text.Equals("/help") ||
+											update.Message.Text.Equals($"/help@{BOT_USER_NAME}"):
 					await SendWelcomeMessage(_telegramClient, update, cancellationToken, update.Message.From);
 					break;
-				case UpdateType.Message when update.Message.Text.Equals("/allbannedusers") || update.Message.Text.Equals($"/allbannedusers@{BOT_USER_NAME}"):
+				case UpdateType.Message when update.Message.Text.Equals("/allbannedusers") ||
+											update.Message.Text.Equals($"/allbannedusers@{BOT_USER_NAME}"):
 					await GetAllBannedUsers(_telegramClient, update, cancellationToken, update.Message.From);
 					break;
-				case UpdateType.Message when update.Message.Text.Equals("/banrequest") || update.Message.Text.Equals($"/banrequest@{BOT_USER_NAME}"):
+				case UpdateType.Message when update.Message.Text.Equals("/banrequest") ||
+											update.Message.Text.Equals($"/banrequest@{BOT_USER_NAME}"):
 					await SendPull(botClient, update, update.Message.From);
 					break;
 				//case UpdateType.PollAnswer:
@@ -192,40 +210,45 @@ namespace BuisinessLogic.Handlers
 					break;
 				// Disable comments if edited post contains no-comment word
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsChannel() &&
-												   update.EditedMessage.Text.Contains(NoCommentWord):
+													update.EditedMessage.Text.Contains(NoCommentWord):
 				// Delete edited comment with link if user not in white-list
 				case UpdateType.EditedMessage when update.EditedMessage.ContainsUrls() &&
-												   !update.EditedMessage.From.IsBot &&
-												   !update.EditedMessage.From.IsChannel() &&
-												   !await _telegramUserService.InWhitelist(update.Message.From.Id):
+													!update.EditedMessage.From.IsBot &&
+													!update.EditedMessage.From.IsChannel() &&
+													!await _telegramUserService.InWhitelist(update.Message.From.Id):
 				// Delete edited community-comment if user not in white-list
 				case UpdateType.EditedMessage when update.EditedMessage.From.IsBot &&
-												   !update.EditedMessage.SenderChat.InChannelsWhitelist():
-					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.EditedMessage, cancellationToken, InfoMessage, LinkButton);
+													!update.EditedMessage.SenderChat.InChannelsWhitelist():
+					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.EditedMessage,
+						cancellationToken, InfoMessage, LinkButton);
 					break;
 				case UpdateType.CallbackQuery:
-					{
-						await CallBackHandler(update, cancellationToken);
-						break;
-					}
+				{
+					await CallBackHandler(update, cancellationToken);
+					break;
+				}
 				case UpdateType.MyChatMember:
+				{
+					if (update.MyChatMember.NewChatMember.Status == ChatMemberStatus.Administrator)
 					{
-						if (update.MyChatMember.NewChatMember.Status == ChatMemberStatus.Administrator)
+						if (update.MyChatMember.NewChatMember.User.IsBot &&
+							update.MyChatMember.NewChatMember.User.Username == BOT_USER_NAME)
 						{
-							if (update.MyChatMember.NewChatMember.User.IsBot && update.MyChatMember.NewChatMember.User.Username == BOT_USER_NAME)
-							{
-								await _telegramClient.SendTextMessageAsync(update.MyChatMember.Chat.Id, GetStartBOtWelcomeMessage(),
-										cancellationToken: cancellationToken);
-							}
+							await _telegramClient.SendTextMessageAsync(update.MyChatMember.Chat.Id,
+								GetStartBOtWelcomeMessage(),
+								cancellationToken: cancellationToken);
 						}
-						break;
 					}
+
+					break;
+				}
 				default:
 					return;
 			}
 		}
 
-		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+		private static async Task HandleChatMemberUpdateAsync(ITelegramBotClient botClient, Update update,
+			CancellationToken cancellationToken)
 		{
 			var newMember = update.Message.NewChatMembers?.FirstOrDefault();
 			// Проверяем, если пользователь добавлен 
@@ -235,16 +258,19 @@ namespace BuisinessLogic.Handlers
 			}
 		}
 
-		private static async Task SendWelcomeMessage(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
+		private static async Task SendWelcomeMessage(ITelegramBotClient botClient, Update update,
+			CancellationToken token, User user)
 		{
 			await botClient.SendTextMessageAsync(update.Message.Chat.Id, GetWelcomeMessage(user),
 				cancellationToken: token);
 		}
 
-		private async Task GetAllBannedUsers(ITelegramBotClient botClient, Update update, CancellationToken token, User user)
+		private async Task GetAllBannedUsers(ITelegramBotClient botClient, Update update, CancellationToken token,
+			User user)
 		{
 			var banedUers = _telegramUserService.GetAllBanedUsers();
-			var usersMsg = "Список заблокированных пользователей ботом за всё время :\n\n" + string.Join("\n", banedUers);
+			var usersMsg = "Список заблокированных пользователей ботом за всё время :\n\n" +
+							string.Join("\n", banedUers);
 
 			await botClient.SendTextMessageAsync(update.Message.Chat.Id, usersMsg, cancellationToken: token);
 		}
@@ -253,11 +279,11 @@ namespace BuisinessLogic.Handlers
 		{
 			// Создание опроса
 			var pollMessage = await botClient.TelegramClient.SendPollAsync(
-				chatId: update.Message.Chat.Id,
-				question: $"Удалить пользователя {user.Username} из чата за нарушения правил?",
-				options: new[] { "Да ✅", "Нет ❌", "Себя удали!" },
+				update.Message.Chat.Id,
+				$"Удалить пользователя {user.Username} из чата за нарушения правил?",
+				new[] { "Да ✅", "Нет ❌", "Себя удали!" },
 				isAnonymous: false,
-				allowsMultipleAnswers: false  // Только один вариант ответа
+				allowsMultipleAnswers: false // Только один вариант ответа
 			);
 
 			var userInfo = _telegramUserService.GetFromLocal(user.Id);
@@ -299,12 +325,14 @@ namespace BuisinessLogic.Handlers
 				{
 					if (ok.VoterCount > 1)
 					{
-						await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"Большенство пользователей проголосовало за исключения " +
+						await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id,
+							"Большенство пользователей проголосовало за исключения " +
 							$"{user.User.Username} из чата. \n\nПоэтому {user.User.Username} покидает чат!");
 
 						try
 						{
-							await _telegramClient.BanChatMemberAsync(user.PullModel.Message.Chat.Id, user.PullModel.Message.From.Id);
+							await _telegramClient.BanChatMemberAsync(user.PullModel.Message.Chat.Id,
+								user.PullModel.Message.From.Id);
 						}
 						catch (Exception e)
 						{
@@ -322,12 +350,14 @@ namespace BuisinessLogic.Handlers
 					}
 					else
 					{
-						await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"Голосование не сотоялось т.к. нужно больше одного голоса.");
+						await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id,
+							"Голосование не сотоялось т.к. нужно больше одного голоса.");
 					}
 				}
 				else
 				{
-					await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id, $"По результатам голосования пользователь " +
+					await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id,
+						"По результатам голосования пользователь " +
 						$"{user.User.Username} остаётся в чате");
 				}
 

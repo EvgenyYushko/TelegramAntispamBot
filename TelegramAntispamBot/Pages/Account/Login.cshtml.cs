@@ -14,7 +14,8 @@ namespace TelegramAntispamBot.Pages.Account
 	{
 		private readonly IUserService _usersService;
 
-		public LoginModel(IUserService usersService, SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
+		public LoginModel(IUserService usersService, SignInManager<UserEntity> signInManager,
+			ExternalAuthManager externalAuthManager)
 			: base(signInManager, externalAuthManager)
 		{
 			_usersService = usersService;
@@ -46,11 +47,10 @@ namespace TelegramAntispamBot.Pages.Account
 				{
 					return RedirectToPage("/User/Profile");
 				}
-				else
-				{
-					ModelState.AddModelError(string.Empty, "Неверный email или пароль.");
-				}
+
+				ModelState.AddModelError(string.Empty, "Неверный email или пароль.");
 			}
+
 			return Page();
 		}
 	}

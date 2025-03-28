@@ -10,17 +10,27 @@ namespace DomainLayer.Repositories
 	public interface ITelegramUserRepository
 	{
 		Task DeleteReviewedSuspiciousMessages();
+
 		Task UpdateSuspiciousMessages(SuspiciousMessage message);
+
 		public List<SuspiciousMessage> GetAllSuspiciousMessages();
+
 		Task AddSuspiciousMessages(SuspiciousMessage message);
+
 		public TelegramUser Get(long id);
+
 		public TelegramUser GetFromLocal(long id);
 
 		public Task<bool> TryAdd(TelegramUser userInfo);
+
 		public Task<bool> TryAddUserExteranl(TelegramUser userInfo);
+
 		public TelegramUserEntity GetByUserSiteId(Guid id);
+
 		public List<Chanel> GetChatsByUser(long userId);
+
 		public List<Chanel> GetAllChats();
+
 		public Chanel GetChatById(long id);
 
 		public TelegramUser FindByPullId(string pullId);
@@ -35,7 +45,6 @@ namespace DomainLayer.Repositories
 
 		public Task UpdateLocalStorage();
 
-		public List<TelegramChannelAdmin> GetAllAdmins();	
-
+		public List<TelegramChannelAdmin> GetAllAdmins();
 	}
 }

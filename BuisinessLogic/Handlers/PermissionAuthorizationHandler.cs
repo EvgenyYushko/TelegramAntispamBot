@@ -18,7 +18,8 @@ namespace BuisinessLogic.Handlers
 			_serviceScopeFactory = serviceScopeFactory;
 		}
 
-		protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
+		protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+			PermissionRequirement requirement)
 		{
 			var userId = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 			//var userRole = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;

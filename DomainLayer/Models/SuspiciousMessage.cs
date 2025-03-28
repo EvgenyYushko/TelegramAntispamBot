@@ -17,9 +17,9 @@ namespace DomainLayer.Models
 
 		public bool? IsSpamByGemini { get; set; } // Результат проверки Gemini (null, если не проверялось)
 
-		public bool IsSpamByMl { get; set; } 
+		public bool IsSpamByMl { get; set; }
 
-		public bool? IsSpamByUser { get; set; } 
+		public bool? IsSpamByUser { get; set; }
 
 		public bool NeedsManualReview { get; set; } = true; // Требуется ли ручная проверка
 

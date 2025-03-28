@@ -14,10 +14,11 @@ namespace TelegramAntispamBot.Pages.Account
 {
 	public class RegisterModel : AuthModelModel
 	{
-		private readonly IUserService _userService;
 		private readonly IMailService _mailService;
+		private readonly IUserService _userService;
 
-		public RegisterModel(IUserService userService, IMailService mailService, SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
+		public RegisterModel(IUserService userService, IMailService mailService,
+			SignInManager<UserEntity> signInManager, ExternalAuthManager externalAuthManager)
 			: base(signInManager, externalAuthManager)
 		{
 			_userService = userService;
@@ -55,7 +56,7 @@ namespace TelegramAntispamBot.Pages.Account
 
 				try
 				{
-					string bodyHtml = HtmlHelper.HTML_TEMPLATE_VERIFY_CODE.Replace("{kod}", kod.ToString());
+					var bodyHtml = HtmlHelper.HTML_TEMPLATE_VERIFY_CODE.Replace("{kod}", kod.ToString());
 					await _mailService.Send(email, bodyHtml, "Регистрация в Антиспам бот", true);
 				}
 				catch (Exception e)
@@ -97,8 +98,10 @@ namespace TelegramAntispamBot.Pages.Account
 				{
 					ModelState.AddModelError("", error.Description);
 				}
+
 				return Page();
 			}
+
 			return Page();
 		}
 	}

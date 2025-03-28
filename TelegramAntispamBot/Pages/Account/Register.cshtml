@@ -1,11 +1,11 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.Account.RegisterModel
+@using Infrastructure.Enumerations
+@using Microsoft.AspNetCore.Mvc.Localization
+@model RegisterModel
 @{
     ViewData["Title"] = "Register";
     var roles = Enum.GetNames(typeof(Role)).Where(role => role != nameof(Role.Admin)).ToList();
 }
-@using Infrastructure.Enumerations
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 <!DOCTYPE html>
 <html lang="en">
@@ -118,64 +118,66 @@
     </script>
 </head>
 <body class="bg-light">
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-sm">
-                    <div class="card-header text-center bg-primary text-white">
-                        <h4>@Loc["Create"]</h4>
-                    </div>
-                    <div class="card-body">
-                        <form method="post" asp-page-handler="Register">
-                            <div class="mb-3">
-                                <label for="Username" class="form-label">@Loc["Username"]</label>
-                                <input type="text" id="Username" name="Username" class="form-control" placeholder=@Loc["Enter_username"] required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="Email" class="form-label">@Loc["Email"]</label>
-                                <input type="email" id="Email" name="Email" class="form-control" placeholder=@Loc["Input_Email"] required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="VerificationCode" class="form-label">Проверочный код</label>
-                                <div class="d-flex gap-2">
-                                    <input type="text"
-                                           id="VerificationCode"
-                                           name="VerificationCode"
-                                           class="form-control"
-                                           placeholder="Введите полученый код"
-                                           required
-                                           maxlength="6">
-                                    <button type="button"
-                                            class="btn btn-outline-primary send-code-btn"
-                                            onclick="sendVerificationCode()">
-                                        @Loc["Send_Code"]
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="Role" class="form-label">@Loc["Select_Role"]</label>
-                                <select id="Role" name="SelectedRole" class="form-select" required>
-                                    @foreach (var role in roles)
-                                    {
-                                        <option value="@role">@role</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="Password" class="form-label">@Loc["Password"]</label>
-                                <input type="password" id="Password" name="Password" class="form-control" placeholder=@Loc["Create_password"] required>
-                            </div>
-                            <div asp-validation-summary="All" class="text-danger"></div>
-                            <button type="submit" class="btn btn-primary w-100">@Loc["Register"]</button>
-                        </form>
-                    </div>
-                    <div class="card-footer text-center">
-                        <p>@Loc["Already_Account"]<a href="/Account/Login" class="text-decoration-none">@Loc["Login_here"]</a></p>
-                    </div>
-                    @await Html.PartialAsync("_ExternalLoginButtons")
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4>@Loc["Create"]</h4>
                 </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="Register">
+                        <div class="mb-3">
+                            <label for="Username" class="form-label">@Loc["Username"]</label>
+                            <input type="text" id="Username" name="Username" class="form-control" placeholder=@Loc["Enter_username"] required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">@Loc["Email"]</label>
+                            <input type="email" id="Email" name="Email" class="form-control" placeholder=@Loc["Input_Email"] required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="VerificationCode" class="form-label">Проверочный код</label>
+                            <div class="d-flex gap-2">
+                                <input type="text"
+                                       id="VerificationCode"
+                                       name="VerificationCode"
+                                       class="form-control"
+                                       placeholder="Введите полученый код"
+                                       required
+                                       maxlength="6">
+                                <button type="button"
+                                        class="btn btn-outline-primary send-code-btn"
+                                        onclick="sendVerificationCode()">
+                                    @Loc["Send_Code"]
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Role" class="form-label">@Loc["Select_Role"]</label>
+                            <select id="Role" name="SelectedRole" class="form-select" required>
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role">@role</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">@Loc["Password"]</label>
+                            <input type="password" id="Password" name="Password" class="form-control" placeholder=@Loc["Create_password"] required>
+                        </div>
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <button type="submit" class="btn btn-primary w-100">@Loc["Register"]</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <p>
+                        @Loc["Already_Account"]<a href="/Account/Login" class="text-decoration-none">@Loc["Login_here"]</a>
+                    </p>
+                </div>
+                @await Html.PartialAsync("_ExternalLoginButtons")
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>

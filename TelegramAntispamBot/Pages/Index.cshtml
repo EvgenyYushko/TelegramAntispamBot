@@ -1,15 +1,14 @@
 ﻿@page
 @model IndexModel
+@using Microsoft.AspNetCore.Mvc.Localization
 @using static Infrastructure.Common.BotSettings
 @{
-    
     var botName = Loc["Header"];
     var botLink = $"https://t.me/{BOT_USER_NAME}";
     var botOwner = "https://t.me/EvgenyYushko";
 
     ViewData["Title"] = botName;
 }
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 
 <div class="container my-5">
@@ -21,7 +20,7 @@
         <div class="card-body">
             <h3 class="text-center mb-4">📚 @Loc["Description"]</h3>
             <p>@Loc["Description_Text"]</p>
-            <hr />
+            <hr/>
             <h3 class="text-center mb-4">✨ @Loc["Possibilities"]</h3>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">🚫 @Loc["Delete"]</li>
@@ -31,7 +30,7 @@
                 <li class="list-group-item">🔒 @Loc["Disables"]</li>
                 <li class="list-group-item">✅ @Loc["Hellow_Text"]</li>
             </ul>
-            <hr />
+            <hr/>
             <h3 class="text-center mb-4">🚀 @Loc["Quick_start"]</h3>
             <p>@Loc["Instructions"]</p>
             <ol class="list-group list-group-numbered">
@@ -43,7 +42,7 @@
                 <li class="list-group-item">@Loc["Instructions_4"]</li>
                 <li class="list-group-item">@Loc["Instructions_5"]</li>
             </ol>
-            <hr />
+            <hr/>
             <h3 class="text-center mb-4">🔒 @Loc["Settings"]</h3>
             <ol class="list-group list-group-numbered">
                 <li class="list-group-item">@Loc["Settings_1"]</li>

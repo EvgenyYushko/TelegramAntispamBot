@@ -1,9 +1,8 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.Admin.TelegramUsersModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@model TelegramUsersModel
 @{
 }
-
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 
 <!DOCTYPE html>
@@ -109,27 +108,27 @@
     </script>
 </head>
 <body>
-    <h1>@Loc["PageName"]</h1>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>@Loc["UserId"]</th>
-                    <th>@Loc["Name"]</th>
-                    <th>@Loc["CreateDate"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model.TelegramUsers)
-                {
-                    <tr onclick="goToUser(@user.UserId, null)">
-                        <td>@user.UserId</td>
-                        <td>@user.Name</td>
-                        <td>@user.CreateDate</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+<h1>@Loc["PageName"]</h1>
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>@Loc["UserId"]</th>
+            <th>@Loc["Name"]</th>
+            <th>@Loc["CreateDate"]</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Model.TelegramUsers)
+        {
+            <tr onclick="goToUser(@user.UserId, null)">
+                <td>@user.UserId</td>
+                <td>@user.Name</td>
+                <td>@user.CreateDate</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DomainLayer.Models;
 using DomainLayer.Repositories;
@@ -23,22 +21,22 @@ namespace DataAccessLayer.Repositories
 		{
 			foreach (var log in _dbContext.Logs.OrderByDescending(i => i.DateTime).AsQueryable())
 			{
-				yield return new Log()
+				yield return new Log
 				{
 					DateTime = log.DateTime,
 					Type = log.Type,
-					Message = log.Message,
+					Message = log.Message
 				};
 			}
 		}
 
 		public async Task Log(Log log)
 		{
-			var logEntity = new LogEntity()
+			var logEntity = new LogEntity
 			{
 				Type = log.Type,
 				DateTime = DateTimeNow,
-				Message = log.Message,
+				Message = log.Message
 			};
 
 			_dbContext.Logs.Add(logEntity);

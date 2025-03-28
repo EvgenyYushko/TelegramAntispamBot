@@ -34,7 +34,9 @@ namespace BuisinessLogic.Services.Parsers
 					// Десериализация JSON
 					var currencies = JsonSerializer.Deserialize<List<CurrencyRate>>(response);
 					if (currencies == null || !currencies.Any())
+					{
 						throw new Exception("Empty response from API");
+					}
 
 					// Получаем актуальную дату из первого элемента
 					var rateDate = DateTime.TryParse(currencies[0].Date, out var date)

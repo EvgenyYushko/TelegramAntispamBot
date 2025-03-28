@@ -15,7 +15,8 @@ namespace DataAccessLayer
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<UserEntity> _userManager;
 
-		public ExternalAuthManager(ApplicationDbContext dbContext, SignInManager<UserEntity> signInManager, UserManager<UserEntity> userManager)
+		public ExternalAuthManager(ApplicationDbContext dbContext, SignInManager<UserEntity> signInManager,
+			UserManager<UserEntity> userManager)
 		{
 			_context = dbContext;
 			_userManager = userManager;
@@ -24,10 +25,10 @@ namespace DataAccessLayer
 		public async Task<UserEntity> FindUserByEmail(string email)
 		{
 			var userEntity = await _context.Users
-					.Include(u => u.Roles)
-					.Include(u => u.ExternalLogins)
-					.AsNoTracking()
-					.FirstOrDefaultAsync(u => u.Email == email);
+				.Include(u => u.Roles)
+				.Include(u => u.ExternalLogins)
+				.AsNoTracking()
+				.FirstOrDefaultAsync(u => u.Email == email);
 
 			return userEntity;
 		}
@@ -70,9 +71,10 @@ namespace DataAccessLayer
 		{
 			var userEntity = await _context.Users
 				.Include(u => u.ExternalLogins)
-				.FirstOrDefaultAsync(u => u.ExternalLogins.Any(e => e.Provider == provider && e.ProviderKey == providerKey));
+				.FirstOrDefaultAsync(u =>
+					u.ExternalLogins.Any(e => e.Provider == provider && e.ProviderKey == providerKey));
 
-			var userEntityTest =  _context.ExternalLogins
+			var userEntityTest = _context.ExternalLogins
 				.ToList();
 
 			foreach (var login in userEntityTest)
@@ -80,7 +82,8 @@ namespace DataAccessLayer
 				Console.WriteLine($"login={login.Id}");
 			}
 
-			Console.WriteLine($"FindUserByExternalLoginAsync -> info.LoginProvider={provider}, info.ProviderKey={providerKey}");
+			Console.WriteLine(
+				$"FindUserByExternalLoginAsync -> info.LoginProvider={provider}, info.ProviderKey={providerKey}");
 
 			return userEntity;
 		}

@@ -8,7 +8,7 @@ namespace DataAccessLayer.Repositories
 	public class ProfanityCheckerRepository : IProfanityCheckerRepository
 	{
 		private readonly string[] _bannedWords;
-		private string FILE_PATH = Path.Combine(AppContext.BaseDirectory, "Resources", "mat.txt");
+		private readonly string FILE_PATH = Path.Combine(AppContext.BaseDirectory, "Resources", "mat.txt");
 
 		public ProfanityCheckerRepository()
 		{

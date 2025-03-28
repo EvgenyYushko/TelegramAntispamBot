@@ -1,12 +1,11 @@
 ﻿@page
+@using Microsoft.AspNetCore.Mvc.Localization
 @model PrivacyModel
 @{
-    var msg = @Loc["Privacy_Policy"];
+    var msg = Loc["Privacy_Policy"];
     ViewData["Title"] = msg;
     var botOwner = "https://t.me/EvgenyYushko";
 }
-
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 
 <div class="container my-5">
@@ -18,20 +17,20 @@
         <div class="card-body">
             <h3 class="text-center mb-4">📜 @Loc["Provisions"]</h3>
             <p>@Loc["We_Respect"]</p>
-            <hr />
+            <hr/>
             <h3 class="text-center mb-4">📂 @Loc["Collect"]</h3>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">🧾 @Loc["Username"]</li>
                 <li class="list-group-item">💬 @Loc["Contents"]</li>
                 <li class="list-group-item">🌐 @Loc["Metadata"]</li>
             </ul>
-            <hr />
+            <hr/>
             <h3 class="text-center mb-4">🛡️ @Loc["How_Protect"]</h3>
             <p>@Loc["All_Data"]</p>
-            <hr />
+            <hr/>
             <h3 class="text-center mb-4">📤 @Loc["Transfer"]</h3>
             <p>@Loc["Your_Data"]</p>
-            <hr />
+            <hr/>
             <h3 class="text-center mb-4">📞 @Loc["Contacts"]</h3>
             <p>@Loc["Questions"]</p>
         </div>

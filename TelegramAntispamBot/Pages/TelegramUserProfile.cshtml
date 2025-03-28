@@ -1,9 +1,9 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.TelegramUserProfileModel
+@model TelegramUserProfileModel
 @{
     ViewData["Title"] = "User Profile";
     var tgUser = Model.TgUser;
-    var chatLocal = @tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)).Select(p => p.Chanel).FirstOrDefault();
+    var chatLocal = tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)).Select(p => p.Chanel).FirstOrDefault();
 }
 
 <div class="container mt-5">
@@ -26,12 +26,14 @@
                         <dd class="col-sm-8">@tgUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</dd>
                     </dl>
                 </div>
-                @if(Model.ChatId != 0)
+                @if (Model.ChatId != 0)
                 {
                     <div class="col-lg-6">
                         <h5 class="text-success">Role in Chat</h5>
                         <div class="p-3 border rounded bg-light">
-                            <p class="mb-0"><strong>Role:</strong> @chatLocal?.Title</p>
+                            <p class="mb-0">
+                                <strong>Role:</strong> @chatLocal?.Title
+                            </p>
                         </div>
                     </div>
                 }
@@ -50,22 +52,22 @@
                     <h5 class="text-danger">Recent Messages</h5>
                     <table class="table table-hover table-bordered">
                         <thead class="bg-dark text-white">
-                            <tr>
-                                <th>Type right</th>
-                                <th>Allow</th>
-                            </tr>
+                        <tr>
+                            <th>Type right</th>
+                            <th>Allow</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            @foreach (var permisson in @tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)))
-                            {
-                                <tr>
-                                    <td>SendLinks</td>
-                                    <td>
-                                        <input type="checkbox" @(permisson.SendLinks ? "checked" : "")
-                                               onchange="toggleSendLinks(@permisson.UserId, this, @permisson.ChatId)">
-                                    </td>
-                                </tr>
-                            }
+                        @foreach (var permisson in tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)))
+                        {
+                            <tr>
+                                <td>SendLinks</td>
+                                <td>
+                                    <input type="checkbox" @(permisson.SendLinks ? "checked" : "")
+                                           onchange="toggleSendLinks(@permisson.UserId, this, @permisson.ChatId)">
+                                </td>
+                            </tr>
+                        }
                         </tbody>
                     </table>
                 </div>

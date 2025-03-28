@@ -8,6 +8,8 @@ namespace DomainLayer.Models
 	{
 		public long UserId { get; set; }
 
+		public Guid? UserSiteId { get; set; }
+
 		public string Name { get; set; }
 
 		public DateTime CreateDate { get; set; }
@@ -20,7 +22,6 @@ namespace DomainLayer.Models
 
 		public List<UserChannelMembership> ChannelMemberships { get; set; } = new();
 
-		public Guid? UserSiteId { get; set; }
 		public UserEntity? UserSite { get; set; }
 	}
 }

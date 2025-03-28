@@ -8,7 +8,6 @@ using DomainLayer.Repositories;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Models;
-using static DataAccessLayer.Helpers.UserRepositoryHelper;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
 
@@ -21,10 +20,10 @@ namespace DataAccessLayer.Repositories
 		public TelegramUserRepository(ApplicationDbContext context)
 		{
 			_context = context;
-			LocalUserStorage = new();
+			LocalUserStorage = new List<TelegramUser>();
 		}
 
-		private List<TelegramUser> LocalUserStorage { get; set; }
+		private List<TelegramUser> LocalUserStorage { get; }
 
 		public List<SuspiciousMessage> GetAllSuspiciousMessages()
 		{
@@ -65,10 +64,10 @@ namespace DataAccessLayer.Repositories
 		public TelegramUser Get(long id)
 		{
 			var userDb = _context.TelegramUsers
-					.Include(t => t.Permissions)
-					.ThenInclude(p => p.Chat)
-					.AsNoTracking()
-					.FirstOrDefault(u => u.UserId.Equals(id));
+				.Include(t => t.Permissions)
+				.ThenInclude(p => p.Chat)
+				.AsNoTracking()
+				.FirstOrDefault(u => u.UserId.Equals(id));
 
 			return new TelegramUser
 			{
@@ -76,13 +75,13 @@ namespace DataAccessLayer.Repositories
 				Name = userDb.Name,
 				CreateDate = userDb.CreateDate,
 				Permissions = userDb.Permissions
-					.Select(p => new TelegramPermissions()
+					.Select(p => new TelegramPermissions
 					{
 						Id = p.Id,
 						UserId = p.UserId,
 						ChatId = p.ChatId,
 						SendLinks = p.SendLinks,
-						Chanel = new Chanel()
+						Chanel = new Chanel
 						{
 							TelegramChatId = p.Chat.Id,
 							Title = p.Chat.Title
@@ -109,13 +108,13 @@ namespace DataAccessLayer.Repositories
 					Name = userDb.Name,
 					CreateDate = userDb.CreateDate,
 					Permissions = userDb.Permissions
-						.Select(p => new TelegramPermissions()
+						.Select(p => new TelegramPermissions
 						{
 							Id = p.Id,
 							UserId = p.UserId,
 							ChatId = p.ChatId,
 							SendLinks = p.SendLinks,
-							Chanel = new Chanel()
+							Chanel = new Chanel
 							{
 								TelegramChatId = p.Chat.Id,
 								Title = p.Chat.Title
@@ -157,7 +156,7 @@ namespace DataAccessLayer.Repositories
 
 				await usersChatPErmisions.ForEachAsync(p => p.SendLinks = true);
 
-				Console.WriteLine($"Данный пользователь уже существует в БД");
+				Console.WriteLine("Данный пользователь уже существует в БД");
 				await _context.SaveChangesAsync();
 
 				return true;
@@ -185,7 +184,7 @@ namespace DataAccessLayer.Repositories
 
 			if (await _context.GetUser(userInfo.UserId) is not null)
 			{
-				Console.WriteLine($"Данный пользователь уже существует в БД");
+				Console.WriteLine("Данный пользователь уже существует в БД");
 
 				// Пользака нету в текущем канале
 				if (!_context.UserInChanel(userInfo.UserId, userInfo.Chanel.TelegramChatId))
@@ -276,6 +275,7 @@ namespace DataAccessLayer.Repositories
 					await AddUserWithPermissions(admin.UserId, admin.Name, chat.TelegramChatId);
 					await UpdateMemberShip(admin.UserId, chat.TelegramChatId);
 				}
+
 				await AddAdmin(userInfo, admin);
 			}
 		}
@@ -350,11 +350,10 @@ namespace DataAccessLayer.Repositories
 				.DistinctBy(c => c.ChannelId);
 
 			return chats.Select(u =>
-
 				new Chanel
 				{
 					CreatorId = u.Channel.CreatorId,
-					Creator = new TelegramUser()
+					Creator = new TelegramUser
 					{
 						UserId = u.Channel.Creator.UserId,
 						Name = u.Channel.Creator.Name
@@ -375,7 +374,6 @@ namespace DataAccessLayer.Repositories
 				.Where(m => m.UserId == userId);
 
 			return chats.Select(u =>
-
 				new Chanel
 				{
 					CreatorId = u.Channel.CreatorId,
@@ -404,7 +402,7 @@ namespace DataAccessLayer.Repositories
 			return new Chanel
 			{
 				CreatorId = chat.CreatorId,
-				Creator = new TelegramUser()
+				Creator = new TelegramUser
 				{
 					UserId = chat.Creator.UserId,
 					Name = chat.Creator.Name
@@ -439,7 +437,7 @@ namespace DataAccessLayer.Repositories
 
 		public async Task AddUserToBanList(TelegramUser user)
 		{
-			var userEntity = new TelegramBannedUsersEntity()
+			var userEntity = new TelegramBannedUsersEntity
 			{
 				Id = user.User.Id,
 				UserName = user.User.Username,
@@ -473,7 +471,7 @@ namespace DataAccessLayer.Repositories
 				if (telegramUser is not null)
 				{
 					telegramUser.Permissions = userDbo.Permissions
-						.Select(p => new TelegramPermissions()
+						.Select(p => new TelegramPermissions
 						{
 							Id = p.Id,
 							UserId = p.UserId,
@@ -489,7 +487,7 @@ namespace DataAccessLayer.Repositories
 					Name = userDbo.Name,
 					CreateDate = userDbo.CreateDate,
 					Permissions = userDbo.Permissions
-						.Select(p => new TelegramPermissions()
+						.Select(p => new TelegramPermissions
 						{
 							Id = p.Id,
 							UserId = p.UserId,
@@ -508,7 +506,7 @@ namespace DataAccessLayer.Repositories
 		{
 			var tgPer = _context.TelegramUsers.FirstOrDefault(p => p.UserId.Equals(user.UserId));
 			tgPer.Permissions = user.Permissions
-				.Select(p => new TelegramPermissionsEntity()
+				.Select(p => new TelegramPermissionsEntity
 				{
 					Id = p.Id,
 					UserId = p.UserId,

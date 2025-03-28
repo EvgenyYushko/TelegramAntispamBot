@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Telegram.Bot.Types;
 
 namespace Infrastructure.Models
@@ -8,6 +7,8 @@ namespace Infrastructure.Models
 	public class TelegramUser
 	{
 		public long UserId { get; set; }
+
+		public Guid UserSiteId { get; set; } = default;
 
 		public string Name { get; set; }
 
@@ -20,8 +21,6 @@ namespace Infrastructure.Models
 		public PullModel PullModel { get; set; } = new();
 
 		public Chanel Chanel { get; set; } = new();
-
-		public Guid UserSiteId { get; set; } = default;
 
 		public override bool Equals(object obj)
 		{
@@ -37,18 +36,27 @@ namespace Infrastructure.Models
 	public class Chanel
 	{
 		public long TelegramChatId { get; set; }
-		public string Title { get; set; }
-		public string ChatType { get; set; }
-		public TelegramUser Creator { get; set; }
+
 		public long CreatorId { get; set; }
+
+		public string Title { get; set; }
+
+		public string ChatType { get; set; }
+
+		public TelegramUser Creator { get; set; }
+
 		public ChatMember ChatMember { get; set; }
+
 		public List<TelegramUser> AdminsMembers { get; set; } = new();
+
 		public List<long> AdminsIds { get; set; } = new();
+
 		public List<TelegramUser> Members { get; set; } = new();
 
 		public override string ToString()
 		{
-			return $"TelegramChatId = {TelegramChatId}, Title = {Title}, CreatorId = {CreatorId}, AdminsIds ={string.Join(", ", AdminsIds)}";
+			return
+				$"TelegramChatId = {TelegramChatId}, Title = {Title}, CreatorId = {CreatorId}, AdminsIds ={string.Join(", ", AdminsIds)}";
 		}
 	}
 }

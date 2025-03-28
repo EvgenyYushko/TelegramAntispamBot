@@ -10,10 +10,10 @@ namespace BuisinessLogic.Services
 	{
 		private readonly TelegramBotClient _telegramClient;
 		private readonly long _userId;
-		private CancellationTokenSource _cts;
 		private Task _animationTask = Task.CompletedTask;
+		private CancellationTokenSource _cts;
+		private bool _messageSent;
 		private Message _msgProgress;
-		private bool _messageSent = false;
 
 		public WaitDialog(TelegramBotClient telegramClient, long userId)
 		{
@@ -44,7 +44,7 @@ namespace BuisinessLogic.Services
 				// Запускаем анимацию
 				_animationTask = Task.Run(async () =>
 				{
-					bool showHourglass = true;
+					var showHourglass = true;
 					try
 					{
 						while (!_cts.Token.IsCancellationRequested)
@@ -61,7 +61,9 @@ namespace BuisinessLogic.Services
 							await Task.Delay(1500, _cts.Token);
 						}
 					}
-					catch (OperationCanceledException) { }
+					catch (OperationCanceledException)
+					{
+					}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Animation error: {ex.Message}");
@@ -86,7 +88,9 @@ namespace BuisinessLogic.Services
 			{
 				await _animationTask;
 			}
-			catch (OperationCanceledException) { }
+			catch (OperationCanceledException)
+			{
+			}
 
 			// Удаляем сообщение только если оно было отправлено
 			if (_messageSent && _msgProgress != null)

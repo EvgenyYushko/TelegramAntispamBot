@@ -11,7 +11,7 @@ namespace Infrastructure.Helpers
 		{
 			return new Claim[]
 			{
-				new Claim(CustomClaims.UserId, user.Id.ToString())
+				new(CustomClaims.UserId, user.Id.ToString())
 			};
 		}
 
@@ -21,7 +21,7 @@ namespace Infrastructure.Helpers
 			var random = new Random();
 			var chars = new char[12]; // Длина пароля
 
-			for (int i = 0; i < chars.Length; i++)
+			for (var i = 0; i < chars.Length; i++)
 			{
 				chars[i] = validChars[random.Next(0, validChars.Length)];
 			}

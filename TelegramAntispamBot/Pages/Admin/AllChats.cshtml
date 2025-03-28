@@ -1,5 +1,5 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.Admin.AllChatsModel
+@model AllChatsModel
 @{
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
@@ -73,25 +73,25 @@
 <div policy="Tutor" class="table-container">
     <table>
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Creator Id</th>
-                <th>Creator Name</th>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Creator Id</th>
+            <th>Creator Name</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var chat in Model.Chats)
-            {
-                <tr onclick="goToChat(@chat.TelegramChatId)">
-                    <td>@chat.TelegramChatId</td>
-                    <td>@chat.Title</td>
-                    <td>@chat.ChatType</td>
-                    <td>@chat.Creator.UserId</td>
-                    <td>@chat.Creator.Name</td>
-                </tr>
-            }
+        @foreach (var chat in Model.Chats)
+        {
+            <tr onclick="goToChat(@chat.TelegramChatId)">
+                <td>@chat.TelegramChatId</td>
+                <td>@chat.Title</td>
+                <td>@chat.ChatType</td>
+                <td>@chat.Creator.UserId</td>
+                <td>@chat.Creator.Name</td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>

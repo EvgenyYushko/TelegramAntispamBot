@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Infrastructure.Enumerations;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using ServiceLayer.Services.Authorization;
@@ -15,11 +16,12 @@ namespace TelegramAntispamBot.Pages.Account
 {
 	public class TelegramEntryModel : PageModelBase
 	{
+		private readonly ITelegramUserService _telegramUserService;
 		private readonly IUserService _userService;
 		private readonly IConfiguration configuration;
-		private readonly ITelegramUserService _telegramUserService;
 
-		public TelegramEntryModel(IUserService userService, IConfiguration configuration, ITelegramUserService telegramUserService)
+		public TelegramEntryModel(IUserService userService, IConfiguration configuration,
+			ITelegramUserService telegramUserService)
 		{
 			_userService = userService;
 			this.configuration = configuration;
@@ -27,16 +29,17 @@ namespace TelegramAntispamBot.Pages.Account
 		}
 
 		public async Task<IActionResult> OnGet(
-		   [FromQuery] long id,
-		   [FromQuery] string first_name,
-		   [FromQuery] string last_name,
-		   [FromQuery] string username,
-		   [FromQuery] string photo_url,
-		   [FromQuery] long auth_date,
-		   [FromQuery] string hash)
+			[FromQuery] long id,
+			[FromQuery] string first_name,
+			[FromQuery] string last_name,
+			[FromQuery] string username,
+			[FromQuery] string photo_url,
+			[FromQuery] long auth_date,
+			[FromQuery] string hash)
 		{
 			//Console.WriteLine($"id={id}, first_name={first_name}, last_name={last_name}, username={username}, photo_url={photo_url}, auth_date={auth_date}, hash={hash}");
-			var botToken = configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
+			var botToken = configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ??
+							Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
 			//Console.WriteLine($"botToken={botToken}");
 			//id=1231047171
 			//first_name=Evgeny
@@ -57,9 +60,9 @@ namespace TelegramAntispamBot.Pages.Account
 
 			var secretKey = SHA256.HashData(Encoding.UTF8.GetBytes(botToken));
 			var hashString = new HMACSHA256(secretKey)
-			   .ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", dataToCheck)))
-			   .Select(b => b.ToString("x2"))
-			   .Aggregate((a, b) => a + b);
+				.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", dataToCheck)))
+				.Select(b => b.ToString("x2"))
+				.Aggregate((a, b) => a + b);
 
 			//Console.WriteLine($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
 			var isValid = hashString.Equals(hash, StringComparison.Ordinal); // Без IgnoreCase
@@ -68,7 +71,7 @@ namespace TelegramAntispamBot.Pages.Account
 			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
 			{
 				Console.WriteLine($"UserId = {id} Name = {username} UserSiteId = {UserId}");
-				var res = await _telegramUserService.TryAddUserExteranl(new()
+				var res = await _telegramUserService.TryAddUserExteranl(new TelegramUser
 				{
 					UserId = id,
 					Name = username,

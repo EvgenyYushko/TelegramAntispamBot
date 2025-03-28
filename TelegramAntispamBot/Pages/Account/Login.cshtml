@@ -1,8 +1,8 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.Account.LoginModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@model LoginModel
 @{
 }
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Loc
 <!DOCTYPE html>
 <html lang="en">
@@ -72,35 +72,37 @@
     </style>
 </head>
 <body class="bg-light">
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-sm">
-                    <div class="card-header text-center bg-primary text-white">
-                        <h4>@Loc["Welcome"]</h4>
-                    </div>
-                    <div class="card-body">
-                        <form method="post" asp-page-handler="Login">
-                            <div class="mb-3">
-                                <label for="UserName" class="form-label">@Loc["Email"]</label>
-                                <input type="text" id="UserName" name="UserName" class="form-control" placeholder=@Loc["Input_Email"] required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="Password" class="form-label">@Loc["Password"]</label>
-                                <input type="password" id="Password" name="Password" class="form-control" placeholder=@Loc["Enter_Password"] required>
-                            </div>
-                            <div asp-validation-summary="All" class="text-danger"></div>
-                            <button type="submit" class="btn btn-primary w-100">@Loc["Login"]</button>
-                        </form>
-                    </div>
-                    <div class="card-footer text-center">
-                        <p>@Loc["have't_account"] <a href="/Account/Register" class="text-decoration-none">@Loc["Register_here"]</a></p>
-                    </div>
-                    <!-- Блок социальных логинов -->
-                    @await Html.PartialAsync("_ExternalLoginButtons")    
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4>@Loc["Welcome"]</h4>
                 </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="Login">
+                        <div class="mb-3">
+                            <label for="UserName" class="form-label">@Loc["Email"]</label>
+                            <input type="text" id="UserName" name="UserName" class="form-control" placeholder=@Loc["Input_Email"] required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">@Loc["Password"]</label>
+                            <input type="password" id="Password" name="Password" class="form-control" placeholder=@Loc["Enter_Password"] required>
+                        </div>
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <button type="submit" class="btn btn-primary w-100">@Loc["Login"]</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <p>
+                        @Loc["have't_account"] <a href="/Account/Register" class="text-decoration-none">@Loc["Register_here"]</a>
+                    </p>
+                </div>
+                <!-- Блок социальных логинов -->
+                @await Html.PartialAsync("_ExternalLoginButtons")
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>

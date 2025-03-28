@@ -30,7 +30,7 @@ namespace BuisinessLogic.Services.Authorization
 			if (result.Succeeded)
 			{
 				await _userManager.AddToRoleAsync(user, role);
-				await _signInManager.SignInAsync(user, isPersistent: false);
+				await _signInManager.SignInAsync(user, false);
 			}
 
 			return result;
@@ -57,16 +57,12 @@ namespace BuisinessLogic.Services.Authorization
 
 		public async Task<SignInResult> Login(string userName, string password)
 		{
-			return await _signInManager.PasswordSignInAsync(
-					userName,
-					password,
-					isPersistent: false,
-					lockoutOnFailure: false);
+			return await _signInManager.PasswordSignInAsync(userName,password,false,false);
 		}
 
 		public async Task<IdentityResult> Delete(Guid id)
 		{
-			UserEntity user = await _userManager.FindByIdAsync(id.ToString());
+			var user = await _userManager.FindByIdAsync(id.ToString());
 			if (user != null)
 			{
 				return await _userManager.DeleteAsync(user);
@@ -99,11 +95,10 @@ namespace BuisinessLogic.Services.Authorization
 			var userEntity = _userManager.Users.Include(u => u.Roles);
 			if (userEntity is null)
 			{
-				throw new Exception($"Пользователей не найдено");
+				throw new Exception("Пользователей не найдено");
 			}
 
 			return userEntity.Select(u =>
-
 				new UserAccount(u.Id,
 					u.UserName,
 					u.PasswordHash,

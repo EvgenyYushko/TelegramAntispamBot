@@ -5,6 +5,7 @@ using Infrastructure.InjectSettings;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
+using Telegram.Bot.Args;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -16,8 +17,8 @@ namespace TelegramAntispamBot.Controllers
 	[Route("[controller]")]
 	public class BotController : ControllerBase
 	{
-		private readonly IHandleMessageService _messageService;
 		private readonly TelegramInject _botClient;
+		private readonly IHandleMessageService _messageService;
 
 		public BotController(IHandleMessageService messageService, TelegramInject telegram)
 		{
@@ -57,18 +58,20 @@ namespace TelegramAntispamBot.Controllers
 				{
 					AllowedUpdates = Array.Empty<UpdateType>() // Обработка всех типов обновлений
 				},
-				cancellationToken: cts.Token
+				cts.Token
 			);
 			_botClient.TelegramClient.OnApiResponseReceived += BotClient_OnApiResponseReceived;
 			_botClient.TelegramClient.OnMakingApiRequest += BotClient_OnMakingApiRequest;
 		}
 
-		private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+		private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
+			CancellationToken cancellationToken)
 		{
 			await Post(update);
 		}
 
-		private static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+		private static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception,
+			CancellationToken cancellationToken)
 		{
 			var errorMessage = exception switch
 			{
@@ -81,10 +84,16 @@ namespace TelegramAntispamBot.Controllers
 		}
 
 		private static ValueTask BotClient_OnMakingApiRequest(ITelegramBotClient botClient,
-			Telegram.Bot.Args.ApiRequestEventArgs args, CancellationToken cancellationToken = default) => default;
+			ApiRequestEventArgs args, CancellationToken cancellationToken = default)
+		{
+			return default;
+		}
 
 		private static ValueTask BotClient_OnApiResponseReceived(ITelegramBotClient botClient,
-			Telegram.Bot.Args.ApiResponseEventArgs args, CancellationToken cancellationToken = default) => default;
+			ApiResponseEventArgs args, CancellationToken cancellationToken = default)
+		{
+			return default;
+		}
 
 		#endregion
 	}

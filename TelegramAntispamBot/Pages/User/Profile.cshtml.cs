@@ -12,8 +12,8 @@ namespace TelegramAntispamBot.Pages.User
 	[Authorize]
 	public class ProfileModel : PageModelBase
 	{
-		private readonly IUserService _usersService;
 		private readonly ITelegramUserService _telegramUserService;
+		private readonly IUserService _usersService;
 
 		public ProfileModel(IUserService usersService, ITelegramUserService telegramUserService)
 		{

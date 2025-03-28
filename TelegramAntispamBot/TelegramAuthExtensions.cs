@@ -10,19 +10,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PuppeteerSharp;
-using Telegram.Bot.Types;
 
 namespace TelegramAntispamBot
 {
 	public static class TelegramAuthExtensions
 	{
-		public static AuthenticationBuilder AddTelegramAuth(this AuthenticationBuilder builder, Action<GitHubAuthenticationOptions> configuration)
+		public static AuthenticationBuilder AddTelegramAuth(this AuthenticationBuilder builder,
+			Action<GitHubAuthenticationOptions> configuration)
 		{
 			return builder.AddRemoteScheme<TelegramAuthOptions, TelegramAuthHandler>(
 				"Telegram",
 				"Telegram Auth",
-				options => { options.CallbackPath="/Login"; });
+				options => { options.CallbackPath = "/Login"; });
 		}
 	}
 
@@ -33,7 +32,8 @@ namespace TelegramAntispamBot
 
 	public class TelegramAuthHandler : RemoteAuthenticationHandler<TelegramAuthOptions>
 	{
-		public TelegramAuthHandler(IOptionsMonitor<TelegramAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+		public TelegramAuthHandler(IOptionsMonitor<TelegramAuthOptions> options, ILoggerFactory logger,
+			UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
 		{
 		}
 
@@ -52,14 +52,16 @@ namespace TelegramAntispamBot
 
 			var isValid = await ValidateTelegramUserAsync(user);
 			if (!isValid)
+			{
 				return HandleRequestResult.Fail("Invalid Telegram authentication");
+			}
 
 			var claims = new List<Claim>
-		{
-			new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-			new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim()),
-			new("Telegram:Username", user.Username)
-		};
+			{
+				new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+				new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim()),
+				new("Telegram:Username", user.Username)
+			};
 
 			var identity = new ClaimsIdentity(claims, Scheme.Name);
 			var principal = new ClaimsPrincipal(identity);

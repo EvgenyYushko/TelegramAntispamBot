@@ -1,5 +1,5 @@
 ﻿@page
-@model TelegramAntispamBot.Pages.Admin.AllUsersModel
+@model AllUsersModel
 @{
 }
 
@@ -95,21 +95,21 @@
 <div policy="Admin" class="table-container">
     <table>
         <thead>
-            <tr>
-                <th>User Name</th>
-                <th>Email</th>
-                <th>Roles</th>
-            </tr>
+        <tr>
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Roles</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var user in Model.UsersAccount)
-            {
-                <tr>
-                    <td>@user.UserName</td>
-                    <td>@user.Email</td>
-                    <td>@string.Join(", ", @user.Roles.FirstOrDefault())</td>
-                </tr>
-            }
+        @foreach (var user in Model.UsersAccount)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@string.Join(", ", user.Roles.FirstOrDefault())</td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>

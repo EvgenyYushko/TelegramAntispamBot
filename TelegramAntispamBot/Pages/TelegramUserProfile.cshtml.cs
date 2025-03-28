@@ -13,8 +13,11 @@ namespace TelegramAntispamBot.Pages
 	[Authorize]
 	public class TelegramUserProfileModel : PageModel
 	{
-		private ITelegramUserService _telegramUserService;
 		private TelegramBotClient _telegramClient;
+		private ITelegramUserService _telegramUserService;
+		private TelegramUser _tgUser;
+
+		private long _userId;
 
 		public TelegramUserProfileModel(ITelegramUserService telegramUserService, TelegramInject telegramInject)
 		{
@@ -22,8 +25,8 @@ namespace TelegramAntispamBot.Pages
 			_telegramClient = telegramInject.TelegramClient;
 		}
 
-		private long _userId;
-		private TelegramUser _tgUser;
+		[BindProperty]
+		public long ChatId { get; set; }
 
 		[BindProperty]
 		public TelegramUser TgUser
@@ -33,14 +36,8 @@ namespace TelegramAntispamBot.Pages
 				_tgUser = _tgUser ??= _telegramUserService.Get(_userId);
 				return _tgUser;
 			}
-			set
-			{
-				_tgUser = value;
-			}
+			set => _tgUser = value;
 		}
-
-		[BindProperty]
-		public long ChatId { get; set; }
 
 		public async Task<IActionResult> OnGetAsync(long userId, long chatId)
 		{

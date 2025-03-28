@@ -5,6 +5,7 @@ namespace MailSenderService.ServiceLayer.Services
 {
 	public interface IMailService
 	{
-		Task Send(string toAddress, string body, string theme, bool isBodyHtml = false, List<string> copyAddress = null);
+		Task Send(string toAddress, string body, string theme, bool isBodyHtml = false,
+			List<string> copyAddress = null);
 	}
 }

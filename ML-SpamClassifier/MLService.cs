@@ -16,8 +16,8 @@ namespace ML_SpamClassifier
 {
 	public class MLService : IMLService
 	{
-		private readonly ITelegramUserRepository _telegramUserRepository;
 		private readonly IGoogleDriveUploader _googleDriveUploader;
+		private readonly ITelegramUserRepository _telegramUserRepository;
 
 		public MLService(ITelegramUserRepository telegramUserRepository, IGoogleDriveUploader googleDriveUploader)
 		{
@@ -27,7 +27,7 @@ namespace ML_SpamClassifier
 
 		public Task AddSuspiciousMessages(SuspiciousMessageDto message)
 		{
-			return _telegramUserRepository.AddSuspiciousMessages(new SuspiciousMessage()
+			return _telegramUserRepository.AddSuspiciousMessages(new SuspiciousMessage
 			{
 				Text = message.Text,
 				CreatedAt = message.CreatedAt,
@@ -41,7 +41,7 @@ namespace ML_SpamClassifier
 
 		public Task UpdateSuspiciousMessages(SuspiciousMessageDto message)
 		{
-			return _telegramUserRepository.UpdateSuspiciousMessages(new SuspiciousMessage()
+			return _telegramUserRepository.UpdateSuspiciousMessages(new SuspiciousMessage
 			{
 				Id = message.Id,
 				Text = message.Text,
@@ -58,7 +58,7 @@ namespace ML_SpamClassifier
 		{
 			var msgs = _telegramUserRepository.GetAllSuspiciousMessages();
 
-			return msgs.Select(m => new SuspiciousMessageDto()
+			return msgs.Select(m => new SuspiciousMessageDto
 			{
 				Text = m.Text,
 				IsSpamByUser = m.IsSpamByUser,
@@ -110,7 +110,9 @@ namespace ML_SpamClassifier
 			}
 
 			if (!File.Exists(_dataSetPath))
+			{
 				throw new FileNotFoundException($"Файл {_dataSetPath} с данными не найден");
+			}
 
 			foreach (var msg in msgToUpdate)
 			{
@@ -132,7 +134,7 @@ namespace ML_SpamClassifier
 			}
 		}
 
-		static string CleanResponse(string text)
+		private static string CleanResponse(string text)
 		{
 			var patterns = new[]
 			{

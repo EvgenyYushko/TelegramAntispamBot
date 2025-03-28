@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BuisinessLogic.Services.Telegram;
 using Infrastructure.InjectSettings;
 using Microsoft.Extensions.Hosting;
 using ServiceLayer.Services.Telegram;
@@ -16,11 +14,12 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 	public abstract class BaseSiteBackgroundService : BackgroundService
 	{
 		private readonly BackgroundSiteSetting _setting;
-		private readonly ITelegramUserService _telegramUserService;
 		private readonly TelegramBotClient _telegramClient;
+		private readonly ITelegramUserService _telegramUserService;
 		private Timer _timer;
 
-		protected BaseSiteBackgroundService(TelegramInject botClient, BackgroundSiteSetting setting, ITelegramUserService telegramUserService)
+		protected BaseSiteBackgroundService(TelegramInject botClient, BackgroundSiteSetting setting,
+			ITelegramUserService telegramUserService)
 		{
 			_setting = setting;
 			_telegramUserService = telegramUserService;
@@ -41,8 +40,9 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 				var now = DateTimeNow;
 				var nextRunTimes = scheduledTimes
 					.Select(time => now.Date.Add(time)) // Получаем DateTime для каждого времени сегодня
-					.Where(time => time > now)          // Выбираем только будущие времена
-					.DefaultIfEmpty(now.Date.AddDays(1).Add(scheduledTimes[0])) // Если все времена прошли, берем первое время завтра
+					.Where(time => time > now) // Выбираем только будущие времена
+					.DefaultIfEmpty(now.Date.AddDays(1)
+						.Add(scheduledTimes[0])) // Если все времена прошли, берем первое время завтра
 					.Min(); // Берем ближайшее время
 
 				var res = nextRunTimes - now;
@@ -74,7 +74,9 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 					//};
 
 					var tasks = allChats
-						.Select(channel => _telegramClient.SendTextMessageAsync(channel.TelegramChatId, currStr, parseMode: ParseMode.Markdown))
+						.Select(channel =>
+							_telegramClient.SendTextMessageAsync(channel.TelegramChatId, currStr,
+								parseMode: ParseMode.Markdown))
 						.Cast<Task>().ToArray();
 
 					await Task.WhenAll(tasks);

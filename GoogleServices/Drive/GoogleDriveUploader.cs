@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+using Google.Apis.Upload;
 using GoogleServices.Interfaces;
+using File = Google.Apis.Drive.v3.Data.File;
 
 namespace GoogleServices.Drive
 {
@@ -20,7 +22,7 @@ namespace GoogleServices.Drive
 			var credential = GoogleCredential.FromJson(serviceAccountJson)
 				.CreateScoped(DriveService.Scope.DriveFile);
 
-			_driveService = new DriveService(new BaseClientService.Initializer()
+			_driveService = new DriveService(new BaseClientService.Initializer
 			{
 				HttpClientInitializer = credential,
 				ApplicationName = "Github Actions Backup Uploader"
@@ -38,7 +40,7 @@ namespace GoogleServices.Drive
 			}
 
 			// Загружаем новый файл
-			var fileMetadata = new Google.Apis.Drive.v3.Data.File()
+			var fileMetadata = new File
 			{
 				Name = fileName,
 				Parents = new[] { driveFolderId }
@@ -53,8 +55,10 @@ namespace GoogleServices.Drive
 			request.Fields = "id";
 			var result = await request.UploadAsync(CancellationToken.None);
 
-			if (result.Status != Google.Apis.Upload.UploadStatus.Completed)
+			if (result.Status != UploadStatus.Completed)
+			{
 				throw new Exception("Upload failed: " + result.Exception);
+			}
 
 			return request.ResponseBody.Id;
 		}
@@ -69,7 +73,7 @@ namespace GoogleServices.Drive
 			}
 		}
 
-		public async Task<Google.Apis.Drive.v3.Data.File> GetFileByNameAsync(string fileName, string folderId = null)
+		public async Task<File> GetFileByNameAsync(string fileName, string folderId = null)
 		{
 			// Создаем запрос для поиска файла по имени
 			var listRequest = _driveService.Files.List();
@@ -91,7 +95,7 @@ namespace GoogleServices.Drive
 			return result.Files.FirstOrDefault();
 		}
 
-		public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetAllFilesInFolderAsync(string folderId)
+		public async Task<IList<File>> GetAllFilesInFolderAsync(string folderId)
 		{
 			var listRequest = _driveService.Files.List();
 

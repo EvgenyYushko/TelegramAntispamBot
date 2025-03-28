@@ -10,20 +10,20 @@ namespace TelegramAntispamBot.Pages
 	[IgnoreAntiforgeryToken]
 	public class ErrorModel : PageModel
 	{
-		public string RequestId { get; set; }
-
-		public bool IsDevelopment => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
-
-		public string EnvironmentLoc => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-
-		public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
 		private readonly ILogger<ErrorModel> _logger;
 
 		public ErrorModel(ILogger<ErrorModel> logger)
 		{
 			_logger = logger;
 		}
+
+		public string RequestId { get; set; }
+
+		public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+		public bool IsDevelopment => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+		public string EnvironmentLoc => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
 		public void OnGet()
 		{

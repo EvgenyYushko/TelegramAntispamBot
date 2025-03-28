@@ -11,16 +11,17 @@ namespace TelegramAntispamBot.BackgroundServices
 	{
 		private readonly HabrParser _habrParser;
 
-		public HabrBackgroundService(TelegramInject botClient, HabrParser habrParser, ITelegramUserService telegramUserService)
+		public HabrBackgroundService(TelegramInject botClient, HabrParser habrParser,
+			ITelegramUserService telegramUserService)
 			: base(botClient, new BackgroundSiteSetting
-			{
-				ScheduledTimes = new[]
 				{
-					new TimeSpan(11, 0, 0), // 11:00
-					//new TimeSpan(16, 0, 0)  // 16:00
-				}
-			},
-			telegramUserService)
+					ScheduledTimes = new[]
+					{
+						new TimeSpan(11, 0, 0) // 11:00
+						//new TimeSpan(16, 0, 0)  // 16:00
+					}
+				},
+				telegramUserService)
 		{
 			_habrParser = habrParser;
 		}

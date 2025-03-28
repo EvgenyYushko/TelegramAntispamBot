@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using GoogleServices.Interfaces;
 using Microsoft.ML;
 using ML_SpamClassifier.Interfaces;
 using ML_SpamClassifier.Models;
+using ServiceLayer.Models;
 using ServiceLayer.Services.Telegram;
 using static Infrastructure.Common.TimeZoneHelper;
 using static ML_SpamClassifier.Helpers.MLHelpers;
@@ -14,8 +14,8 @@ namespace ML_SpamClassifier
 {
 	public class SpamDetector : ISpamDetector
 	{
-		private readonly MLContext _mlContext = new();
 		private readonly IGenerativeLanguageModel _generativeLanguageModel;
+		private readonly MLContext _mlContext = new();
 		private readonly IMLService _msService;
 		private ITransformer _model;
 		private PredictionEngine<MessageData, PredictionResult> _predictor;
@@ -42,7 +42,9 @@ namespace ML_SpamClassifier
 		public async Task TrainModelAsync()
 		{
 			if (!File.Exists(_dataSetPath))
+			{
 				throw new FileNotFoundException($"Файл {_dataSetPath} с данными не найден");
+			}
 
 			var data = _mlContext.Data.LoadFromTextFile<MessageData>(
 				_dataSetPath,
@@ -79,7 +81,7 @@ namespace ML_SpamClassifier
 			//	comment = geminiResponse;
 			//}
 
-			Task.Run(async () => await _msService.AddSuspiciousMessages(new ServiceLayer.Models.SuspiciousMessageDto
+			Task.Run(async () => await _msService.AddSuspiciousMessages(new SuspiciousMessageDto
 			{
 				Text = text,
 				IsSpamByMl = prediction.IsSpam,
@@ -98,12 +100,13 @@ namespace ML_SpamClassifier
 
 		private async Task<bool> CheckWithGeminiAsync(string messageText)
 		{
-			var geminiResponse = await _generativeLanguageModel.AskGemini($"Определи, является ли сообщение спамом. \r\n" +
-				$"Критерии спама:\r\n" +
-				$"- Коммерческое предложение\r\n" +
-				$"- Призыв к действию ('Срочно')\r\n" +
-				$"- Подозрительные ссылки\r\n" +
-				$"- Избыточная эмоциональность\r\n" +
+			var geminiResponse = await _generativeLanguageModel.AskGemini(
+				"Определи, является ли сообщение спамом. \r\n" +
+				"Критерии спама:\r\n" +
+				"- Коммерческое предложение\r\n" +
+				"- Призыв к действию ('Срочно')\r\n" +
+				"- Подозрительные ссылки\r\n" +
+				"- Избыточная эмоциональность\r\n" +
 				$"Ответь только 'да' или 'нет': {messageText}");
 
 			return geminiResponse.ToLower().Contains("да");

@@ -9,10 +9,10 @@ namespace Infrastructure.Extentions
 	{
 		public static bool ContainsUrls(this Message message)
 		{
-			return message is { Entities: { } }
-					&& message.Entities.Select(e => e.Type).Contains(MessageEntityType.Url) ||
-					message is { CaptionEntities: { } }
-					&& message.CaptionEntities.Select(e => e.Type).Contains(MessageEntityType.Url);
+			return (message is { Entities: { } }
+					&& message.Entities.Select(e => e.Type).Contains(MessageEntityType.Url)) ||
+					(message is { CaptionEntities: { } }
+					&& message.CaptionEntities.Select(e => e.Type).Contains(MessageEntityType.Url));
 		}
 
 		//public static bool InWhitelist(this User user)
@@ -35,12 +35,12 @@ namespace Infrastructure.Extentions
 		public static bool HasEmptyMessage(this Update update)
 		{
 			return
-				update.Type == UpdateType.Message &&
+				(update.Type == UpdateType.Message &&
 				update.Message?.Text == null &&
-				update.Message?.Caption == null ||
-				update.Type == UpdateType.EditedMessage &&
+				update.Message?.Caption == null) ||
+				(update.Type == UpdateType.EditedMessage &&
 				update.EditedMessage?.Text == null &&
-				update.EditedMessage?.Caption == null;
+				update.EditedMessage?.Caption == null);
 		}
 	}
 }
