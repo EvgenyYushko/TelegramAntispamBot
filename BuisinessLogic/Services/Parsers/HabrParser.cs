@@ -9,6 +9,9 @@ namespace BuisinessLogic.Services.Parsers
 {
 	public class HabrParser
 	{
+		/// <summary>
+		/// https://habr.com/ru/companies/simbirsoft/articles/
+		/// </summary>
 		private const string HabrUrl = "https://habr.com/ru/all/";
 
 		public async Task<string> ParseLatestPostAsync()
@@ -25,10 +28,21 @@ namespace BuisinessLogic.Services.Parsers
 					// Ищем все статьи
 					var articles = htmlDoc.DocumentNode.SelectNodes("//article[contains(@class, 'tm-articles-list__item')]");
 
-					if (articles != null && articles.Any())
+					var allArticles = htmlDoc.DocumentNode.SelectNodes("//article[contains(@class, 'tm-articles-list__item')]");
+					var filteredArticles = allArticles?
+						.Where(article => article.Descendants("a")
+							.Any(a => a.GetAttributeValue("class", "").Contains("tm-publication-hub__link") 
+								   && a.Descendants("span")
+									   .Any(s => s.InnerText.Contains("Искусственный интеллект") ||
+									   s.InnerText.Contains("Машинное обучение") ||
+									   s.InnerText.Contains("Программирование") ||
+									   s.InnerText.Contains("Тестирование IT-систем")
+						)));
+
+					if (articles != null && filteredArticles.Any())
 					{
 						// Берем первую статью
-						var firstArticle = articles.First();
+						var firstArticle = filteredArticles.First();
 
 						// Извлекаем заголовок и ссылку
 						var titleNode = firstArticle.SelectSingleNode(".//h2[contains(@class, 'tm-title')]/a");
