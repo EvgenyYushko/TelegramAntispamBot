@@ -41,7 +41,7 @@ namespace DataAccessLayer.Repositories
 
 		public async Task DeleteAllSuspiciousMessages()
 		{
-			var all = _context.SuspiciousMessages.AsNoTracking();
+			var all = _context.SuspiciousMessages;
 			IEnumerable<SuspiciousMessage> dell = all.Select(s => s);
 			_context.SuspiciousMessages.RemoveRange(dell);
 			await _context.SaveChangesAsync();

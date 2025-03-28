@@ -146,7 +146,7 @@ namespace BuisinessLogic.Handlers
 			{
 				case UpdateType.Message when update.Message.Text.Equals("/start"):
 					{
-						using (new WaitDialg(_telegramClient, update.Message.From.Id).Show())
+						using (new WaitDialog(_telegramClient, update.Message.From.Id).Show())
 						{
 							await SendChoseChats(_telegramClient, update, cancellationToken, false);
 						}

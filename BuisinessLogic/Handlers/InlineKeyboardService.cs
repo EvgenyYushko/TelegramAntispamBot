@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BuisinessLogic.Services;
-using Infrastructure.Common;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -36,7 +35,7 @@ namespace BuisinessLogic.Handlers
 			var userId = callbackQuery.From.Id;
 			if (callbackQuery.Data == OPEN_SETTINGS)
 			{
-				using (new WaitDialg(_telegramClient, userId).Show())
+				using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					var settingsBoard = new InlineKeyboardMarkup(new[]
 					{
@@ -52,29 +51,32 @@ namespace BuisinessLogic.Handlers
 			}
 			if (callbackQuery.Data == OPEN_CHATS)
 			{
-				await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
-					 ChatSettingsInfo,
-					 replyMarkup: GetChatsBoard(userId),
-					 parseMode: ParseMode.Html,
-					 disableWebPagePreview: true);
+				using (new WaitDialog(_telegramClient, userId).Show())
+				{
+					await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
+						 ChatSettingsInfo,
+						 replyMarkup: GetChatsBoard(userId),
+						 parseMode: ParseMode.Html,
+						 disableWebPagePreview: true);
+				}
 			}
 			else if (callbackQuery.Data == BACK)
 			{
-				using (new WaitDialg(_telegramClient, userId).Show())
+				using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					await SendChoseChats(_telegramClient, update, cancellationToken, true);
 				}
 			}
 			else if (callbackQuery.Data == HELP_CHAT)
 			{
-				using (new WaitDialg(_telegramClient, userId).Show())
+				using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					await SendHelpChats(_telegramClient, update, cancellationToken);
 				}
 			}
 			else if (callbackQuery.Data.StartsWith(SPAM) || callbackQuery.Data.StartsWith(HUM))
 			{
-				using (new WaitDialg(_telegramClient, userId).Show())
+				using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					await ChekedSpamMsg(callbackQuery.Data.StartsWith(SPAM), update, callbackQuery, cancellationToken);
 				}
@@ -90,7 +92,7 @@ namespace BuisinessLogic.Handlers
 				{
 					_updateMLProcess = true;
 					var msg = "Сообщений для обновления датасета нету.";
-					using (new WaitDialg(_telegramClient, userId).Show())
+					using (new WaitDialog(_telegramClient, userId).Show())
 					{
 						var isUpdated = await _mLService.UpdateDataSet();
 						if (isUpdated)
@@ -140,14 +142,14 @@ namespace BuisinessLogic.Handlers
 			if (edit)
 			{
 				await _telegramClient.EditMessageTextAsync(userId, update.CallbackQuery.Message.MessageId,
-							BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count),
+							StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count),
 							replyMarkup: GetMainMenuBoard(userId),
 							parseMode: ParseMode.Html,
 							disableWebPagePreview: true);
 			}
 			else
 			{
-				await botClient.SendTextMessageAsync(userId, BotSettings.StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count)
+				await botClient.SendTextMessageAsync(userId, StartInfo(allTgUsers.Count, allChars.Count, allTgBannedUsers.Count)
 					, parseMode: ParseMode.Html, disableWebPagePreview: true,
 					cancellationToken: token, replyMarkup: GetMainMenuBoard(userId));
 			}
