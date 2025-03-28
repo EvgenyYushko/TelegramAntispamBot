@@ -9,7 +9,7 @@ namespace DomainLayer.Repositories
 {
 	public interface ITelegramUserRepository
 	{
-		Task DeleteAllSuspiciousMessages();
+		Task DeleteReviewedSuspiciousMessages();
 		Task UpdateSuspiciousMessages(SuspiciousMessage message);
 		public List<SuspiciousMessage> GetAllSuspiciousMessages();
 		Task AddSuspiciousMessages(SuspiciousMessage message);

@@ -12,6 +12,6 @@ namespace ServiceLayer.Services.Telegram
 		public Task<bool> UpdateDataSet();
 		public Task DownloadModel();
 		Task UploadModelAndDataSetToDrive();
-		Task DeleteAllSuspiciousMessages();
+		Task DeleteReviewedSuspiciousMessages();
 	}
 }

@@ -100,7 +100,7 @@ namespace BuisinessLogic.Handlers
 							//await Task.Delay(120000);
 							await _spamDetector.TrainModelAsync();
 							await _mLService.UploadModelAndDataSetToDrive();
-							await _mLService.DeleteAllSuspiciousMessages();
+							await _mLService.DeleteReviewedSuspiciousMessages();
 							msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
 						}
 					}
@@ -176,8 +176,6 @@ namespace BuisinessLogic.Handlers
 			var text = $"Модель: {(msg.IsSpamByMl ? "Спам" : "Не спам")}, вероятность = {percent}%\n" +
 					   $"Gemini: {(msg.IsSpamByGemini.Value ? "Спам" : "Не спам")}" +
 					   $"\n\n" + msg.Text;
-
-			Console.WriteLine(text);
 
 			if (callbackQuery.Message.Text != text)
 			{

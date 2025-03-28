@@ -71,9 +71,9 @@ namespace ML_SpamClassifier
 			}).ToList();
 		}
 
-		public Task DeleteAllSuspiciousMessages()
+		public Task DeleteReviewedSuspiciousMessages()
 		{
-			return _telegramUserRepository.DeleteAllSuspiciousMessages();
+			return _telegramUserRepository.DeleteReviewedSuspiciousMessages();
 		}
 
 		public async Task DownloadModel()
