@@ -99,7 +99,6 @@ namespace BuisinessLogic.Handlers
 						var isUpdated = await _mLService.UpdateDataSet();
 						if (isUpdated)
 						{
-							//await Task.Delay(120000);
 							await _spamDetector.TrainModelAsync();
 							await _mLService.UploadModelAndDataSetToDrive();
 							await _mLService.DeleteReviewedSuspiciousMessages();

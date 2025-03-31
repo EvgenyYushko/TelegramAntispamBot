@@ -40,13 +40,10 @@ namespace DataAccessLayer.Repositories
 
 		public async Task DeleteReviewedSuspiciousMessages()
 		{
-			var all = await _context.SuspiciousMessages
-				.AsNoTracking()
-				.ToListAsync();
+			var messagesToDelete = _context.SuspiciousMessages
+				.Where(s => !s.NeedsManualReview && s.IsSpamByUser != null);
 
-			var filtered = all.Where(s => !s.NeedsManualReview && s.IsSpamByUser is not null);
-
-			_context.SuspiciousMessages.RemoveRange(filtered);
+			_context.SuspiciousMessages.RemoveRange(messagesToDelete);
 			await _context.SaveChangesAsync();
 		}
 
