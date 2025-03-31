@@ -36,7 +36,7 @@ namespace BuisinessLogic.Handlers
 			var userId = callbackQuery.From.Id;
 			if (callbackQuery.Data == OPEN_SETTINGS)
 			{
-				using (new WaitDialog(_telegramClient, userId).Show())
+				await using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					var settingsBoard = new InlineKeyboardMarkup(new[]
 					{
@@ -53,7 +53,7 @@ namespace BuisinessLogic.Handlers
 
 			if (callbackQuery.Data == OPEN_CHATS)
 			{
-				using (new WaitDialog(_telegramClient, userId).Show())
+				await using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					await _telegramClient.EditMessageTextAsync(userId, callbackQuery.Message.MessageId,
 						ChatSettingsInfo,
@@ -64,21 +64,21 @@ namespace BuisinessLogic.Handlers
 			}
 			else if (callbackQuery.Data == BACK)
 			{
-				using (new WaitDialog(_telegramClient, userId).Show())
+				await using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					await SendChoseChats(_telegramClient, update, cancellationToken, true);
 				}
 			}
 			else if (callbackQuery.Data == HELP_CHAT)
 			{
-				using (new WaitDialog(_telegramClient, userId).Show())
+				await using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					await SendHelpChats(_telegramClient, update, cancellationToken);
 				}
 			}
 			else if (callbackQuery.Data.StartsWith(SPAM) || callbackQuery.Data.StartsWith(HUM))
 			{
-				using (new WaitDialog(_telegramClient, userId).Show())
+				await using (new WaitDialog(_telegramClient, userId).Show())
 				{
 					await ChekedSpamMsg(callbackQuery.Data.StartsWith(SPAM), update, callbackQuery, cancellationToken);
 				}
@@ -94,7 +94,7 @@ namespace BuisinessLogic.Handlers
 				{
 					_updateMLProcess = true;
 					var msg = "Сообщений для обновления датасета нету.";
-					using (new WaitDialog(_telegramClient, userId).Show())
+					await using (new WaitDialog(_telegramClient, userId).Show())
 					{
 						var isUpdated = await _mLService.UpdateDataSet();
 						if (isUpdated)

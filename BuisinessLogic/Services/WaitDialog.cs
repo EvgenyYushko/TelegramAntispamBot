@@ -11,9 +11,9 @@ namespace BuisinessLogic.Services
 		private readonly TelegramBotClient _telegramClient;
 		private readonly long _userId;
 		private Task _animationTask = Task.CompletedTask;
-		private CancellationTokenSource _cts;
-		private bool _messageSent;
-		private Message _msgProgress;
+		private CancellationTokenSource _cts = new();
+		private Message? _msgProgress;
+		private bool _disposed;
 
 		public WaitDialog(TelegramBotClient telegramClient, long userId)
 		{
@@ -23,80 +23,95 @@ namespace BuisinessLogic.Services
 
 		public WaitDialog Show()
 		{
-			// Запускаем асинхронно, но не блокируем поток
 			_ = ShowWaitDialogAsync();
 			return this;
 		}
 
 		private async Task ShowWaitDialogAsync()
 		{
-			_cts = new CancellationTokenSource();
-
 			try
 			{
-				// Ждем 500 мс перед отправкой сообщения
-				await Task.Delay(500, _cts.Token);
+				await Task.Delay(600, _cts.Token);
 
-				// Если отмены не было, отправляем сообщение
-				_msgProgress = await _telegramClient.SendTextMessageAsync(_userId, "⏳");
-				_messageSent = true;
+				_msgProgress = await _telegramClient.SendTextMessageAsync(
+					_userId,
+					"⏳",
+					cancellationToken: _cts.Token
+				);
 
-				// Запускаем анимацию
-				_animationTask = Task.Run(async () =>
-				{
-					var showHourglass = true;
-					try
-					{
-						while (!_cts.Token.IsCancellationRequested)
-						{
-							var symbol = showHourglass ? "⌛" : "⏳";
-							showHourglass = !showHourglass;
-
-							await _telegramClient.EditMessageTextAsync(
-								_userId,
-								_msgProgress.MessageId,
-								symbol
-							);
-
-							await Task.Delay(1500, _cts.Token);
-						}
-					}
-					catch (OperationCanceledException)
-					{
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine($"Animation error: {ex.Message}");
-					}
-				});
+				_animationTask = AnimateMessageAsync();
 			}
 			catch (OperationCanceledException)
 			{
-				// Отмена до отправки сообщения — игнорируем
+				// Игнорируем, если отменили до отправки
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Failed to show wait dialog: {ex.Message}");
 			}
 		}
 
-		public void Dispose()
+		private async Task AnimateMessageAsync()
 		{
-			_cts?.Cancel();
-			CloseAsync().Wait();
+			var showHourglass = true;
+			while (!_cts.Token.IsCancellationRequested)
+			{
+				try
+				{
+					var symbol = showHourglass ? "⌛" : "⏳";
+					showHourglass = !showHourglass;
+
+					await _telegramClient.EditMessageTextAsync(
+						_userId,
+						_msgProgress!.MessageId,
+						symbol,
+						cancellationToken: _cts.Token
+					);
+
+					await Task.Delay(1500, _cts.Token);
+				}
+				catch (OperationCanceledException)
+				{
+					break;
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Animation error: {ex.Message}");
+					break;
+				}
+			}
 		}
 
-		private async Task CloseAsync()
+		public async ValueTask DisposeAsync()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
+
+			_cts.Cancel();
+
 			try
 			{
 				await _animationTask;
-			}
-			catch (OperationCanceledException)
-			{
-			}
 
-			// Удаляем сообщение только если оно было отправлено
-			if (_messageSent && _msgProgress != null)
+				if (_msgProgress != null)
+				{
+					await _telegramClient.DeleteMessageAsync(
+						_userId,
+						_msgProgress.MessageId
+					);
+				}
+			}
+			catch (Exception ex)
 			{
-				await _telegramClient.DeleteMessageAsync(_userId, _msgProgress.MessageId);
+				Console.WriteLine($"Failed to clean up wait dialog: {ex.Message}");
+			}
+			finally
+			{
+				_cts.Dispose();
 			}
 		}
+
+		public void Dispose() => DisposeAsync().GetAwaiter().GetResult();
 	}
 }
