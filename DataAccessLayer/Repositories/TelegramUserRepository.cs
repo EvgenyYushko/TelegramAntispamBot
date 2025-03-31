@@ -354,6 +354,7 @@ namespace DataAccessLayer.Repositories
 			var chats = _context.UserChannelMembership
 				.Include(u => u.Channel)
 				.ThenInclude(c => c.Creator)
+				.Include(c => c.Channel.ChatPermissions)
 				.AsNoTracking()
 				.DistinctBy(c => c.ChannelId);
 

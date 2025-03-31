@@ -7,7 +7,7 @@ using TelegramAntispamBot.BackgroundServices.Base;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
-	public class CurrencyBackgroundService : BaseSiteBackgroundService
+	public class CurrencyBackgroundService : ShedullerBackgroundService
 	{
 		private readonly NbrbCurrencyParser _nbrbCurrencyParser;
 

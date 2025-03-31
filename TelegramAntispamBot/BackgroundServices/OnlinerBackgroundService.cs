@@ -7,7 +7,7 @@ using TelegramAntispamBot.BackgroundServices.Base;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
-	public class OnlinerBackgroundService : BaseSiteBackgroundService
+	public class OnlinerBackgroundService : ShedullerBackgroundService
 	{
 		private readonly OnlinerParser _onlinerParser;
 

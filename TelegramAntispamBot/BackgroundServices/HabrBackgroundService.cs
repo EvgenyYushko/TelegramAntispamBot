@@ -7,7 +7,7 @@ using TelegramAntispamBot.BackgroundServices.Base;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
-	public class HabrBackgroundService : BaseSiteBackgroundService
+	public class HabrBackgroundService : ShedullerBackgroundService
 	{
 		private readonly HabrParser _habrParser;
 

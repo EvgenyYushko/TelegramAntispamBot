@@ -11,14 +11,14 @@ using static Infrastructure.Common.TimeZoneHelper;
 
 namespace TelegramAntispamBot.BackgroundServices.Base
 {
-	public abstract class BaseSiteBackgroundService : BackgroundService
+	public abstract class ShedullerBackgroundService : BackgroundService
 	{
 		private readonly BackgroundSiteSetting _setting;
 		private readonly TelegramBotClient _telegramClient;
 		private readonly ITelegramUserService _telegramUserService;
 		private Timer _timer;
 
-		protected BaseSiteBackgroundService(TelegramInject botClient, BackgroundSiteSetting setting,
+		protected ShedullerBackgroundService(TelegramInject botClient, BackgroundSiteSetting setting,
 			ITelegramUserService telegramUserService)
 		{
 			_setting = setting;
@@ -59,7 +59,7 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 			}
 		}
 
-		private async Task DoWork()
+		protected async virtual Task DoWork()
 		{
 			try
 			{
@@ -78,8 +78,6 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 
 					return;
 				}
-
-				Console.WriteLine("Пустые данные валют");
 			}
 			catch (Exception ex)
 			{
@@ -87,7 +85,10 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 			}
 		}
 
-		protected abstract Task<string> Parse();
+		protected virtual Task<string> Parse()
+		{
+			throw new NotImplementedException();
+		}
 
 		public override async Task StopAsync(CancellationToken stoppingToken)
 		{

@@ -81,16 +81,20 @@ namespace ML_SpamClassifier
 			//	comment = geminiResponse;
 			//}
 
-			Task.Run(async () => await _msService.AddSuspiciousMessages(new SuspiciousMessageDto
-			{
-				Text = text,
-				IsSpamByMl = prediction.IsSpam,
-				IsSpamByGemini = isSpamByGemini,
-				IsSpamByUser = null,
-				Probability = prediction.Probability,
-				NeedsManualReview = true,
-				CreatedAt = DateTimeNow
-			})).Wait();
+			// Если есть раногласия по поводу решения между моделью и Gemini то сохраним на анализ пользаку
+			//if (prediction.IsSpam != isSpamByGemini)
+			//{
+				Task.Run(async () => await _msService.AddSuspiciousMessages(new SuspiciousMessageDto
+				{
+					Text = text,
+					IsSpamByMl = prediction.IsSpam,
+					IsSpamByGemini = isSpamByGemini,
+					IsSpamByUser = null,
+					Probability = prediction.Probability,
+					NeedsManualReview = true,
+					CreatedAt = DateTimeNow
+				})).Wait();
+			//}
 
 			return false;
 			//}

@@ -124,6 +124,7 @@ namespace TelegramAntispamBot
 				services.AddHostedService<CurrencyBackgroundService>();
 				services.AddHostedService<HabrBackgroundService>();
 				services.AddHostedService<OnlinerBackgroundService>();
+				services.AddHostedService<TrainModelBackgroundService>();
 			}
 			else
 			{
