@@ -42,5 +42,7 @@ namespace ServiceLayer.Services.Telegram
 		public Task<bool> CheckReputation(Message message);
 
 		public List<TelegramUser> GetAllAdmins();
+
+		public Task UpdateChatPermissions(Infrastructure.Models.ChatPermissions chatPermissions);
 	}
 }

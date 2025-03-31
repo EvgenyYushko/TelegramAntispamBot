@@ -113,6 +113,8 @@ namespace DataAccessLayer
 
 		public DbSet<TelegramPermissionsEntity> TelegramPermissions { get; set; }
 
+		public DbSet<ChatPermissionsEntity> ChatPermissions { get; set; }
+
 		public DbSet<ExternalLoginEntity> ExternalLogins { get; set; }
 
 		public DbSet<TelegramChannel> TelegramChanel { get; set; }

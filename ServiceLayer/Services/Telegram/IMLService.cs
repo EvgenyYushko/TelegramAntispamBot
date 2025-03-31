@@ -7,7 +7,7 @@ namespace ServiceLayer.Services.Telegram
 	public interface IMLService
 	{
 		public Task UpdateSuspiciousMessages(SuspiciousMessageDto message);
-		public List<SuspiciousMessageDto> GetAllSuspiciousMessages();
+		public Task<List<SuspiciousMessageDto>> GetAllSuspiciousMessages();
 		public Task AddSuspiciousMessages(SuspiciousMessageDto message);
 		public Task<bool> UpdateDataSet();
 		public Task DownloadModel();

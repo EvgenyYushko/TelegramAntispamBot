@@ -13,7 +13,7 @@ namespace DomainLayer.Repositories
 
 		Task UpdateSuspiciousMessages(SuspiciousMessage message);
 
-		public List<SuspiciousMessage> GetAllSuspiciousMessages();
+		public Task<List<SuspiciousMessage>> GetAllSuspiciousMessages();
 
 		Task AddSuspiciousMessages(SuspiciousMessage message);
 
@@ -46,5 +46,7 @@ namespace DomainLayer.Repositories
 		public Task UpdateLocalStorage();
 
 		public List<TelegramChannelAdmin> GetAllAdmins();
+
+		public Task UpdateChatPermissions(Infrastructure.Models.ChatPermissions chatPermissions);
 	}
 }

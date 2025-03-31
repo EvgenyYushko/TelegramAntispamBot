@@ -54,9 +54,9 @@ namespace ML_SpamClassifier
 			});
 		}
 
-		public List<SuspiciousMessageDto> GetAllSuspiciousMessages()
+		public async Task<List<SuspiciousMessageDto>> GetAllSuspiciousMessages()
 		{
-			var msgs = _telegramUserRepository.GetAllSuspiciousMessages();
+			var msgs = await _telegramUserRepository.GetAllSuspiciousMessages();
 
 			return msgs.Select(m => new SuspiciousMessageDto
 			{
@@ -96,7 +96,7 @@ namespace ML_SpamClassifier
 
 		public async Task<bool> UpdateDataSet()
 		{
-			var msgs = _telegramUserRepository.GetAllSuspiciousMessages();
+			var msgs = await _telegramUserRepository.GetAllSuspiciousMessages();
 			var msgToUpdate = msgs.Where(m => !m.NeedsManualReview && m.IsSpamByUser is not null);
 			if (!msgToUpdate.Any())
 			{

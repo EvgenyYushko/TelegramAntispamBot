@@ -67,15 +67,10 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 				if (currStr is not null)
 				{
 					var allChats = _telegramUserService.GetAllChats();
-					//var channelsId = new List<long>
-					//{
-					//	-1002227239224 // Тест бота
-					//	,-1002360730808  // Женя тестирует бота
-					//};
 
 					var tasks = allChats
-						.Select(channel =>
-							_telegramClient.SendTextMessageAsync(channel.TelegramChatId, currStr,
+						.Where(c => c.ChatPermission.SendNews)
+						.Select(channel => _telegramClient.SendTextMessageAsync(channel.TelegramChatId, currStr,
 								parseMode: ParseMode.Markdown))
 						.Cast<Task>().ToArray();
 

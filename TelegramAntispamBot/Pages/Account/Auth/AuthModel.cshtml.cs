@@ -83,8 +83,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			}
 
 			// Логика для неавторизованного пользователя (вход/регистрация)
-			var existingUser =
-				await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
+			var existingUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
 			if (existingUser != null)
 			{
 				await _signInManager.SignInAsync(existingUser, false);

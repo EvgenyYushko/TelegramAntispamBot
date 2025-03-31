@@ -167,5 +167,10 @@ namespace BuisinessLogic.Services.Telegram
 				UserId = a.UserId
 			}).ToList();
 		}
+
+		public Task UpdateChatPermissions(Infrastructure.Models.ChatPermissions chatPermissions)
+		{
+			return _usersRepository.UpdateChatPermissions(chatPermissions);	
+		}
 	}
 }

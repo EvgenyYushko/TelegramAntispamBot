@@ -53,6 +53,8 @@ namespace Infrastructure.Models
 
 		public List<TelegramUser> Members { get; set; } = new();
 
+		public ChatPermissions ChatPermission { get; set; } = new();
+
 		public override string ToString()
 		{
 			return

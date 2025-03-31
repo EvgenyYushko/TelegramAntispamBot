@@ -164,7 +164,7 @@ namespace BuisinessLogic.Handlers
 		{
 			var callbackQuery = update.CallbackQuery;
 			var userId = callbackQuery.From.Id;
-			var msgs = _mLService.GetAllSuspiciousMessages();
+			var msgs = await _mLService.GetAllSuspiciousMessages();
 			var msg = msgs.FirstOrDefault(m => m.IsSpamByUser is null && m.NeedsManualReview);
 			if (msg is null)
 			{

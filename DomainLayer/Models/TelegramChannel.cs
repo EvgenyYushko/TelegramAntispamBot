@@ -23,5 +23,7 @@ namespace DomainLayer.Models
 		public List<UserChannelMembership> Members { get; set; } = new();
 
 		public List<TelegramPermissionsEntity> Permissions { get; set; } = new();
+
+		public ChatPermissionsEntity ChatPermissions { get; set; } = new();
 	}
 }

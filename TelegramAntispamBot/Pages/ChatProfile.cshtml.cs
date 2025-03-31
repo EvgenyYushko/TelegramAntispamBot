@@ -11,26 +11,37 @@ namespace TelegramAntispamBot.Pages
 	[Authorize]
 	public class ChatProfileModel : PageModel
 	{
+		private long _chatId;
+		private Chanel _chat;
 		private ITelegramUserService _telegramUserService;
-
 		public ChatProfileModel(ITelegramUserService telegramUserService)
 		{
 			_telegramUserService = telegramUserService;
 		}
-
 		[BindProperty]
-		public Chanel Chat { get; set; }
+		public Chanel Chat => _chat ??= _telegramUserService.GetChatById(_chatId);
 
 		public async Task<IActionResult> OnGetAsync(long chatId)
 		{
 			if (User.Identity.IsAuthenticated)
 			{
-				Chat = _telegramUserService.GetChatById(chatId);
+				_chatId = chatId;
 				Console.WriteLine(Chat);
 				return Page();
 			}
 
 			return RedirectToPage("/Account/Register");
+		}
+
+		public async Task OnGetSetAllowSendNews(bool allowSendNews, long chatId)
+		{
+			_chatId = chatId;
+
+			await _telegramUserService.UpdateChatPermissions(new ChatPermissions()
+			{
+				ChatId = chatId,
+				SendNews = allowSendNews
+			});
 		}
 	}
 }

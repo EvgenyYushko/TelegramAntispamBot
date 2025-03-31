@@ -25,11 +25,11 @@ namespace DataAccessLayer.Repositories
 
 		private List<TelegramUser> LocalUserStorage { get; }
 
-		public List<SuspiciousMessage> GetAllSuspiciousMessages()
+		public Task<List<SuspiciousMessage>> GetAllSuspiciousMessages()
 		{
 			return _context.SuspiciousMessages
 				.AsNoTracking()
-				.ToList();
+				.ToListAsync();
 		}
 
 		public async Task AddSuspiciousMessages(SuspiciousMessage message)
@@ -233,6 +233,7 @@ namespace DataAccessLayer.Repositories
 				}
 
 				await AddTelegramChannel(chat);
+				await AddTelegramChannelPermissions(chat);
 
 				if (chat.AdminsMembers.Count > 0)
 				{
@@ -301,6 +302,16 @@ namespace DataAccessLayer.Repositories
 			await _context.TelegramChanel.AddAsync(chanel);
 		}
 
+		private async Task AddTelegramChannelPermissions(Chanel chat)
+		{
+			var chatPerns = new ChatPermissionsEntity
+			{
+				ChatId = chat.TelegramChatId,
+				SendNews = true
+			};
+			await _context.ChatPermissions.AddAsync(chatPerns);
+		}
+
 		private async Task AddOrUpdateTelegrammPermission(long userId, long chatId)
 		{
 			Console.WriteLine("AddOrUpdateTelegrammPermission");
@@ -361,7 +372,13 @@ namespace DataAccessLayer.Repositories
 					ChatType = u.Channel.ChatType,
 					TelegramChatId = u.Channel.Id,
 					Title = u.Channel.Title,
-					AdminsIds = u.Channel.Admins.Select(a => a.UserId).ToList()
+					AdminsIds = u.Channel.Admins.Select(a => a.UserId).ToList(),
+					ChatPermission = new Infrastructure.Models.ChatPermissions()
+					{
+						Id = u.Channel.ChatPermissions.Id,
+						ChatId = u.Channel.ChatPermissions.ChatId,
+						SendNews = u.Channel.ChatPermissions.SendNews
+					}
 				}
 			).ToList();
 		}
@@ -392,6 +409,7 @@ namespace DataAccessLayer.Repositories
 				.ThenInclude(c => c.User)
 				.Include(c => c.Admins)
 				.ThenInclude(m => m.User)
+				.Include(c => c.ChatPermissions)
 				//.AsNoTracking()
 				.First(m => m.Id.Equals(id));
 
@@ -426,7 +444,13 @@ namespace DataAccessLayer.Repositories
 						UserId = m.UserId,
 						Name = m.Name,
 						CreateDate = m.CreateDate
-					}).ToList()
+					}).ToList(),
+				ChatPermission = new Infrastructure.Models.ChatPermissions
+				{
+					Id = chat.ChatPermissions.Id,
+					ChatId = chat.ChatPermissions.ChatId,
+					SendNews = chat.ChatPermissions.SendNews
+				}
 			};
 		}
 
@@ -523,6 +547,16 @@ namespace DataAccessLayer.Repositories
 			return _context.TelegramChannelAdmin
 				.AsNoTracking()
 				.ToList();
+		}
+
+		public async Task UpdateChatPermissions(Infrastructure.Models.ChatPermissions chatPermissions)
+		{
+			var per = await _context.ChatPermissions
+				.FirstOrDefaultAsync(c => c.ChatId.Equals(chatPermissions.ChatId));
+
+			per.SendNews = chatPermissions.SendNews;
+
+			await _context.SaveChangesAsync();
 		}
 	}
 }
