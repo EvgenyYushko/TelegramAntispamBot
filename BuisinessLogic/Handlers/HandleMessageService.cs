@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BuisinessLogic.Services;
+using BuisinessLogic.Services.Facades;
 using Infrastructure.Enumerations;
 using Infrastructure.Extentions;
 using Infrastructure.InjectSettings;
@@ -25,6 +26,7 @@ namespace BuisinessLogic.Handlers
 		private static bool _updateMLProcess;
 		private readonly IDeleteMessageService _deleteMessageService;
 		private readonly IMLService _mLService;
+		private readonly MLFacade _mLFacade;
 		private readonly IProfanityCheckerService _profanityCheckerService;
 		private readonly ISpamDetector _spamDetector;
 		private readonly ITelegramUserService _telegramUserService;
@@ -37,6 +39,7 @@ namespace BuisinessLogic.Handlers
 			, IUserService userService
 			, ISpamDetector spamDetector
 			, IMLService mLService
+			, MLFacade mLFacade
 		)
 		{
 			_deleteMessageService = deleteMessageService;
@@ -45,6 +48,7 @@ namespace BuisinessLogic.Handlers
 			_userService = userService;
 			_spamDetector = spamDetector;
 			_mLService = mLService;
+			_mLFacade = mLFacade;
 		}
 
 		/// <inheritdoc />

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Infrastructure.InjectSettings;
 using Quartz;
@@ -12,15 +11,11 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 {
 	public abstract class SchedulerJob : IJob
 	{
-		private readonly BackgroundSiteSetting _setting;
 		private readonly TelegramBotClient _telegramClient;
 		private readonly ITelegramUserService _telegramUserService;
-		private Timer _timer;
 
-		protected SchedulerJob(TelegramInject botClient, BackgroundSiteSetting setting,
-			ITelegramUserService telegramUserService)
+		protected SchedulerJob(TelegramInject botClient, ITelegramUserService telegramUserService)
 		{
-			_setting = setting;
 			_telegramUserService = telegramUserService;
 			_telegramClient = botClient.TelegramClient;
 		}
@@ -55,11 +50,5 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 		{
 			throw new NotImplementedException();
 		}
-	}
-
-	public class BackgroundSiteSetting
-	{
-		public TimeSpan[] ScheduledTimes { get; set; }
-		public int DayInterval { get; set; } = 1; // По умолчанию ежедневно
 	}
 }

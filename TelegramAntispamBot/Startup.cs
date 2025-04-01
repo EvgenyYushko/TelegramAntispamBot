@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BuisinessLogic.Handlers;
 using BuisinessLogic.Services.Authorization;
+using BuisinessLogic.Services.Facades;
 using BuisinessLogic.Services.Parsers;
 using BuisinessLogic.Services.Telegram;
 using DataAccessLayer;
@@ -14,6 +15,7 @@ using DomainLayer.Repositories;
 using GoogleServices.Drive;
 using GoogleServices.Gemini;
 using GoogleServices.Interfaces;
+using Infrastructure.Common;
 using Infrastructure.Enumerations;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models;
@@ -37,19 +39,17 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using ML_SpamClassifier;
 using ML_SpamClassifier.Interfaces;
+using Quartz;
 using QuartzHostedService;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using TelegramAntispamBot.BackgroundServices;
+using TelegramAntispamBot.BackgroundServices.Base;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
 using static Infrastructure.Constants.TelegramConstatns;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
-using Quartz;
-using static Quartz.MisfireInstruction;
-using TelegramAntispamBot.BackgroundServices.Base;
-using Infrastructure.Common;
 
 namespace TelegramAntispamBot
 {
@@ -124,12 +124,9 @@ namespace TelegramAntispamBot
 				services.AddSingleton<IMLService, MLService>();
 				services.AddSingleton<ExternalAuthManager>();
 				services.AddSingleton<ISpamDetector, SpamDetector>();
+				services.AddSingleton<MLFacade>();
 
 				services.AddHostedService<SendMailBackgroundService>();
-				//services.AddHostedService<CurrencyJob>();
-				//services.AddHostedService<HabrJob>();
-				//services.AddHostedService<OnlinerJob>();
-				//services.AddHostedService<TrainModeJob>();
 			}
 			else
 			{
@@ -138,6 +135,7 @@ namespace TelegramAntispamBot
 				services.AddScoped<IMLService, MLService>();
 				services.AddScoped<ExternalAuthManager>();
 				services.AddScoped<ISpamDetector, SpamDetector>();
+				services.AddScoped<MLFacade>();
 			}
 			services.AddSingleton<IMailService, MailService>();
 			services.AddHostedService<HealthCheckBackgroundService>();
@@ -168,7 +166,7 @@ namespace TelegramAntispamBot
 				{
 					var jobKey = new JobKey($"{job.Key}Job");
 					q.AddJob(job.Type, jobKey, j => j.StoreDurably());
-    
+
 					q.AddTrigger(t => t
 						.WithIdentity($"{job.Key}Trigger")
 						.ForJob(jobKey)
@@ -181,13 +179,13 @@ namespace TelegramAntispamBot
 			services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 			// Получаем IScheduler для проверки расписаний
-			services.AddTransient(provider => 
+			services.AddTransient(provider =>
 			{
 				var schedulerFactory = provider.GetRequiredService<ISchedulerFactory>();
 				return schedulerFactory.GetScheduler().GetAwaiter().GetResult();
 			});
 			services.AddTransient<ScheduleInspectorService>();
-			
+
 			//var googleFoldrId = Configuration.GetValue<string>(GOOGLE_SPAM_ML_FOLDER_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_SPAM_ML_FOLDER_ID);
 			//services.AddSingleton<ISpamDetector>(provider =>
 			//{
@@ -322,7 +320,13 @@ namespace TelegramAntispamBot
 			using (var scope = app.ApplicationServices.CreateScope())
 			{
 				var inspector = scope.ServiceProvider.GetRequiredService<ScheduleInspectorService>();
-				Task.Run(async ()=> await inspector.PrintScheduleInfo()).Wait();
+				Task.Run(async () => await inspector.PrintScheduleInfo()).Wait();
+
+				if (!local)
+				{
+					var ml = scope.ServiceProvider.GetRequiredService<MLFacade>();
+					Task.Run(async () => await ml.LoadModel()).Wait();
+				}
 			}
 
 			if (local)
@@ -335,6 +339,8 @@ namespace TelegramAntispamBot
 					var generativeLanguageModel = scope.ServiceProvider.GetRequiredService<IGenerativeLanguageModel>();
 					var mlService = scope.ServiceProvider.GetRequiredService<IMLService>();
 					var telegreamUserService = new TelegramUserService(new TelegramUserRepository(dbContext));
+					var ml = scope.ServiceProvider.GetRequiredService<MLFacade>();
+					Task.Run(async () => await ml.LoadModel()).Wait();
 
 					var testController = new BotController
 						(
@@ -346,6 +352,7 @@ namespace TelegramAntispamBot
 								, userService
 								, new SpamDetector(generativeLanguageModel, mlService, env)
 								, mlService
+								, ml
 							)
 							, _telegram
 						);

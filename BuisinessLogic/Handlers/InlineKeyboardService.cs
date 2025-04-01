@@ -25,10 +25,10 @@ namespace BuisinessLogic.Handlers
 
 		private const string SPAM = "spam";
 
-		private static readonly InlineKeyboardButton[] myChatsButton ={ InlineKeyboardButton.WithCallbackData("📂 Мои чаты", OPEN_CHATS) };
-		private static readonly InlineKeyboardButton[] connectSettingButton ={ InlineKeyboardButton.WithCallbackData("Подключить защиту", OPEN_SETTINGS) };
-		private static readonly InlineKeyboardButton[] helpChatButton ={ InlineKeyboardButton.WithCallbackData("Помощь боту", HELP_CHAT) };
-		private static readonly InlineKeyboardButton[] reTrainModelButton ={ InlineKeyboardButton.WithCallbackData("Переобучить модель", RE_TRAIN_MODEL) };
+		private static readonly InlineKeyboardButton[] myChatsButton = { InlineKeyboardButton.WithCallbackData("📂 Мои чаты", OPEN_CHATS) };
+		private static readonly InlineKeyboardButton[] connectSettingButton = { InlineKeyboardButton.WithCallbackData("Подключить защиту", OPEN_SETTINGS) };
+		private static readonly InlineKeyboardButton[] helpChatButton = { InlineKeyboardButton.WithCallbackData("Помощь боту", HELP_CHAT) };
+		private static readonly InlineKeyboardButton[] reTrainModelButton = { InlineKeyboardButton.WithCallbackData("Переобучить модель", RE_TRAIN_MODEL) };
 
 		private async Task CallBackHandler(Update update, CancellationToken cancellationToken)
 		{
@@ -96,12 +96,8 @@ namespace BuisinessLogic.Handlers
 					var msg = "Сообщений для обновления датасета нету.";
 					await using (new WaitDialog(_telegramClient, userId).Show())
 					{
-						var isUpdated = await _mLService.UpdateDataSet();
-						if (isUpdated)
+						if (await _mLFacade.RetrainModel())
 						{
-							await _spamDetector.TrainModelAsync();
-							await _mLService.UploadModelAndDataSetToDrive();
-							await _mLService.DeleteReviewedSuspiciousMessages();
 							msg = "Модель успешно обучена. Дата сет и модель обновлены на гугл диске";
 						}
 					}

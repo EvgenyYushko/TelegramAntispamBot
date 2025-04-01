@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BuisinessLogic.Services.Parsers;
 using Infrastructure.InjectSettings;
 using ServiceLayer.Services.Telegram;
@@ -11,16 +10,8 @@ namespace TelegramAntispamBot.BackgroundServices
 	{
 		private readonly OnlinerParser _onlinerParser;
 
-		public OnlinerJob(TelegramInject botClient, OnlinerParser onlinerParser,
-			ITelegramUserService telegramUserService)
-			: base(botClient, new BackgroundSiteSetting
-				{
-					ScheduledTimes = new[]
-					{
-						new TimeSpan(13, 0, 0) // 13:00
-					}
-				},
-				telegramUserService)
+		public OnlinerJob(TelegramInject botClient, OnlinerParser onlinerParser, ITelegramUserService telegramUserService)
+			: base(botClient, telegramUserService)
 		{
 			_onlinerParser = onlinerParser;
 		}
