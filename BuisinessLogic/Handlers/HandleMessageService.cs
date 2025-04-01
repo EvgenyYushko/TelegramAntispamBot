@@ -55,8 +55,8 @@ namespace BuisinessLogic.Handlers
 
 			if (_firstRunBot)
 			{
-				await _mLService.DownloadModel();
-				await _spamDetector.LoadModel();
+				//await _mLService.DownloadModel();
+				//await _spamDetector.LoadModel();
 				await _telegramUserService.UpdateLocalStorage();
 				_firstRunBot = false;
 			}

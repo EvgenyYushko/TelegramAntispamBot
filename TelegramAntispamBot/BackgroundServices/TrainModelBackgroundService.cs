@@ -24,6 +24,16 @@ namespace TelegramAntispamBot.BackgroundServices
 		{
 			_mLService = mLService;
 			_spamDetector = spamDetector;
+
+			Task.Run(async () => await Load()).Wait();
+		}
+
+		private async Task Load()
+		{
+			Console.WriteLine("TrainModelBackgroundService.Load - Start");
+			await _mLService.DownloadModel();
+			await _spamDetector.LoadModel();
+			Console.WriteLine("TrainModelBackgroundService.Load - End");
 		}
 
 		protected async override Task DoWork()
