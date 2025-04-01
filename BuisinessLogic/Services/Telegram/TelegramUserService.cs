@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DomainLayer.Repositories;
+using Infrastructure.Enumerations;
 using Infrastructure.Models;
 using ServiceLayer.Models;
 using ServiceLayer.Services.Telegram;
@@ -114,7 +115,10 @@ namespace BuisinessLogic.Services.Telegram
 							UserId = p.UserId,
 							SendLinks = p.SendLinks
 						})
-						.ToList()
+						.ToList(),
+					UserSite = u.UserSite is not null 
+						? new UserAccount(u.UserSiteId.Value, u.UserSite.UserName, u.UserSite.PasswordHash, u.UserSite.Email, new List<Role>() { }) 
+						: null
 				})
 				.ToList();
 		}

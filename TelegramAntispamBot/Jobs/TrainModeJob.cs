@@ -3,9 +3,9 @@ using BuisinessLogic.Services.Facades;
 using Infrastructure.InjectSettings;
 using Quartz;
 using ServiceLayer.Services.Telegram;
-using TelegramAntispamBot.BackgroundServices.Base;
+using TelegramAntispamBot.Jobs.Base;
 
-namespace TelegramAntispamBot.BackgroundServices
+namespace TelegramAntispamBot.Jobs
 {
 	public class TrainModeJob : SchedulerJob
 	{

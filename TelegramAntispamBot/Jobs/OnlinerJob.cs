@@ -2,9 +2,9 @@
 using BuisinessLogic.Services.Parsers;
 using Infrastructure.InjectSettings;
 using ServiceLayer.Services.Telegram;
-using TelegramAntispamBot.BackgroundServices.Base;
+using TelegramAntispamBot.Jobs.Base;
 
-namespace TelegramAntispamBot.BackgroundServices
+namespace TelegramAntispamBot.Jobs
 {
 	public class OnlinerJob : SchedulerJob
 	{

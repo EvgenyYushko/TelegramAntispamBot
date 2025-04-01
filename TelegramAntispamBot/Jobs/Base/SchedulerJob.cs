@@ -7,12 +7,12 @@ using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
-namespace TelegramAntispamBot.BackgroundServices.Base
+namespace TelegramAntispamBot.Jobs.Base
 {
 	public abstract class SchedulerJob : IJob
 	{
 		private readonly TelegramBotClient _telegramClient;
-		private readonly ITelegramUserService _telegramUserService;
+		protected readonly ITelegramUserService _telegramUserService;
 
 		protected SchedulerJob(TelegramInject botClient, ITelegramUserService telegramUserService)
 		{

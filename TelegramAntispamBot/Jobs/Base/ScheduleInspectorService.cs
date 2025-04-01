@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using Infrastructure.Common;
 using Quartz;
 using Quartz.Impl.Matchers;
-using static Infrastructure.Common.TimeZoneHelper;
 
-namespace TelegramAntispamBot.BackgroundServices.Base
+namespace TelegramAntispamBot.Jobs.Base
 {
 	public class ScheduleInspectorService
 	{

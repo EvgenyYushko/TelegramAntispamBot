@@ -45,9 +45,10 @@ using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using TelegramAntispamBot.BackgroundServices;
-using TelegramAntispamBot.BackgroundServices.Base;
 using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
+using TelegramAntispamBot.Jobs;
+using TelegramAntispamBot.Jobs.Base;
 using static Infrastructure.Constants.TelegramConstatns;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 
@@ -125,8 +126,6 @@ namespace TelegramAntispamBot
 				services.AddSingleton<ExternalAuthManager>();
 				services.AddSingleton<ISpamDetector, SpamDetector>();
 				services.AddSingleton<MLFacade>();
-
-				services.AddHostedService<SendMailBackgroundService>();
 			}
 			else
 			{
@@ -158,6 +157,7 @@ namespace TelegramAntispamBot
 					new { Type = typeof(OnlinerJob), Key = "Onliner", Time = "0 0 13 * * ?" },
 					new { Type = typeof(CurrencyJob), Key = "Currency", Time = "0 0 9 * * ?" },
 					new { Type = typeof(TrainModeJob), Key = "TrainMode", Time = "0 0 23 * * ?" },
+					new { Type = typeof(SendMailJob), Key = "SendMail", Time = "0 0 10 ? * MON" }, // Каждый понедельник в 10:00
 				};
 
 				var timeZone = TimeZoneHelper.GetTimeZoneInfo();

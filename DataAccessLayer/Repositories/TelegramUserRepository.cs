@@ -483,6 +483,7 @@ namespace DataAccessLayer.Repositories
 		{
 			return _context.TelegramUsers
 				.Include(t => t.Permissions)
+				.Include(t => t.UserSite)
 				.AsNoTracking()
 				.ToList();
 		}

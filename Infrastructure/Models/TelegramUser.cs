@@ -10,6 +10,8 @@ namespace Infrastructure.Models
 
 		public Guid UserSiteId { get; set; } = default;
 
+		public UserAccount UserSite { get; set; }
+		
 		public string Name { get; set; }
 
 		public DateTime CreateDate { get; set; }
