@@ -140,10 +140,13 @@ namespace DataAccessLayer.Repositories
 				LocalUserStorage.Clear();
 			}
 
-			var user = await _context.GetUser(userInfo.UserId);
+			var user = await _context.GetUser(userInfo.UserId, false);
 			if (user is not null)
 			{
+				Console.WriteLine(user);
+				Console.WriteLine(userInfo);
 				user.UserSiteId = userInfo.UserSiteId;
+				Console.WriteLine(user);
 
 				var userChats = _context.UserChannelMembership
 					.Where(m => m.UserId == userInfo.UserId);

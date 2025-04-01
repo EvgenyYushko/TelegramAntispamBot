@@ -29,7 +29,7 @@ namespace Infrastructure.Models
 
 		public override string ToString()
 		{
-			return $"UserId={UserId}, Name={Name} UserSiteId={UserSiteId}";
+			return $"UserId={UserId}, Name={Name} UserSiteId={UserSiteId} this={this.GetType().Name}";
 		}
 	}
 

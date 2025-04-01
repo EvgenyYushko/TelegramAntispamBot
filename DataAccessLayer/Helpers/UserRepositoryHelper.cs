@@ -7,9 +7,14 @@ namespace DataAccessLayer.Helpers
 {
 	internal static class UserRepositoryHelper
 	{
-		public static Task<TelegramUserEntity> GetUser(this ApplicationDbContext context, long userId)
+		public static Task<TelegramUserEntity> GetUser(this ApplicationDbContext context, long userId, bool asNoTrak = true)
 		{
-			return context.TelegramUsers.AsNoTracking().FirstOrDefaultAsync(u => u.UserId.Equals(userId));
+			if (asNoTrak)
+			{
+				return context.TelegramUsers.AsNoTracking().FirstOrDefaultAsync(u => u.UserId.Equals(userId));
+			}
+
+			return context.TelegramUsers.FirstOrDefaultAsync(u => u.UserId.Equals(userId));
 		}
 
 		public static bool UserInChanel(this ApplicationDbContext context, long userId, long chanelId)

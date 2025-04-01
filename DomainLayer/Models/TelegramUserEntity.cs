@@ -23,5 +23,10 @@ namespace DomainLayer.Models
 		public List<UserChannelMembership> ChannelMemberships { get; set; } = new();
 
 		public UserEntity? UserSite { get; set; }
+
+		public override string ToString()
+		{
+			return $"UserId = {UserId}, UserSiteId={(UserSiteId is null ? "null" : UserSiteId)},  this={this.GetType().Name}";
+		}
 	}
 }
