@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Models;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
+using static Infrastructure.Helpers.Logger;
 
 namespace DataAccessLayer.Repositories
 {
@@ -135,7 +136,7 @@ namespace DataAccessLayer.Repositories
 			var userLocal = LocalUserStorage.FirstOrDefault(u => u.UserId == userInfo.UserId);
 			if (userLocal is not null)
 			{
-				Console.WriteLine("Пользователь уже существует в локльном хранилище - Удалим");
+				Log("Пользователь уже существует в локльном хранилище - Удалим");
 				//var indexUser = LocalUserStorage.IndexOf(userLocal);
 				LocalUserStorage.Clear();
 			}
@@ -143,10 +144,10 @@ namespace DataAccessLayer.Repositories
 			var user = await _context.GetUser(userInfo.UserId, false);
 			if (user is not null)
 			{
-				Console.WriteLine(user);
-				Console.WriteLine(userInfo);
+				Log(user);
+				Log(userInfo);
 				user.UserSiteId = userInfo.UserSiteId;
-				Console.WriteLine(user);
+				Log(user);
 
 				var userChats = _context.UserChannelMembership
 					.Where(m => m.UserId == userInfo.UserId);
@@ -156,14 +157,14 @@ namespace DataAccessLayer.Repositories
 
 				await usersChatPErmisions.ForEachAsync(p => p.SendLinks = true);
 
-				Console.WriteLine("Данный пользователь уже существует в БД");
+				Log("Данный пользователь уже существует в БД");
 				await _context.SaveChangesAsync();
 
 				return true;
 			}
 
-			Console.WriteLine("TryAddUserExteranl");
-			Console.WriteLine(userInfo);
+			Log("TryAddUserExteranl");
+			Log(userInfo);
 			await AddUser(userInfo.UserId, userInfo.Name, userInfo.UserSiteId);
 			await _context.SaveChangesAsync();
 
@@ -174,22 +175,22 @@ namespace DataAccessLayer.Repositories
 		{
 			if (LocalUserStorage.Exists(u => u.UserId == userInfo.UserId))
 			{
-				Console.WriteLine("Пользователь уже существует в локльном хранилище");
+				Log("Пользователь уже существует в локльном хранилище");
 			}
 			else
 			{
-				Console.WriteLine("Пользователь Не существует в локльном хранилище");
+				Log("Пользователь Не существует в локльном хранилище");
 				LocalUserStorage.Add(userInfo);
 			}
 
 			if (await _context.GetUser(userInfo.UserId) is not null)
 			{
-				Console.WriteLine("Данный пользователь уже существует в БД");
+				Log("Данный пользователь уже существует в БД");
 
 				// Пользака нету в текущем канале
 				if (!_context.UserInChanel(userInfo.UserId, userInfo.Chanel.TelegramChatId))
 				{
-					//Console.WriteLine($"Данный пользователь уже существует в канале {userInfo.Chanel.TelegramChatId}");
+					//Log($"Данный пользователь уже существует в канале {userInfo.Chanel.TelegramChatId}");
 					await TryAddChanel(userInfo);
 				}
 				else
@@ -228,7 +229,7 @@ namespace DataAccessLayer.Repositories
 				var creatorUser = await _context.GetUser(creator.UserId);
 				if (creatorUser is null && chat.CreatorId != userInfo.UserId)
 				{
-					Console.WriteLine("Begin AddUserWithPErmissions");
+					Log("Begin AddUserWithPErmissions");
 					await AddUserWithPermissions(creator.UserId, creator.Name, chat.TelegramChatId);
 				}
 
@@ -314,7 +315,7 @@ namespace DataAccessLayer.Repositories
 
 		private async Task AddOrUpdateTelegrammPermission(long userId, long chatId)
 		{
-			Console.WriteLine("AddOrUpdateTelegrammPermission");
+			Log("AddOrUpdateTelegrammPermission");
 			var pers = _context.TelegramPermissions
 				.AsNoTracking()
 				.FirstOrDefault(p => p.UserId.Equals(userId) && p.ChatId.Equals(chatId));
@@ -414,9 +415,9 @@ namespace DataAccessLayer.Repositories
 				//.AsNoTracking()
 				.First(m => m.Id.Equals(id));
 
-			Console.WriteLine($"chat.Creator={chat.Creator}");
-			Console.WriteLine($"chat.Admins={chat.Admins}");
-			Console.WriteLine($"chat.Members={chat.Members}");
+			Log($"chat.Creator={chat.Creator}");
+			Log($"chat.Admins={chat.Admins}");
+			Log($"chat.Members={chat.Members}");
 
 			return new Chanel
 			{

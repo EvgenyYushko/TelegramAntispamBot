@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ServiceLayer.Services.Telegram;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Pages
 {
@@ -26,7 +27,7 @@ namespace TelegramAntispamBot.Pages
 			if (User.Identity.IsAuthenticated)
 			{
 				_chatId = chatId;
-				Console.WriteLine(Chat);
+				Log(Chat);
 				return Page();
 			}
 

@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BuisinessLogic.Services.Telegram;
 using Infrastructure.InjectSettings;
 using MailSenderService;
 using MailSenderService.ServiceLayer.Services;
 using Quartz;
 using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Jobs.Base;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Jobs
 {
@@ -37,7 +36,7 @@ namespace TelegramAntispamBot.Jobs
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex);
+				Log(ex);
 			}
 
 			await base.Execute(context);

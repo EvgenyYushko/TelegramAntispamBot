@@ -11,6 +11,7 @@ using ServiceLayer.Models;
 using ServiceLayer.Services.Telegram;
 using static Infrastructure.Common.TimeZoneHelper;
 using static ML_SpamClassifier.Helpers.MLHelpers;
+using static Infrastructure.Helpers.Logger;
 
 namespace ML_SpamClassifier
 {
@@ -62,7 +63,7 @@ namespace ML_SpamClassifier
 			_mlContext.Model.Save(_model, data.Schema, _modelPath);
 
 			CreatePredictor();
-			Console.WriteLine(GetModelStatus());
+			Log(GetModelStatus());
 		}
 
 		private void CreatePredictor()
@@ -79,7 +80,7 @@ namespace ML_SpamClassifier
 
 			var prediction = _predictor.Predict(new MessageData { Text = text });
 
-			Console.WriteLine($"IsSpam = {prediction.IsSpam}, Probability = {prediction.Probability}");
+			Log($"IsSpam = {prediction.IsSpam}, Probability = {prediction.Probability}");
 
 			//if (0.10 < prediction.Probability && prediction.Probability < 0.90) // сохраним для анализа
 			//{

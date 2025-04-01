@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using static Infrastructure.Helpers.Logger;
 
 namespace BuisinessLogic.Services
 {
@@ -47,7 +48,7 @@ namespace BuisinessLogic.Services
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Failed to show wait dialog: {ex.Message}");
+				Log($"Failed to show wait dialog: {ex.Message}");
 			}
 		}
 
@@ -76,7 +77,7 @@ namespace BuisinessLogic.Services
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Animation error: {ex.Message}");
+					Log($"Animation error: {ex.Message}");
 					break;
 				}
 			}
@@ -104,7 +105,7 @@ namespace BuisinessLogic.Services
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Failed to clean up wait dialog: {ex.Message}");
+				Log($"Failed to clean up wait dialog: {ex.Message}");
 			}
 			finally
 			{

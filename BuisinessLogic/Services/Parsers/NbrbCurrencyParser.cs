@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static Infrastructure.Common.TimeZoneHelper;
+using static Infrastructure.Helpers.Logger;
 
 namespace BuisinessLogic.Services.Parsers
 {
@@ -76,7 +77,7 @@ namespace BuisinessLogic.Services.Parsers
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Error: {ex}");
+					Log($"Error: {ex}");
 					return $"❌ *Ошибка!* ❌\n`{ex.Message}`";
 				}
 			}

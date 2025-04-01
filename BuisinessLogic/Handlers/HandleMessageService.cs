@@ -17,6 +17,8 @@ using Telegram.Bot.Types.Enums;
 using static Infrastructure.Common.BotSettings;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
+using static Infrastructure.Helpers.Logger;
+using Infrastructure.Helpers;
 
 namespace BuisinessLogic.Handlers
 {
@@ -342,7 +344,7 @@ namespace BuisinessLogic.Handlers
 						}
 						catch (Exception e)
 						{
-							Console.WriteLine(e);
+							Logger.Log(e.ToString());
 						}
 
 						try
@@ -351,7 +353,7 @@ namespace BuisinessLogic.Handlers
 						}
 						catch (Exception e)
 						{
-							Console.WriteLine(e);
+							Logger.Log(e.ToString());
 						}
 					}
 					else

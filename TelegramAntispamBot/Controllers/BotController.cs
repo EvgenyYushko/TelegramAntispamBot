@@ -10,6 +10,7 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Controllers
 {
@@ -31,15 +32,15 @@ namespace TelegramAntispamBot.Controllers
 		{
 			try
 			{
-				Console.WriteLine("Invike method Post()");
-				Console.WriteLine($"{update.Message?.Text}");
+				Log("Invike method Post()");
+				Log($"{update.Message?.Text}");
 
 				var token = new CancellationToken();
 				await _messageService.HandleUpdateAsync(_botClient, update, update.Type, token);
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e.ToString());
+				Log(e.ToString());
 			}
 
 			return Ok();
@@ -79,7 +80,7 @@ namespace TelegramAntispamBot.Controllers
 					=> $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
 				_ => exception.ToString()
 			};
-			Console.WriteLine(errorMessage);
+			Log(errorMessage);
 			return Task.CompletedTask;
 		}
 

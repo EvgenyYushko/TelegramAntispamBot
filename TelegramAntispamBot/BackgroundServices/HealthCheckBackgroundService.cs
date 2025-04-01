@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Infrastructure.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
@@ -31,16 +32,16 @@ namespace TelegramAntispamBot.BackgroundServices
 					if (response.IsSuccessStatusCode)
 					{
 						var content = await response.Content.ReadAsStringAsync(stoppingToken);
-						Console.WriteLine(content);
+						Log(content);
 					}
 					else
 					{
-						Console.WriteLine($"Health check failed: {response.StatusCode}");
+						Log($"Health check failed: {response.StatusCode}");
 					}
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Error in health check: {ex.Message}");
+					Log($"Error in health check: {ex.Message}");
 				}
 
 				await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);

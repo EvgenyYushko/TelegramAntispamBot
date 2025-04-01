@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Account.Auth;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Pages.Account
 {
@@ -61,7 +62,7 @@ namespace TelegramAntispamBot.Pages.Account
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine(e);
+					Log(e);
 					ModelState.AddModelError("", "Ошибка отправки на данный Email");
 					return Page();
 				}

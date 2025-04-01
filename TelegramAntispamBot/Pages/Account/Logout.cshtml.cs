@@ -4,6 +4,7 @@ using DomainLayer.Models.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TelegramAntispamBot.Pages.Base;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Pages.Account
 {
@@ -20,7 +21,7 @@ namespace TelegramAntispamBot.Pages.Account
 		{
 			var authScheme = User.Identity?.AuthenticationType;
 
-			Console.WriteLine($"LogoutModel-OnGetAsync-authScheme = {authScheme}");
+			Log($"LogoutModel-OnGetAsync-authScheme = {authScheme}");
 
 			// 1. Выход из локальной аутентификации (куки)
 			await _signInManager.SignOutAsync();

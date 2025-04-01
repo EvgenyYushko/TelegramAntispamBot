@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using TelegramAntispamBot.Pages.Base;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Pages.User
 {
@@ -23,7 +24,7 @@ namespace TelegramAntispamBot.Pages.User
 		{
 			if (User.Identity.IsAuthenticated)
 			{
-				Console.WriteLine("ProfileModel-OnGetAsync-UserId=" + UserId);
+				Log("ProfileModel-OnGetAsync-UserId=" + UserId);
 				await _signInManager.SignOutAsync();
 				var res = await _userService.Delete(UserId);
 

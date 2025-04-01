@@ -6,6 +6,7 @@ using Quartz;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Jobs.Base
 {
@@ -42,7 +43,7 @@ namespace TelegramAntispamBot.Jobs.Base
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.ToString(), "Job execution failed");
+				Log(ex.ToString());
 			}
 		}
 

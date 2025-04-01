@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Pages.Base;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Pages.User
 {
@@ -31,17 +32,17 @@ namespace TelegramAntispamBot.Pages.User
 		{
 			if (User.Identity.IsAuthenticated)
 			{
-				Console.WriteLine("ProfileModel-OnGetAsync-UserId=" + UserId);
+				Log("ProfileModel-OnGetAsync-UserId=" + UserId);
 				CurrentUser = await _usersService.GetUserById(UserId);
 				var siteUser = _telegramUserService.GetByUserSiteId(UserId);
 				if (siteUser != null)
 				{
-					Console.WriteLine(siteUser);
+					Log(siteUser);
 					TelegramUser = siteUser;
 				}
 
 				//await _telegramUserService.GetChatsByUser(UserId);
-				Console.WriteLine(CurrentUser);
+				Log(CurrentUser);
 				return Page();
 			}
 

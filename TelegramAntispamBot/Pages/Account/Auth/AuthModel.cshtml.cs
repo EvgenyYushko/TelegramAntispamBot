@@ -8,6 +8,7 @@ using Infrastructure.Enumerations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TelegramAntispamBot.Pages.Base;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Pages.Account.Auth
 {
@@ -28,14 +29,14 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
 			properties.Items["ReturnUrl"] = returnUrl;
 
-			Console.WriteLine($"redirectUrl={redirectUrl}, returnUrl={returnUrl}");
+			Log($"redirectUrl={redirectUrl}, returnUrl={returnUrl}");
 
 			return new ChallengeResult(provider, properties);
 		}
 
 		public async Task<IActionResult> OnGetCallbackAsync()
 		{
-			Console.WriteLine("AuthModelModel-OnGetCallbackAsync");
+			Log("AuthModelModel-OnGetCallbackAsync");
 
 			var info = await _signInManager.GetExternalLoginInfoAsync();
 			if (info == null)
@@ -44,7 +45,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 				return RedirectToPage("/Account/Login");
 			}
 
-			Console.WriteLine($"info.LoginProvider={info.LoginProvider}, info.ProviderKey={info.ProviderKey}");
+			Log($"info.LoginProvider={info.LoginProvider}, info.ProviderKey={info.ProviderKey}");
 
 			// Получаем redirectUrl
 			if (!info.AuthenticationProperties.Items.TryGetValue("ReturnUrl", out var redirectUrl))
@@ -55,7 +56,7 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 			// Если пользователь уже авторизован, привязываем аккаунт
 			if (User.Identity.IsAuthenticated)
 			{
-				Console.WriteLine($"User.Identity.IsAuthenticated={User.Identity.IsAuthenticated}");
+				Log($"User.Identity.IsAuthenticated={User.Identity.IsAuthenticated}");
 
 				var currentUser = await _externalAuthManager.FindUserById(UserId);
 				if (currentUser == null)
@@ -63,13 +64,13 @@ namespace TelegramAntispamBot.Pages.Account.Auth
 					return NotFound($"Не удалось загрузить пользователя с ID '{UserId}'.");
 				}
 
-				Console.WriteLine($"UserId={UserId}");
+				Log($"UserId={UserId}");
 
 				// Проверяем, не привязан ли аккаунт к другому пользователю
 				var existingLoginUser = await _externalAuthManager.FindUserByExternalLoginAsync(info.LoginProvider, info.ProviderKey);
 				if (existingLoginUser != null)
 				{
-					Console.WriteLine($"existingLoginUser={existingLoginUser.Id}");
+					Log($"existingLoginUser={existingLoginUser.Id}");
 					// Ошибка: аккаунт уже связан
 					return LocalRedirect(redirectUrl);
 				}

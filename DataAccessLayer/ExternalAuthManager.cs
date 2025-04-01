@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.AuthorizeHelper;
+using static Infrastructure.Helpers.Logger;
 
 namespace DataAccessLayer
 {
@@ -79,11 +80,10 @@ namespace DataAccessLayer
 
 			foreach (var login in userEntityTest)
 			{
-				Console.WriteLine($"login={login.Id}");
+				Log($"login={login.Id}");
 			}
 
-			Console.WriteLine(
-				$"FindUserByExternalLoginAsync -> info.LoginProvider={provider}, info.ProviderKey={providerKey}");
+			Log($"FindUserByExternalLoginAsync -> info.LoginProvider={provider}, info.ProviderKey={providerKey}");
 
 			return userEntity;
 		}

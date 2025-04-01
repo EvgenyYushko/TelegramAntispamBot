@@ -5,6 +5,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using Infrastructure.Models;
 using MailSenderService.ServiceLayer.Services;
+using static Infrastructure.Helpers.Logger;
 
 namespace MailSenderService.BuisinessLogic.Services
 {
@@ -49,7 +50,7 @@ namespace MailSenderService.BuisinessLogic.Services
 					//mailMessage.Attachments.Add(new Attachment("test.txt"));
 
 					smtpClient.Send(mailMessage);
-					Console.WriteLine("Письмо отправлено!");
+					Log("Письмо отправлено!");
 				}
 			}
 

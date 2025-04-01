@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Infrastructure.Common;
 using Quartz;
 using Quartz.Impl.Matchers;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Jobs.Base
 {
@@ -28,17 +29,17 @@ namespace TelegramAntispamBot.Jobs.Base
 					var jobDetail = await _scheduler.GetJobDetail(jobKey);
 					var triggers = await _scheduler.GetTriggersOfJob(jobKey);
 
-					Console.WriteLine($"Job: {jobKey.Name}");
+					Log($"Job: {jobKey.Name}");
 
 					foreach (var trigger in triggers)
 					{
 						var nextFireTimeUtc = trigger.GetNextFireTimeUtc();
 						var nextFireTimeLocal = TimeZoneHelper.ConvertFromUtc(nextFireTimeUtc);
 
-						Console.WriteLine($"  Trigger: {trigger.Key.Name}");
-						Console.WriteLine($"  Next fire time (UTC): {nextFireTimeUtc}");
-						Console.WriteLine($"  Next fire time (Local): {nextFireTimeLocal}");
-						Console.WriteLine($"  Schedule: {(trigger as ICronTrigger)?.CronExpressionString}");
+						Log($"  Trigger: {trigger.Key.Name}");
+						//Log($"  Next fire time (UTC): {nextFireTimeUtc}");
+						Log($"  Next fire time (Local): {nextFireTimeLocal}");
+						Log($"  Schedule: {(trigger as ICronTrigger)?.CronExpressionString}");
 					}
 				}
 			}

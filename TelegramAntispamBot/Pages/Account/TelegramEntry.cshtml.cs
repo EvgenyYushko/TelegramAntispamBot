@@ -11,6 +11,7 @@ using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Pages.Base;
 using static Infrastructure.Constants.TelegramConstatns;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot.Pages.Account
 {
@@ -37,10 +38,10 @@ namespace TelegramAntispamBot.Pages.Account
 			[FromQuery] long auth_date,
 			[FromQuery] string hash)
 		{
-			//Console.WriteLine($"id={id}, first_name={first_name}, last_name={last_name}, username={username}, photo_url={photo_url}, auth_date={auth_date}, hash={hash}");
+			//Log($"id={id}, first_name={first_name}, last_name={last_name}, username={username}, photo_url={photo_url}, auth_date={auth_date}, hash={hash}");
 			var botToken = configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ??
 							Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
-			//Console.WriteLine($"botToken={botToken}");
+			//Log($"botToken={botToken}");
 			//id=1231047171
 			//first_name=Evgeny
 			//last_name=Yushko
@@ -64,13 +65,13 @@ namespace TelegramAntispamBot.Pages.Account
 				.Select(b => b.ToString("x2"))
 				.Aggregate((a, b) => a + b);
 
-			//Console.WriteLine($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
+			//Log($"hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)={hashString.Equals(hash, StringComparison.OrdinalIgnoreCase)}");
 			var isValid = hashString.Equals(hash, StringComparison.Ordinal); // Без IgnoreCase
-			Console.WriteLine($"Exact match: {isValid}");
+			Log($"Exact match: {isValid}");
 
 			if (hashString.Equals(hash, StringComparison.OrdinalIgnoreCase))
 			{
-				Console.WriteLine($"UserId = {id} Name = {username} UserSiteId = {UserId}");
+				Log($"UserId = {id} Name = {username} UserSiteId = {UserId}");
 				var res = await _telegramUserService.TryAddUserExteranl(new TelegramUser
 				{
 					UserId = id,
@@ -80,26 +81,26 @@ namespace TelegramAntispamBot.Pages.Account
 
 				if (res)
 				{
-					Console.WriteLine("user link sucsec");
+					Log("user link sucsec");
 					var userChats = _telegramUserService.GetChatsByUser(id);
 					if (userChats is not null)
 					{
-						Console.WriteLine("For user finde him chat");
+						Log("For user finde him chat");
 
 						foreach (var chat in userChats)
 						{
-							Console.WriteLine(chat);
+							Log(chat);
 						}
 
 						if (userChats.Any(c => c.AdminsIds.Contains(id) || c.CreatorId.Equals(id)))
 						{
-							Console.WriteLine("User was make admin chat!");
+							Log("User was make admin chat!");
 							await _userService.UpdateRole(UserId, Role.Tutor);
 						}
 					}
 				}
 
-				Console.WriteLine($"UserId = {id} Name = {username} UserSiteId = {UserId}");
+				Log($"UserId = {id} Name = {username} UserSiteId = {UserId}");
 
 				return RedirectToPage("/User/Profile");
 			}

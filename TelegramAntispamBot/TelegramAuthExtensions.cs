@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot
 {
@@ -39,7 +40,7 @@ namespace TelegramAntispamBot
 
 		protected override async Task<HandleRequestResult> HandleRemoteAuthenticateAsync()
 		{
-			Console.WriteLine("TelegramAuthHandler-HandleRemoteAuthenticateAsync");
+			Log("TelegramAuthHandler-HandleRemoteAuthenticateAsync");
 			var user = new UserTeleg
 			{
 				Id = long.Parse(Request.Form["id"]),

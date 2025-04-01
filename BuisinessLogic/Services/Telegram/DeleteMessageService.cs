@@ -6,6 +6,7 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using static Infrastructure.Helpers.Logger;
 
 namespace BuisinessLogic.Services.Telegram
 {
@@ -18,7 +19,7 @@ namespace BuisinessLogic.Services.Telegram
 			var messageText = message.Text;
 			var messageId = message.MessageId;
 
-			Console.WriteLine($"Message for delete: '{messageText}' (id: {messageId})");
+			Log($"Message for delete: '{messageText}' (id: {messageId})");
 			await botClient.DeleteMessageAsync(chatId, messageId, cancellationToken);
 
 			if (message.From is { Username: { } })
@@ -30,13 +31,13 @@ namespace BuisinessLogic.Services.Telegram
 				}
 				catch (ApiRequestException ex) when (ex.ErrorCode == 403)
 				{
-					Console.WriteLine("User does not contact the bot or has blocked it");
+					Log("User does not contact the bot or has blocked it");
 					await botClient.SendTextMessageAsync(chatId, msg, cancellationToken: cancellationToken,
 						replyMarkup: inlineKeyboard);
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine($"User error send message after delete message: {e}");
+					Log($"User error send message after delete message: {e}");
 				}
 			}
 		}

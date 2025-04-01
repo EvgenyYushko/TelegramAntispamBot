@@ -40,7 +40,8 @@ namespace TelegramAntispamBot.Tests
 			_service = new HandleMessageService(_deleteMessageService.Object, _profanityCheckerService.Object, _userInfoService.Object
 				, _userSerivce.Object
 				, _spamDetector.Object
-				, _mlService.Object);
+				, _mlService.Object
+				, null);
 		}
 
 		[Test]

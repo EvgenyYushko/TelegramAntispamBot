@@ -10,6 +10,7 @@ using Google.Apis.Services;
 using Google.Apis.Upload;
 using GoogleServices.Interfaces;
 using File = Google.Apis.Drive.v3.Data.File;
+using static Infrastructure.Helpers.Logger;
 
 namespace GoogleServices.Drive
 {
@@ -115,7 +116,7 @@ namespace GoogleServices.Drive
 			// Для отладки: выводим найденные файлы
 			foreach (var file in result.Files)
 			{
-				Console.WriteLine($"Found: {file.Name} ({file.Id})");
+				Log($"Found: {file.Name} ({file.Id})");
 			}
 
 			return result.Files;

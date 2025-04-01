@@ -51,6 +51,7 @@ using TelegramAntispamBot.Jobs;
 using TelegramAntispamBot.Jobs.Base;
 using static Infrastructure.Constants.TelegramConstatns;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
+using static Infrastructure.Helpers.Logger;
 
 namespace TelegramAntispamBot
 {
@@ -314,8 +315,8 @@ namespace TelegramAntispamBot
 				endpoints.MapRazorPages();
 			});
 
-			Console.WriteLine($"Using timezone: {TimeZoneHelper.GetTimeZoneInfo().DisplayName}");
-			Console.WriteLine($"Current local time: {TimeZoneHelper.DateTimeNow}");
+			Log($"Using timezone: {TimeZoneHelper.GetTimeZoneInfo().DisplayName}");
+			Log($"Current local time: {TimeZoneHelper.DateTimeNow}");
 
 			using (var scope = app.ApplicationServices.CreateScope())
 			{
@@ -360,7 +361,7 @@ namespace TelegramAntispamBot
 				}
 			}
 
-			Console.WriteLine($"Bot {Task.Run(async () => await _telegram.TelegramClient.GetMeAsync()).Result.Username} is running...");
+			Log($"Bot {Task.Run(async () => await _telegram.TelegramClient.GetMeAsync()).Result.Username} is running...");
 		}
 
 		public async Task ConfigureWebhookAsync(bool local)

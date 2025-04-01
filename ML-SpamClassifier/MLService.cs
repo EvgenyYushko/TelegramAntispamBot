@@ -11,6 +11,7 @@ using GoogleServices.Interfaces;
 using ServiceLayer.Models;
 using ServiceLayer.Services.Telegram;
 using static ML_SpamClassifier.Helpers.MLHelpers;
+using static Infrastructure.Helpers.Logger;
 
 namespace ML_SpamClassifier
 {
@@ -84,7 +85,7 @@ namespace ML_SpamClassifier
 			{
 				// Загрузка файла с Google Диска
 				await _googleDriveUploader.DownloadFileAsync(modelFile.Id, _modelPath);
-				Console.WriteLine(GetModelStatus());
+				Log(GetModelStatus());
 			}
 		}
 

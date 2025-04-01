@@ -8,6 +8,7 @@ using Infrastructure.Models;
 using ServiceLayer.Models;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot.Types;
+using static Infrastructure.Helpers.Logger;
 
 namespace BuisinessLogic.Services.Telegram
 {
@@ -35,7 +36,7 @@ namespace BuisinessLogic.Services.Telegram
 			var res = await _usersRepository.TryAdd(userInfo);
 			if (res)
 			{
-				Console.WriteLine("User already exist");
+				Log("User already exist");
 			}
 
 			return res;

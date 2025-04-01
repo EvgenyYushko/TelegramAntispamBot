@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using GoogleServices.Gemini.Models;
 using GoogleServices.Interfaces;
 using Newtonsoft.Json;
+using static Infrastructure.Helpers.Logger;
 
 namespace GoogleServices.Gemini
 {
@@ -30,7 +31,7 @@ namespace GoogleServices.Gemini
 		private static void SwitchToNextModel()
 		{
 			GeminiModel = modelsStack.Pop();
-			Console.WriteLine($"USE MODEL: {GeminiModel}");
+			Log($"USE MODEL: {GeminiModel}");
 		}
 
 		private static void InitGeminiModels()
@@ -127,12 +128,12 @@ namespace GoogleServices.Gemini
 
 					// Экспоненциальная задержка: 2^attempt секунд
 					var delaySeconds = (int)Math.Pow(2, attempt);
-					Console.WriteLine($"Rate limit exceeded. Retrying in {delaySeconds} seconds...");
+					Log($"Rate limit exceeded. Retrying in {delaySeconds} seconds...");
 					await Task.Delay(delaySeconds * 1000);
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Error: {ex.Message}");
+					Log($"Error: {ex.Message}");
 					throw;
 				}
 			}

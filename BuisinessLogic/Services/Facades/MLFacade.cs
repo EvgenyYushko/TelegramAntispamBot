@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using ML_SpamClassifier.Interfaces;
 using ServiceLayer.Services.Telegram;
+using static Infrastructure.Helpers.Logger;
 
 namespace BuisinessLogic.Services.Facades
 {
@@ -18,10 +19,10 @@ namespace BuisinessLogic.Services.Facades
 
 		public async Task LoadModel()
 		{
-			Console.WriteLine("MLFacade.Load - Start");
+			Log("MLFacade.Load - Start");
 			await _mLService.DownloadModel();
 			await _spamDetector.LoadModel();
-			Console.WriteLine("MLFacade.Load - End");
+			Log("MLFacade.Load - End");
 		}
 
 		public async Task<bool> RetrainModel()
