@@ -55,8 +55,6 @@ namespace BuisinessLogic.Handlers
 
 			if (_firstRunBot)
 			{
-				//await _mLService.DownloadModel();
-				//await _spamDetector.LoadModel();
 				await _telegramUserService.UpdateLocalStorage();
 				_firstRunBot = false;
 			}
@@ -109,7 +107,7 @@ namespace BuisinessLogic.Handlers
 
 				if (update.Message is not null)
 				{
-					await _telegramUserService.TryAdd(new ()
+					await _telegramUserService.TryAdd(new()
 					{
 						UserId = update.Message.From.Id,
 						Name = update.Message.From.Username,
@@ -162,14 +160,14 @@ namespace BuisinessLogic.Handlers
 						await SendChoseChats(_telegramClient, update, cancellationToken, false);
 					}
 				}
-					break;
+				break;
 				case UpdateType.Message when IsFlooding(update.Message.From.Id):
 					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId,
 						cancellationToken);
 					break;
 				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
-					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken,
-						InfoMessageProfanityChecker);
+					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId,
+						cancellationToken);
 					if (!await _telegramUserService.CheckReputation(update.Message))
 					{
 						await SendPull(botClient, update, update.Message.From);
@@ -277,7 +275,13 @@ namespace BuisinessLogic.Handlers
 
 		private async Task SendPull(TelegramInject botClient, Update update, User user)
 		{
-			// Создание опроса
+			var userInfo = _telegramUserService.GetFromLocal(user.Id);
+
+			if (userInfo.PullModel.PullTimer != null)
+			{
+				return;
+			}
+
 			var pollMessage = await botClient.TelegramClient.SendPollAsync(
 				update.Message.Chat.Id,
 				$"Удалить пользователя {user.Username} из чата за нарушения правил?",
@@ -285,8 +289,6 @@ namespace BuisinessLogic.Handlers
 				isAnonymous: false,
 				allowsMultipleAnswers: false // Только один вариант ответа
 			);
-
-			var userInfo = _telegramUserService.GetFromLocal(user.Id);
 
 			userInfo.PullModel.PullTimer = new Timer(OnTimerElapsed, user.Id, TimeSpan.FromSeconds(20), Timeout.InfiniteTimeSpan);
 			userInfo.PullModel.Message = update.Message;
@@ -321,13 +323,13 @@ namespace BuisinessLogic.Handlers
 
 			if (user.PullModel.PullTimer is null)
 			{
-				if (ok.VoterCount > no.VoterCount)
+				if (ok.VoterCount > 1)
 				{
-					if (ok.VoterCount > 1)
+					if (ok.VoterCount > no.VoterCount)
 					{
 						await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id,
 							"Большенство пользователей проголосовало за исключения " +
-							$"{user.User.Username} из чата. \n\nПоэтому {user.User.Username} покидает чат!");
+							$"{user.Name} из чата. \n\nПоэтому {user.Name} покидает чат!");
 
 						try
 						{
@@ -351,14 +353,14 @@ namespace BuisinessLogic.Handlers
 					else
 					{
 						await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id,
-							"Голосование не сотоялось т.к. нужно больше одного голоса.");
+							"По результатам голосования пользователь " +
+							$"{user.Name} остаётся в чате");
 					}
 				}
 				else
 				{
 					await _telegramClient.SendTextMessageAsync(user.PullModel.Message.Chat.Id,
-						"По результатам голосования пользователь " +
-						$"{user.User.Username} остаётся в чате");
+							"Голосование не сотоялось т.к. нужно больше одного голоса.");
 				}
 
 				user.ResetPull();

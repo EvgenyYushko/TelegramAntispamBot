@@ -113,18 +113,18 @@
     <table>
         <thead>
         <tr>
-            <th>@Loc["UserId"]</th>
+            @* <th>@Loc["UserId"]</th> *@
             <th>@Loc["Name"]</th>
-            <th>@Loc["CreateDate"]</th>
+            @* <th>@Loc["CreateDate"]</th> *@
         </tr>
         </thead>
         <tbody>
         @foreach (var user in Model.TelegramUsers)
         {
             <tr onclick="goToUser(@user.UserId, null)">
-                <td>@user.UserId</td>
+                @* <td>@user.UserId</td> *@
                 <td>@user.Name</td>
-                <td>@user.CreateDate</td>
+                @* <td>@user.CreateDate</td> *@
             </tr>
         }
         </tbody>

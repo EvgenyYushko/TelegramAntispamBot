@@ -46,7 +46,7 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 					.Min(); // Берем ближайшее время
 
 				var res = nextRunTimes - now;
-				Console.WriteLine("GetNextDelay = " + res.ToString("c"));
+				Console.WriteLine("GetNextDelay = " + res.ToString("c") + this.GetType().FullName.ToString());
 
 				return res;
 			}

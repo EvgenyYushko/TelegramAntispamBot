@@ -291,7 +291,7 @@ namespace TelegramAntispamBot
 								, new ProfanityCheckerService(new ProfanityCheckerRepository())
 								, telegreamUserService
 								, userService
-								, new SpamDetector(generativeLanguageModel, mlService)
+								, new SpamDetector(generativeLanguageModel, mlService, env)
 								, mlService
 							)
 							, _telegram

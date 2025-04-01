@@ -16,15 +16,15 @@
 				<div class="col-lg-6">
 					<h5 class="text-primary">Chat Details</h5>
 					<dl class="row">
-						<dt class="col-sm-4">Chat ID:</dt>
-						<dd class="col-sm-8">@Model.Chat.TelegramChatId</dd>
+						@* <dt class="col-sm-4">Chat ID:</dt> *@
+						@* <dd class="col-sm-8">@Model.Chat.TelegramChatId</dd> *@
 					</dl>
 				</div>
 				<div class="col-lg-6">
 					<h5 class="text-success">Creator</h5>
 					<div class="p-3 border rounded bg-light">
 						<p class="mb-0">
-							<strong>ID:</strong> @Model.Chat.CreatorId <strong>Name:</strong> @Model.Chat.Creator.Name
+							@* <strong>ID:</strong> @Model.Chat.CreatorId *@ <strong>Name:</strong> @Model.Chat.Creator.Name
 						</p>
 					</div>
 				</div>
@@ -72,18 +72,18 @@
 				<table class="table table-hover table-bordered">
 					<thead class="bg-dark text-white">
 						<tr>
-							<th>User ID</th>
+							@* <th>User ID</th> *@
 							<th>Name</th>
-							<th>Create Date</th>
+							@* <th>Create Date</th> *@
 						</tr>
 					</thead>
 					<tbody>
 						@foreach (var member in Model.Chat.Members)
 						{
 							<tr onclick="goToUser(@member.UserId, @Model.Chat.TelegramChatId)">
-								<td>@member.UserId</td>
+								@* <td>@member.UserId</td> *@
 								<td>@member.Name</td>
-								<td>@member.CreateDate.ToString("yyyy-MM-dd HH:mm")</td>
+								@* <td>@member.CreateDate.ToString("yyyy-MM-dd HH:mm")</td> *@
 							</tr>
 						}
 					</tbody>

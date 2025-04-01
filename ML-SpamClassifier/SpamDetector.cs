@@ -2,6 +2,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using GoogleServices.Interfaces;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.ML;
 using ML_SpamClassifier.Interfaces;
 using ML_SpamClassifier.Models;
@@ -17,13 +19,15 @@ namespace ML_SpamClassifier
 		private readonly IGenerativeLanguageModel _generativeLanguageModel;
 		private readonly MLContext _mlContext = new();
 		private readonly IMLService _msService;
+		private readonly IWebHostEnvironment _env;
 		private ITransformer _model;
 		private PredictionEngine<MessageData, PredictionResult> _predictor;
 
-		public SpamDetector(IGenerativeLanguageModel generativeLanguageModel, IMLService msService)
+		public SpamDetector(IGenerativeLanguageModel generativeLanguageModel, IMLService msService, IWebHostEnvironment env)
 		{
 			_generativeLanguageModel = generativeLanguageModel;
 			_msService = msService;
+			_env = env;
 		}
 
 		public async Task LoadModel()
@@ -68,6 +72,11 @@ namespace ML_SpamClassifier
 
 		public bool IsSpam(string text, ref string comment)
 		{
+			if (_env.IsDevelopment())
+			{
+				return false;
+			}
+
 			var prediction = _predictor.Predict(new MessageData { Text = text });
 
 			Console.WriteLine($"IsSpam = {prediction.IsSpam}, Probability = {prediction.Probability}");
