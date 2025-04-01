@@ -25,9 +25,6 @@ namespace BuisinessLogic.Services.Parsers
 					var htmlDoc = new HtmlDocument();
 					htmlDoc.LoadHtml(html);
 
-					// Ищем все статьи
-					var articles = htmlDoc.DocumentNode.SelectNodes("//article[contains(@class, 'tm-articles-list__item')]");
-
 					var allArticles = htmlDoc.DocumentNode.SelectNodes("//article[contains(@class, 'tm-articles-list__item')]");
 					var filteredArticles = allArticles?
 						.Where(article => article.Descendants("a")
@@ -39,7 +36,7 @@ namespace BuisinessLogic.Services.Parsers
 									   s.InnerText.Contains("Тестирование IT-систем")
 						)));
 
-					if (articles != null && filteredArticles.Any())
+					if (filteredArticles.Any())
 					{
 						// Берем первую статью
 						var firstArticle = filteredArticles.First();

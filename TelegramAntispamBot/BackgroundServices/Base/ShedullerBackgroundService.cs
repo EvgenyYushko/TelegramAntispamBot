@@ -39,15 +39,13 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 			{
 				var now = DateTimeNow;
 				var nextRunTimes = scheduledTimes
-					.Select(time => now.Date.Add(time)) // Получаем DateTime для каждого времени сегодня
-					.Where(time => time > now) // Выбираем только будущие времена
-					.DefaultIfEmpty(now.Date.AddDays(1)
-						.Add(scheduledTimes[0])) // Если все времена прошли, берем первое время завтра
-					.Min(); // Берем ближайшее время
+					.Select(time => CalculateNextRunDate(now, time, _setting.DayInterval))
+					.Where(time => time > now)
+					.DefaultIfEmpty(CalculateNextRunDate(now.AddDays(1), scheduledTimes[0], _setting.DayInterval))
+					.Min();
 
 				var res = nextRunTimes - now;
-				Console.WriteLine("GetNextDelay = " + res.ToString("c") + this.GetType().FullName.ToString());
-
+				Console.WriteLine($"Next run in: {res.ToString("c")} ({this.GetType().FullName})");
 				return res;
 			}
 
@@ -56,6 +54,24 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 			{
 				await DoWork();
 				_timer.Change(GetNextDelay(), Timeout.InfiniteTimeSpan); // Перезапускаем таймер
+			}
+
+			DateTime CalculateNextRunDate(DateTime referenceDate, TimeSpan time, int dayInterval)
+			{
+				// Если сегодня подходящий день и время еще не прошло
+				if (IsScheduledDay(referenceDate, dayInterval) && referenceDate.TimeOfDay < time)
+				{
+					return referenceDate.Date.Add(time);
+				}
+    
+				// Ищем следующий подходящий день
+				var daysToAdd = dayInterval - (referenceDate.DayOfYear % dayInterval);
+				return referenceDate.Date.AddDays(daysToAdd).Add(time);
+			}
+
+			bool IsScheduledDay(DateTime date, int dayInterval)
+			{
+				return (date.DayOfYear % dayInterval) == 0;
 			}
 		}
 
@@ -66,13 +82,18 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 				var currStr = await Parse();
 				if (currStr is not null)
 				{
+					Console.WriteLine("Parse.Start");
+
 					var allChats = _telegramUserService.GetAllChats();
 
 					var tasks = allChats
 						.Where(c => c.ChatPermission.SendNews)
 						.Select(channel => _telegramClient.SendTextMessageAsync(channel.TelegramChatId, currStr,
 								parseMode: ParseMode.Markdown))
-						.Cast<Task>().ToArray();
+						.Cast<Task>()
+						.ToArray();
+
+					Console.WriteLine($"Parse.tasks.Count() - {tasks.Count()}");
 
 					await Task.WhenAll(tasks);
 
@@ -100,5 +121,6 @@ namespace TelegramAntispamBot.BackgroundServices.Base
 	public class BackgroundSiteSetting
 	{
 		public TimeSpan[] ScheduledTimes { get; set; }
+		public int DayInterval { get; set; } = 1; // По умолчанию ежедневно
 	}
 }
