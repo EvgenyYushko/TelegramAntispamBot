@@ -37,6 +37,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using ML_SpamClassifier;
 using ML_SpamClassifier.Interfaces;
+using QuartzHostedService;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
@@ -45,6 +46,10 @@ using TelegramAntispamBot.Controllers;
 using TelegramAntispamBot.Filters;
 using static Infrastructure.Constants.TelegramConstatns;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
+using Quartz;
+using static Quartz.MisfireInstruction;
+using TelegramAntispamBot.BackgroundServices.Base;
+using Infrastructure.Common;
 
 namespace TelegramAntispamBot
 {
@@ -121,10 +126,10 @@ namespace TelegramAntispamBot
 				services.AddSingleton<ISpamDetector, SpamDetector>();
 
 				services.AddHostedService<SendMailBackgroundService>();
-				services.AddHostedService<CurrencyBackgroundService>();
-				services.AddHostedService<HabrBackgroundService>();
-				services.AddHostedService<OnlinerBackgroundService>();
-				services.AddHostedService<TrainModelBackgroundService>();
+				//services.AddHostedService<CurrencyJob>();
+				//services.AddHostedService<HabrJob>();
+				//services.AddHostedService<OnlinerJob>();
+				//services.AddHostedService<TrainModeJob>();
 			}
 			else
 			{
@@ -144,6 +149,45 @@ namespace TelegramAntispamBot
 			services.AddScoped<IPasswordHasher, PasswordHasher>();
 			services.AddScoped<ILogRepository, LogRepository>();
 
+			services.AddQuartz(q =>
+			{
+				q.SchedulerId = "MainScheduler";
+				q.UseMicrosoftDependencyInjectionJobFactory();
+
+				var jobs = new[]
+				{
+					new { Type = typeof(HabrJob), Key = "Habr", Time = "0 0 11 * * ?" },
+					new { Type = typeof(OnlinerJob), Key = "Onliner", Time = "0 0 13 * * ?" },
+					new { Type = typeof(CurrencyJob), Key = "Currency", Time = "0 0 9 * * ?" },
+					new { Type = typeof(TrainModeJob), Key = "TrainMode", Time = "0 0 23 * * ?" },
+				};
+
+				var timeZone = TimeZoneHelper.GetTimeZoneInfo();
+
+				foreach (var job in jobs)
+				{
+					var jobKey = new JobKey($"{job.Key}Job");
+					q.AddJob(job.Type, jobKey, j => j.StoreDurably());
+    
+					q.AddTrigger(t => t
+						.WithIdentity($"{job.Key}Trigger")
+						.ForJob(jobKey)
+						.WithCronSchedule($"{job.Time}", x => x.InTimeZone(timeZone))
+					);
+				}
+			});
+
+			// Запуск Quartz как фоновой службы
+			services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+			// Получаем IScheduler для проверки расписаний
+			services.AddTransient(provider => 
+			{
+				var schedulerFactory = provider.GetRequiredService<ISchedulerFactory>();
+				return schedulerFactory.GetScheduler().GetAwaiter().GetResult();
+			});
+			services.AddTransient<ScheduleInspectorService>();
+			
 			//var googleFoldrId = Configuration.GetValue<string>(GOOGLE_SPAM_ML_FOLDER_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_SPAM_ML_FOLDER_ID);
 			//services.AddSingleton<ISpamDetector>(provider =>
 			//{
@@ -271,6 +315,15 @@ namespace TelegramAntispamBot
 				endpoints.MapControllers();
 				endpoints.MapRazorPages();
 			});
+
+			Console.WriteLine($"Using timezone: {TimeZoneHelper.GetTimeZoneInfo().DisplayName}");
+			Console.WriteLine($"Current local time: {TimeZoneHelper.DateTimeNow}");
+
+			using (var scope = app.ApplicationServices.CreateScope())
+			{
+				var inspector = scope.ServiceProvider.GetRequiredService<ScheduleInspectorService>();
+				Task.Run(async ()=> await inspector.PrintScheduleInfo()).Wait();
+			}
 
 			if (local)
 			{

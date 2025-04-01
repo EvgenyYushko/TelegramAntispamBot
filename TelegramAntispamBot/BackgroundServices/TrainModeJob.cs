@@ -2,17 +2,18 @@
 using System.Threading.Tasks;
 using Infrastructure.InjectSettings;
 using ML_SpamClassifier.Interfaces;
+using Quartz;
 using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.BackgroundServices.Base;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
-	public class TrainModelBackgroundService : ShedullerBackgroundService
+	public class TrainModeJob : SchedulerJob
 	{
 		private readonly IMLService _mLService;
 		private readonly ISpamDetector _spamDetector;
 
-		public TrainModelBackgroundService(TelegramInject botClient, ITelegramUserService telegramUserService, IMLService mLService, ISpamDetector spamDetector)
+		public TrainModeJob(TelegramInject botClient, ITelegramUserService telegramUserService, IMLService mLService, ISpamDetector spamDetector)
 				: base(botClient, new BackgroundSiteSetting
 				{
 					ScheduledTimes = new[]
@@ -37,7 +38,7 @@ namespace TelegramAntispamBot.BackgroundServices
 			Console.WriteLine("TrainModelBackgroundService.Load - End");
 		}
 
-		protected async override Task DoWork()
+		public override async Task Execute(IJobExecutionContext context)
 		{
 			var isUpdated = await _mLService.UpdateDataSet();
 			if (isUpdated)
@@ -46,6 +47,8 @@ namespace TelegramAntispamBot.BackgroundServices
 				await _mLService.UploadModelAndDataSetToDrive();
 				await _mLService.DeleteReviewedSuspiciousMessages();
 			}
+
+			await base.Execute(context);
 		}
 	}
 }

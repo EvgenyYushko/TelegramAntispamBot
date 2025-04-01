@@ -7,11 +7,11 @@ using TelegramAntispamBot.BackgroundServices.Base;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
-	public class CurrencyBackgroundService : ShedullerBackgroundService
+	public class CurrencyJob : SchedulerJob
 	{
 		private readonly NbrbCurrencyParser _nbrbCurrencyParser;
 
-		public CurrencyBackgroundService(TelegramInject botClient, NbrbCurrencyParser nbrbCurrencyParser,
+		public CurrencyJob(TelegramInject botClient, NbrbCurrencyParser nbrbCurrencyParser,
 			ITelegramUserService telegramUserService)
 			: base(botClient, new BackgroundSiteSetting
 				{

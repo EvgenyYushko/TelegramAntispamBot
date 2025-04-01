@@ -7,11 +7,11 @@ using TelegramAntispamBot.BackgroundServices.Base;
 
 namespace TelegramAntispamBot.BackgroundServices
 {
-	public class OnlinerBackgroundService : ShedullerBackgroundService
+	public class OnlinerJob : SchedulerJob
 	{
 		private readonly OnlinerParser _onlinerParser;
 
-		public OnlinerBackgroundService(TelegramInject botClient, OnlinerParser onlinerParser,
+		public OnlinerJob(TelegramInject botClient, OnlinerParser onlinerParser,
 			ITelegramUserService telegramUserService)
 			: base(botClient, new BackgroundSiteSetting
 				{
