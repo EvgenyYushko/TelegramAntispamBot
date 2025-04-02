@@ -179,8 +179,9 @@ namespace BuisinessLogic.Handlers
 			}
 
 			var percent = Math.Round(msg.Probability * 100, 2).ToString().Replace(".", ",");
-			var text = $"Модель: {(msg.IsSpamByMl ? "Спам" : "Не спам")}, вероятность = {percent}%\n" +
-						$"Gemini: {(msg.IsSpamByGemini.Value ? "Спам" : "Не спам")}" +
+			var text = $"Создано: {msg.CreatedAt.ToString("MM.dd HH:mm:ss.fff")}\n" +
+					   $"Модель: {(msg.IsSpamByMl ? "Спам" : "Не спам")} - {percent}%\n" +
+					   $"Gemini:  {(msg.IsSpamByGemini.Value ? "Спам" : "Не спам")}" +
 						"\n\n" + msg.Text;
 
 			if (callbackQuery.Message.Text != text)
