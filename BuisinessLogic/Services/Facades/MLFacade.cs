@@ -27,6 +27,8 @@ namespace BuisinessLogic.Services.Facades
 
 		public async Task<bool> RetrainModel()
 		{
+			Log("RetrainModel - Start");
+
 			var isUpdated = await _mLService.UpdateDataSet();
 			if (isUpdated)
 			{
@@ -34,6 +36,8 @@ namespace BuisinessLogic.Services.Facades
 				await _mLService.UploadModelAndDataSetToDrive();
 				await _mLService.DeleteReviewedSuspiciousMessages();
 			}
+
+			Log("RetrainModel - End");
 
 			return isUpdated;
 		}

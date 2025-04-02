@@ -1,97 +1,61 @@
 ﻿@page
 @model AllChatsModel
 @{
-    Layout = "~/Pages/Shared/_Layout.cshtml";
+	Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
 <style>
-    /* Общие стили */
-    body {
-        font-family: 'Arial', sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f8f9fa;
-        color: #212529;
-    }
+	/* Специфичные стили только для этой страницы */
+	.tg-chat-card {
+		display: flex;
+		flex-direction: column;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+		cursor: pointer;
+	}
 
-    h1 {
-        text-align: center;
-        margin: 20px 0;
-        font-size: 2rem;
-        color: #343a40;
-    }
+		.tg-chat-card:hover {
+			background-color: rgba(255, 255, 255, 0.05);
+		}
 
-    /* Таблица */
-    .table-container {
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 20px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow-x: auto;
-    }
+	.tg-chat-title {
+		font-weight: 500;
+		color: var(--tg-primary-color);
+		margin-bottom: 4px;
+	}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 1rem;
-    }
-
-    table, th, td {
-        border: 1px solid #dee2e6;
-    }
-
-    th, td {
-        padding: 15px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #007bff;
-        color: white;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-
-    tr:nth-child(odd) {
-        background-color: #f8f9fa;
-    }
-
-    tr:hover {
-        background-color: #e9ecef;
-        cursor: pointer;
-    }
+	.tg-chat-meta {
+		display: flex;
+		justify-content: space-between;
+		color: var(--tg-hint-color);
+		font-size: 13px;
+	}
 </style>
 
 <script>
-    function goToChat(chatId) {
-        window.location.href = '/ChatProfile?chatId=' + chatId;
-    }
+	function goToChat(chatId) {
+		window.location.href = '/ChatProfile?chatId=' + chatId;
+	}
 </script>
 
-<div policy="Tutor" class="table-container">
-    <table>
-        <thead>
-        <tr>
-            @* <th>Id</th> *@
-            <th>Title</th>
-            @* <th>Type</th> *@
-            @* <th>Creator Id</th> *@
-            @* <th>Creator Name</th> *@
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var chat in Model.Chats)
-        {
-            <tr onclick="goToChat(@chat.TelegramChatId)">
-                @* <td>@chat.TelegramChatId</td> *@
-                <td>@chat.Title</td>
-                @* <td>@chat.ChatType</td>
-                <td>@chat.Creator.UserId</td>
-                <td>@chat.Creator.Name</td> *@
-            </tr>
-        }
-        </tbody>
-    </table>
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>Chats Management</h1>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">Active Chats</h3>
+		<div class="tg-button-grid">
+			@foreach (var chat in Model.Chats)
+			{
+				<div class="tg-chat-card" onclick="goToChat(@chat.TelegramChatId)">
+					<div class="tg-chat-title">@chat.Title</div>
+					<div class="tg-chat-meta">
+						<span>@chat.ChatType</span>
+						<span>Created by: @chat.Creator.Name</span>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
 </div>

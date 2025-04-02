@@ -2,130 +2,97 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @model AnalyticsModel
 @{
+	Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 @inject IViewLocalizer Loc
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics for Admin</title>
-    <style>
-        /* Общие стили */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #212529;
-        }
+<style>
+	/* Специфичные стили для страницы аналитики */
+	.tg-log-item {
+		display: flex;
+		flex-direction: column;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+	}
 
-        h1 {
-            text-align: center;
-            margin: 20px 0;
-            font-size: 2rem;
-            color: #343a40;
-        }
+	.tg-log-header {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 6px;
+	}
 
-        /* Таблица */
-        .table-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow-x: auto; /* Для горизонтальной прокрутки на маленьких экранах */
-        }
+	.tg-log-time {
+		color: var(--tg-hint-color);
+		font-size: 13px;
+	}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 1rem;
-        }
+	.tg-log-type {
+		color: var(--tg-primary-color);
+		font-weight: 500;
+	}
 
-        table, th, td {
-            border: 1px solid #dee2e6;
-        }
+	.tg-log-message {
+		word-break: break-word;
+		font-size: 14px;
+	}
 
-        th, td {
-            padding: 15px;
-            text-align: left;
-        }
+	.tg-actions {
+		display: flex;
+		gap: 10px;
+		margin-top: 16px;
+	}
 
-        th {
-            background-color: #007bff;
-            color: white;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
+	.tg-action-btn {
+		padding: 10px 16px;
+		border-radius: 8px;
+		border: none;
+		font-weight: 500;
+		cursor: pointer;
+		transition: opacity 0.2s;
+	}
 
-        tr:nth-child(odd) {
-            background-color: #f8f9fa;
-        }
+		.tg-action-btn:hover {
+			opacity: 0.9;
+		}
 
-        tr:hover {
-            background-color: #e9ecef;
-            cursor: pointer;
-        }
+	.tg-export-btn {
+		background-color: var(--tg-primary-color);
+		color: white;
+	}
 
-        td {
-            word-wrap: break-word; /* Перенос слов */
-        }
+	.tg-clear-btn {
+		background-color: var(--tg-danger-color);
+		color: white;
+	}
+</style>
 
-        /* Кнопки */
-        .button-container {
-            text-align: center;
-            margin: 20px 0;
-        }
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>@Loc["Analytics_Dashboard"]</h1>
+	</div>
 
-            .button-container button {
-                margin: 5px;
-                padding: 10px 20px;
-                font-size: 1rem;
-                color: white;
-                background-color: #28a745;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
+	<div class="tg-card">
+		<h3 class="tg-card-title">System Logs</h3>
+		<div class="tg-button-grid">
+			@foreach (var log in Model.Logs)
+			{
+				<div class="tg-log-item">
+					<div class="tg-log-header">
+						<span class="tg-log-time">@log.DateTime</span>
+						<span class="tg-log-type">@log.Type</span>
+					</div>
+					<div class="tg-log-message">@log.Message</div>
+				</div>
+			}
+		</div>
+	</div>
 
-                .button-container button:hover {
-                    background-color: #218838;
-                }
-        table td:nth-child(3) {
-            word-break: break-all;
-        }
-    </style>
-</head>
-<body>
-<h1>@Loc["Analytics_Dashboard"]</h1>
-<div class="table-container">
-    <table>
-        <thead>
-        <tr>
-            <th>@Loc["Date_Time"]</th>
-            <th>@Loc["Type"]</th>
-            <th>@Loc["Message"]</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var log in Model.Logs)
-        {
-            <tr>
-                <td>@log.DateTime</td>
-                <td>@log.Type</td>
-                <td>@log.Message</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+	<div class="tg-actions">
+		<button class="tg-action-btn tg-export-btn" onclick="window.location.href='/export-logs'">
+			@Loc["Export_Log"]
+		</button>
+		<button class="tg-action-btn tg-clear-btn" onclick="window.location.href='/clear-logs'">
+			@Loc["Clear Log"]
+		</button>
+	</div>
 </div>
-<div class="button-container">
-    <button onclick="window.location.href='/export-logs'">@Loc["Export_Log"]</button>
-    <button onclick="window.location.href='/clear-logs'">@Loc["Clear Log"]</button>
-</div>
-</body>
-</html>

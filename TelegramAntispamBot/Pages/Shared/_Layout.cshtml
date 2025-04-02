@@ -1,119 +1,151 @@
 ﻿@using System.Threading
 @using Microsoft.AspNetCore.Mvc.Localization
 @{
-    var currentCulture = Thread.CurrentThread.CurrentCulture.Name;
+	var currentCulture = Thread.CurrentThread.CurrentCulture.Name;
 }
 @inject IViewLocalizer Loc
+@using System.Linq
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="~/images/Bot.jpg" type="image/png"/>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S7W8HPXKEK"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-S7W8HPXKEK');
-    </script>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"]</title>
-    @* <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"> *@
+	<link rel="icon" href="~/images/Bot.jpg" type="image/png" />
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-S7W8HPXKEK"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() { dataLayer.push(arguments); }
+		gtag('js', new Date());
+		gtag('config', 'G-S7W8HPXKEK');
+	</script>
+	<meta charset="utf-8"/>
+	@* <meta name="viewport" content="width=device-width, initial-scale=1.0" /> *@
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>@ViewData["Title"]</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    @* <link rel="stylesheet" href="~/css/site.css" /> *@
-    <style>
-        /* Основной контейнер для страницы */
-        html, body {
-            height: 100%; /* Заполнение всей высоты экрана */
-            margin: 0;
-        }
+	<!-- Подключаем сначала Telegram стили -->
+	<link rel="stylesheet" href="~/css/telegram-theme.css" asp-append-version="true" />
 
-        /* Контейнер для всего содержимого */
-        .page-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh; /* Высота всей страницы */
-        }
+	<!-- Затем Bootstrap с ограниченной областью действия -->
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-        /* Основное содержимое */
-        main {
-            flex: 1; /* Заполняет всё пространство между хедером и футером */
-        }
+	<style>
+		/* Стили для навбара в Telegram-стиле */
+		.tg-navbar {
+			background-color: var(--tg-secondary-bg);
+			border-bottom: 1px solid var(--tg-border-color);
+			padding: 0.5rem 1rem;
+		}
 
-        /* Стили футера */
-        footer {
-            background-color: #f8f9fa;
-            text-align: center;
-            padding: 15px 0;
-        }
+		.tg-navbar-brand {
+			color: var(--tg-text-color) !important;
+			font-weight: 500;
+			font-size: 1.1rem;
+		}
 
-        .language-switcher {
-            margin: 10px;
-            text-align: right;
-        }
+		.tg-nav-link {
+			color: var(--tg-text-color) !important;
+			padding: 0.5rem 1rem;
+			margin: 0 0.2rem;
+			border-radius: 8px;
+			transition: background-color 0.2s;
+		}
 
-            .language-switcher select {
-                padding: 5px 10px;
-                font-size: 1rem;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                background-color: #fff;
-                cursor: pointer;
-            }
-    </style>
+			.tg-nav-link:hover,
+			.tg-nav-link.active {
+				background-color: rgba(46, 166, 255, 0.1);
+				color: var(--tg-primary-color) !important;
+			}
+
+		.tg-navbar-toggler {
+			border: 1px solid var(--tg-border-color);
+			padding: 0.25rem 0.5rem;
+		}
+
+		.tg-navbar-toggler-icon {
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+		}
+
+		/* Адаптивные стили */
+		@@media (max-width: 992px) {
+			.tg-navbar {
+				padding: 0.5rem;
+			}
+
+			.navbar-collapse {
+				background-color: var(--tg-secondary-bg);
+				border-radius: 0 0 8px 8px;
+				padding: 0.5rem;
+				margin-top: 0.5rem;
+			}
+
+			.tg-nav-link {
+				margin: 0.2rem 0;
+			}
+		}
+	</style>
 </head>
-<body>
-<div class="page-container">
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">@Loc["BotName"]</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/">@Loc["Main"]</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/privacy">@Loc["Privacy_Policy"]</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Account/Login">@Loc["Account"]</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
+<body class="tg-theme">
+	<div class="page-container">
+		<header>
+			<nav class="navbar navbar-expand-lg tg-navbar">
+				<div class="container-fluid">
+					<a class="navbar-brand tg-navbar-brand" href="#">@Loc["BotName"]</a>
+					<button class="navbar-toggler tg-navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon tg-navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarNav">
+						<ul class="navbar-nav">
+							<li class="nav-item">
+								@{
+									var currentPath = HttpContextAccessor.HttpContext.Request.Path;
+								}
+								<a class="nav-link tg-nav-link @(currentPath == "/" ? "active" : "")" href="/">@Loc["Main"]</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link tg-nav-link @(currentPath.Value.StartsWith("/privacy", StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="/privacy">@Loc["Privacy_Policy"]</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link tg-nav-link @(currentPath.Value.StartsWith("/User/Profile", StringComparison.OrdinalIgnoreCase) 
+									|| currentPath.Value.StartsWith("/Account/Login", StringComparison.OrdinalIgnoreCase)
+									|| currentPath.Value.StartsWith("/Account/Register", StringComparison.OrdinalIgnoreCase)? "active" : "")" href="/Account/Login">@Loc["Account"]</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
 
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
+		<main role="main" class="flex-grow-1">
+			<!-- Изменено -->
+			<div class="tg-container">
+				@RenderBody()
+			</div>
+		</main>
 
-    <footer class="border-top footer text-muted">
-        <div class="container d-flex justify-content-center align-items-center gap-3">
-            <span>
-                &copy; 2025 - @Loc["BotName"] - <a asp-area="" asp-page="/Privacy">@Loc["Privacy_Policy"]</a>
-            </span>
-            <form method="post" asp-page="/SetLanguageModel" class="d-inline">
-                <select name="language" onchange="this.form.submit()" class="form-select form-select-sm d-inline-block w-auto">
-                    <option value="ru" selected="@(currentCulture == "ru")">🏳 Русский</option>
-                    <option value="en" selected="@(currentCulture == "en")">🏳‍🌈 English</option>
-                </select>
-            </form>
-        </div>
-    </footer>
-</div>
+		<footer class="tg-footer">
+			<div class="container d-flex justify-content-center align-items-center gap-3">
+				<span>
+					&copy; 2025 - @Loc["BotName"] - <a asp-area="" asp-page="/Privacy">@Loc["Privacy_Policy"]</a>
+				</span>
+				@* <div class="tg-language-container"> *@
+					<form method="post" asp-page="/SetLanguageModel">
+						<select name="language" onchange="this.form.submit()"
+								class="tg-language-select">
+							<option value="ru" selected="@(currentCulture == "ru")">🏳 Русский</option>
+							<option value="en" selected="@(currentCulture == "en")">🏳‍🌈 English</option>
+						</select>
+					</form>
+				@* </div> *@
+			</div>
+		</footer>
+	</div>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@* <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script> *@
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
 
-@await RenderSectionAsync("Scripts", false)
+	@await RenderSectionAsync("Scripts", false)
 </body>
 </html>

@@ -1,0 +1,202 @@
+﻿/* wwwroot/css/telegram-theme.css */
+:root {
+    --tg-bg-color: #18222d;
+    --tg-secondary-bg: #1e2c3a;
+    --tg-text-color: #e1e9f1;
+    --tg-hint-color: #7d8b99;
+    --tg-link-color: #5dacf1;
+    --tg-primary-color: #2ea6ff;
+    --tg-danger-color: #e64d4d;
+    --tg-success-color: #31b545;
+    --tg-border-color: #2d3b48;
+    --tg-section-margin: 12px;
+}
+
+body.tg-theme {
+    background-color: var(--tg-bg-color);
+    color: var(--tg-text-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+    min-height: 100vh;
+}
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+    padding-bottom: 60px; /* Отступ для футера */
+}
+
+.tg-footer {
+    background-color: var(--tg-secondary-bg);
+    padding: 0.4rem 0;
+    margin-top: auto; /* Важно - прижимает футер к низу */
+    border-top: 1px solid var(--tg-border-color);
+}
+
+.tg-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 16px;
+}
+
+.tg-header {
+    padding: 16px 0;
+    margin-bottom: 16px;
+}
+
+    .tg-header h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: var(--tg-text-color);
+    }
+
+    .tg-header p {
+        font-size: 14px;
+        color: var(--tg-hint-color);
+        margin: 0;
+    }
+
+.tg-card {
+    background-color: var(--tg-secondary-bg);
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: var(--tg-section-margin);
+    overflow: hidden;
+}
+
+.tg-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 16px;
+    margin: 0;
+    color: var(--tg-text-color);
+    border-bottom: 1px solid var(--tg-border-color);
+}
+
+.tg-button-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background-color: var(--tg-border-color);
+}
+
+.tg-button {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: var(--tg-secondary-bg);
+    color: var(--tg-text-color);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+    border: none;
+    width: 100%;
+    text-align: left;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+    .tg-button:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .tg-button:active {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+/* Цветовые модификаторы кнопок */
+.tg-button-primary {
+    color: var(--tg-primary-color);
+}
+
+.tg-button-success {
+    color: var(--tg-success-color);
+}
+
+.tg-button-danger {
+    color: var(--tg-danger-color);
+}
+
+.tg-button-link {
+    color: var(--tg-link-color);
+}
+
+/* Медиа-запросы */
+@media (max-width: 840px) {
+    .tg-container {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    .tg-container {
+        padding: 12px;
+    }
+
+    .tg-header h1 {
+        font-size: 18px;
+    }
+
+    .tg-button {
+        padding: 14px 16px;
+        font-size: 15px;
+    }
+}
+
+.tg-language-select {
+    background-color: rgba(255, 255, 255, 0.08); /* Полупрозрачный светлый фон */
+    color: var(--tg-text-color);
+    border: 1px solid var(--tg-primary-color); /* Граница в цвет акцента */
+    border-radius: 8px;
+    padding: 6px 32px 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232ea6ff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    min-width: 120px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Легкая тень */
+}
+
+    .tg-language-select:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+        border-color: var(--tg-primary-color);
+    }
+
+    .tg-language-select:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(46, 166, 255, 0.3);
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .tg-language-select option {
+        background-color: var(--tg-secondary-bg);
+        color: var(--tg-text-color);
+    }
+
+.tg-language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+}
+
+.tg-language-container {
+    display: inline-block;
+    background-color: rgba(46, 166, 255, 0.1);
+    border-radius: 8px;
+    padding: 4px;
+    margin-left: 8px;
+}

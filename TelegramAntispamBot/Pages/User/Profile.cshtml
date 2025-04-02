@@ -2,235 +2,153 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @model ProfileModel
 @{
-    Layout = "~/Pages/Shared/_Layout.cshtml";
-    var user = Model.CurrentUser;
-    var telegramUser = Model.TelegramUser;
+	Layout = "~/Pages/Shared/_Layout.cshtml";
+	var user = Model.CurrentUser;
+	var telegramUser = Model.TelegramUser;
 }
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @inject IViewLocalizer Loc
 
 <style>
-    /* Добавляем общие стили для контейнера */
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-    }
+	/* Дополнительные стили для страницы профиля */
+	.tg-profile-item {
+		display: flex;
+		justify-content: space-between;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+	}
 
-    /* Стили для карточек с кнопками */
-    .card-section {
-        margin: 25px 0;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-    }
+		.tg-profile-item:last-child {
+			border-bottom: none;
+		}
 
-    .section-title {
-        font-size: 1.4rem;
-        color: #2c3e50;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #f0f0f0;
-    }
+	.tg-profile-label {
+		color: var(--tg-hint-color);
+		font-size: 14px;
+	}
 
-    /* Адаптивная сетка для кнопок */
-    .button-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
-    }
+	.tg-profile-value {
+		font-size: 14px;
+		font-weight: 500;
+	}
 
-    /* Общие стили для кнопок */
-    .action-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 15px 20px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 500;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        text-align: center;
-        min-height: 60px;
-    }
-
-    /* Цвета для разных типов кнопок */
-    .admin-button {
-        background-color: #634aa5;
-        color: white;
-    }
-
-    .settings-button {
-        background-color: #2ecc71;
-        color: white;
-    }
-
-    .danger-button {
-        background-color: #e74c3c;
-        color: white;
-    }
-
-    .telegram-button {
-        background-color: #3176a5;
-        color: white;
-    }
-
-    /* Ховер-эффекты */
-    .action-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Адаптивность */
-    @@media (max-width: 768px) {
-        .container {
-            padding: 15px;
-        }
-
-        .button-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .action-button {
-            font-size: 14px;
-            padding: 12px 15px;
-        }
-    }
-
-    /* Специальный контейнер для телеграм-виджета */
-    .telegram-container {
-        margin: 30px 0;
-        text-align: center;
-    }
-
-    .card-section {
-        /* ... existing styles ... */
-        transition: background-color 0.3s;
-        cursor: pointer;
-    }
-
-        .card-section:hover {
-            background-color: #f8f9fa;
-        }
+	.tg-telegram-widget {
+		margin: 16px 0;
+		text-align: center;
+	}
 </style>
+
 <script>
-    function confirmDelete() {
-        return confirm("Вы действительно хотите удалить аккаунт?");
-    }
+	function confirmDelete() {
+		return confirm("Вы действительно хотите удалить аккаунт?");
+	}
 
-    function goToUser(userId, chatId) {
-        window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
-    }
-
+	function goToUser(userId, chatId) {
+		window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
+	}
 </script>
-<div class="container">
-    <div class="header">
-        <h1>@Loc["Welcome"] @user.UserName!</h1>
-        <p>@Loc["Your_Profile"]</p>
-    </div>
 
-    <div class="profile-details">
-        <div class="profile-item">
-            <span class="label">@Loc["Username"]</span>
-            <span>@user.UserName</span>
-        </div>
-        <div class="profile-item">
-            <span class="label">@Loc["Email"]</span>
-            <span>@user.Email</span>
-        </div>
-        <div class="profile-item">
-            <span class="label">@Loc["Roles"]</span>
-            <span>@string.Join(", ", user.Roles.FirstOrDefault())</span>
-        </div>
-    </div>
-    @if (User.Identity.IsAuthenticated)
-    {
-        @if (telegramUser.UserId != 0)
-        {
-            <div class="card-section"
-                 onclick="goToUser(@telegramUser.UserId, null)"
-                 style="cursor: pointer; transition: background-color 0.3s;"
-                 onmouseover="this.style.backgroundColor='#f8f9fa'"
-                 onmouseout="this.style.backgroundColor='#fff'">
-                <h3 class="section-title">Telegram Профиль</h3>
-                <div class="profile-item">
-                    <span class="label">Telegram Id:</span>
-                    <span>@telegramUser.UserId</span>
-                </div>
-                <div class="profile-item">
-                    <span class="label">Имя:</span>
-                    <span>@telegramUser.Name</span>
-                </div>
-                <div class="profile-item">
-                    <span class="label">Дата привязки:</span>
-                    <span>@telegramUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</span>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="telegram-container">
-                <script async
-                        src="https://telegram.org/js/telegram-widget.js?22"
-                        data-telegram-login="YN_AntispamBot"
-                        data-size="large"
-                        data-auth-url="/Account/TelegramEntry"
-                        data-request-access="write">
-                </script>
-            </div>
-        }
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>@Loc["Welcome"] @user.UserName!</h1>
+		<p>@Loc["Your_Profile"]</p>
+	</div>
 
-        <!-- Секция настроек аккаунта -->
-        <div class="card-section">
-            <h3 class="section-title">Настройки профиля</h3>
-            <div class="button-grid">
-                <a href="/Account/Auth/ManageExternalLogins" class="action-button settings-button">
-                    Аккаунты
-                </a>
-            </div>
-        </div>
+	<div class="tg-card">
+		<div class="tg-profile-item">
+			<span class="tg-profile-label">@Loc["Username"]</span>
+			<span class="tg-profile-value">@user.UserName</span>
+		</div>
+		<div class="tg-profile-item">
+			<span class="tg-profile-label">@Loc["Email"]</span>
+			<span class="tg-profile-value">@user.Email</span>
+		</div>
+		<div class="tg-profile-item">
+			<span class="tg-profile-label">@Loc["Roles"]</span>
+			<span class="tg-profile-value">@string.Join(", ", user.Roles.FirstOrDefault())</span>
+		</div>
+	</div>
 
-        <!-- Секция административных действий -->
-        <div policy="Admin" class="card-section">
-            <h3 class="section-title">Настройки сайта</h3>
-            <div class="button-grid">
-                <a href="/Admin/AllUsers" class="action-button admin-button">
-                    Пользователи сайта
-                </a>
-                <a href="/Admin/Analytics" class="action-button admin-button">
-                    @Loc["Site_Statistics"]
-                </a>
-            </div>
-        </div>
+	@if (User.Identity.IsAuthenticated)
+	{
+		@if (telegramUser.UserId != 0)
+		{
+			<div class="tg-card clickable-section" onclick="goToUser(@telegramUser.UserId, null)">
+				<h3 class="tg-card-title">Telegram Профиль</h3>
+				<div class="tg-profile-item">
+					<span class="tg-profile-label">Telegram Id:</span>
+					<span class="tg-profile-value">@telegramUser.UserId</span>
+				</div>
+				<div class="tg-profile-item">
+					<span class="tg-profile-label">Имя:</span>
+					<span class="tg-profile-value">@telegramUser.Name</span>
+				</div>
+				<div class="tg-profile-item">
+					<span class="tg-profile-label">Дата привязки:</span>
+					<span class="tg-profile-value">@telegramUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</span>
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="tg-telegram-widget">
+				<script async
+						src="https://telegram.org/js/telegram-widget.js?22"
+						data-telegram-login="YN_AntispamBot"
+						data-size="large"
+						data-auth-url="/Account/TelegramEntry"
+						data-request-access="write">
+				</script>
+			</div>
+		}
 
-        <div policy="Tutor" class="card-section">
-            <h3 class="section-title">Настройки бота</h3>
-            <div class="button-grid">
-                <a policy="Admin" href="/Admin/TelegramUsers" class="action-button telegram-button">
-                    @Loc["TgUsers"]
-                </a>
-                <a href="/Admin/AllChats" class="action-button telegram-button">
-                    Чаты бота
-                </a>
-            </div>
-        </div>
+		<!-- Секция настроек аккаунта -->
+		<div class="tg-card">
+			<h3 class="tg-card-title">Настройки профиля</h3>
+			<div class="tg-button-grid">
+				<a href="/Account/Auth/ManageExternalLogins" class="tg-button tg-button-success">
+					Аккаунты
+				</a>
+			</div>
+		</div>
 
-        <!-- Опасные действия -->
-        <div class="card-section">
-            @* <h3 class="section-title">@Loc["Danger_Zone"]</h3> *@
-            <div class="button-grid">
-                <button onclick="location.href='@Url.Page("/Account/Logout")'"
-                        class="action-button danger-button">
-                    @Loc["Log_Out"]
-                </button>
-                <button onclick="if (confirmDelete()) { location.href='@Url.Page("/User/Delete")'; }"
-                        class="action-button danger-button">
-                    Удалить аккаунт
-                </button>
-            </div>
-        </div>
-    }
+		<!-- Секция административных действий -->
+		<div policy="Admin" class="tg-card">
+			<h3 class="tg-card-title">Настройки сайта</h3>
+			<div class="tg-button-grid">
+				<a href="/Admin/AllUsers" class="tg-button tg-button-primary">
+					Пользователи сайта
+				</a>
+				<a href="/Admin/Analytics" class="tg-button tg-button-primary">
+					@Loc["Site_Statistics"]
+				</a>
+			</div>
+		</div>
+
+		<div policy="Tutor" class="tg-card">
+			<h3 class="tg-card-title">Настройки бота</h3>
+			<div class="tg-button-grid">
+				<a policy="Admin" href="/Admin/TelegramUsers" class="tg-button tg-button-link">
+					@Loc["TgUsers"]
+				</a>
+				<a href="/Admin/AllChats" class="tg-button tg-button-link">
+					Чаты бота
+				</a>
+			</div>
+		</div>
+
+		<!-- Опасные действия -->
+		<div class="tg-card">
+			<div class="tg-button-grid">
+				<button onclick="location.href='@Url.Page("/Account/Logout")'"
+						class="tg-button tg-button-danger">
+					@Loc["Log_Out"]
+				</button>
+				<button onclick="if (confirmDelete()) { location.href='@Url.Page("/User/Delete")'; }"
+						class="tg-button tg-button-danger">
+					Удалить аккаунт
+				</button>
+			</div>
+		</div>
+	}
 </div>

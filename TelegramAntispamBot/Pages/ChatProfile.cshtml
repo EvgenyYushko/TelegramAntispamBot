@@ -4,91 +4,121 @@
 	ViewData["Title"] = "Telegram Chat Profile";
 }
 
-<div class="container mt-5">
-	<div class="card shadow-lg border-0">
-		<div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-			<h2 class="mb-0">@Model.Chat.Title</h2>
-			<span class="badge bg-info text-white">@Model.Chat.ChatType</span>
+<style>
+	.tg-chat-member {
+		display: flex;
+		align-items: center;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+		cursor: pointer;
+	}
+
+		.tg-chat-member:hover {
+			background-color: rgba(255, 255, 255, 0.05);
+		}
+
+	.tg-permission-switch {
+		position: relative;
+		display: inline-block;
+		width: 50px;
+		height: 24px;
+	}
+
+	.tg-permission-switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.tg-permission-slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: var(--tg-border-color);
+		transition: .4s;
+		border-radius: 24px;
+	}
+
+		.tg-permission-slider:before {
+			position: absolute;
+			content: "";
+			height: 16px;
+			width: 16px;
+			left: 4px;
+			bottom: 4px;
+			background-color: var(--tg-text-color);
+			transition: .4s;
+			border-radius: 50%;
+		}
+
+	input:checked + .tg-permission-slider {
+		background-color: var(--tg-success-color);
+	}
+
+		input:checked + .tg-permission-slider:before {
+			transform: translateX(26px);
+		}
+</style>
+
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>@Model.Chat.Title</h1>
+		<p class="tg-badge">@Model.Chat.ChatType</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">Chat Details</h3>
+		<div class="tg-profile-item">
+			<span class="tg-profile-label">Creator:</span>
+			<span class="tg-profile-value">@Model.Chat.Creator.Name</span>
 		</div>
+	</div>
 
-		<div class="card-body">
-			<div class="row">
-				<div class="col-lg-6">
-					<h5 class="text-primary">Chat Details</h5>
-					<dl class="row">
-						@* <dt class="col-sm-4">Chat ID:</dt> *@
-						@* <dd class="col-sm-8">@Model.Chat.TelegramChatId</dd> *@
-					</dl>
-				</div>
-				<div class="col-lg-6">
-					<h5 class="text-success">Creator</h5>
-					<div class="p-3 border rounded bg-light">
-						<p class="mb-0">
-							@* <strong>ID:</strong> @Model.Chat.CreatorId *@ <strong>Name:</strong> @Model.Chat.Creator.Name
-						</p>
+	<div class="tg-card">
+		<h3 class="tg-card-title">Administrators</h3>
+		@if (Model.Chat.AdminsIds.Any())
+		{
+			<div class="tg-button-grid">
+				@foreach (var admin in Model.Chat.AdminsMembers)
+				{
+					<div class="tg-chat-member" onclick="goToUser(@admin.UserId, @Model.Chat.TelegramChatId)">
+						@admin.Name
 					</div>
-				</div>
+				}
 			</div>
+		}
+		else
+		{
+			<div class="tg-profile-item">
+				<span class="tg-profile-value">No administrators</span>
+			</div>
+		}
+	</div>
 
-			<div class="row mt-4">
-				<div class="col-lg-6">
-					<h5 class="text-warning">Administrators</h5>
-					<div class="p-3 border rounded bg-light">
-						@if (Model.Chat.AdminsIds.Any())
-						{
-							<ul class="list-unstyled mb-0">
-								@foreach (var admin in Model.Chat.AdminsMembers)
-								{
-									<li class="py-1">
-										<i class="bi bi-person-badge"></i> @admin.Name
-									</li>
-								}
-							</ul>
-						}
-						else
-						{
-							<p class="text-muted">No administrators</p>
-						}
-					</div>
-				</div>
-				<div class="col-lg-6">
-					<h5 class="text-info">Permissions</h5>
-					<div class="p-3 border rounded bg-light">
-						<div class="form-check form-switch">
-							<input class="form-check-input" type="checkbox" role="switch"
-								   id="sendNewsPermission"
-							@(Model.Chat.ChatPermission.SendNews ? "checked" : "")
-								   onchange="toggleSendLinks(this, @Model.Chat.TelegramChatId)">
-							<label class="form-check-label" for="sendNewsPermission">
-								Allow sending news
-							</label>
-						</div>
-					</div>
-				</div>
-			</div>
+	<div class="tg-card">
+		<h3 class="tg-card-title">Permissions</h3>
+		<div class="tg-profile-item" style="align-items: center;">
+			<span class="tg-profile-label">Allow sending news:</span>
+			<label class="tg-permission-switch">
+				<input type="checkbox" @(Model.Chat.ChatPermission.SendNews ? "checked" : "")
+					   onchange="toggleSendLinks(this, @Model.Chat.TelegramChatId)">
+				<span class="tg-permission-slider"></span>
+			</label>
+		</div>
+	</div>
 
-			<div class="table-responsive mt-4">
-				<h5 class="text-danger">Members</h5>
-				<table class="table table-hover table-bordered">
-					<thead class="bg-dark text-white">
-						<tr>
-							@* <th>User ID</th> *@
-							<th>Name</th>
-							@* <th>Create Date</th> *@
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var member in Model.Chat.Members)
-						{
-							<tr onclick="goToUser(@member.UserId, @Model.Chat.TelegramChatId)">
-								@* <td>@member.UserId</td> *@
-								<td>@member.Name</td>
-								@* <td>@member.CreateDate.ToString("yyyy-MM-dd HH:mm")</td> *@
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
+	<div class="tg-card">
+		<h3 class="tg-card-title">Members</h3>
+		<div class="tg-button-grid">
+			@foreach (var member in Model.Chat.Members)
+			{
+				<div class="tg-chat-member" onclick="goToUser(@member.UserId, @Model.Chat.TelegramChatId)">
+					@member.Name
+				</div>
+			}
 		</div>
 	</div>
 </div>
@@ -112,25 +142,3 @@
 		}
 	}
 </script>
-
-<style>
-	.card {
-		border-radius: 10px;
-		overflow: hidden;
-	}
-
-	.table th, .table td {
-		text-align: left;
-		padding: 12px;
-	}
-
-	.table-hover tbody tr:hover {
-		background-color: rgba(0, 123, 255, 0.1);
-		cursor: pointer;
-	}
-
-	.form-switch .form-check-input {
-		width: 3em;
-		height: 1.5em;
-	}
-</style>

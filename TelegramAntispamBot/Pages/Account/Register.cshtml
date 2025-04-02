@@ -3,181 +3,181 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
-    var roles = Enum.GetNames(typeof(Role)).Where(role => role != nameof(Role.Admin)).ToList();
+	Layout = "~/Pages/Shared/_Layout.cshtml";
+	var roles = Enum.GetNames(typeof(Role)).Where(role => role != nameof(Role.Admin)).ToList();
 }
 @inject IViewLocalizer Loc
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"]</title>
-    <style>
-        /* Общие стили для кнопок социальной авторизации */
-        .social-signin-btn {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 10px; /* Отступ между кнопками */
-        }
 
-            .social-signin-btn:hover {
-                background-color: #f8f9fa;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                transform: translateY(-1px);
-            }
+<style>
+	.tg-register-form {
+		max-width: 400px;
+		margin: 0 auto;
+	}
 
-            .social-signin-btn:active {
-                transform: translateY(0);
-            }
+	.tg-form-input {
+		width: 100%;
+		padding: 12px 16px;
+		margin-bottom: 16px;
+		background-color: var(--tg-secondary-bg);
+		border: 1px solid var(--tg-border-color);
+		border-radius: 8px;
+		color: var(--tg-text-color);
+	}
 
-        /* Стили для кнопки Google */
-        .google-signin-btn {
-            color: #5f6368;
-            background-color: white;
-        }
+	.tg-form-label {
+		display: block;
+		margin-bottom: 8px;
+		color: var(--tg-hint-color);
+		font-size: 14px;
+	}
 
-        /* Стили для кнопки VK */
-        .vk-signin-btn {
-            color: white;
-            background-color: #0077FF;
-            border-color: #0077FF;
-        }
+	.tg-register-btn {
+		width: 100%;
+		padding: 12px;
+		background-color: var(--tg-primary-color);
+		color: white;
+		border: none;
+		border-radius: 8px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: opacity 0.2s;
+	}
 
-            .vk-signin-btn:hover {
-                background-color: #005ec2;
-                border-color: #005ec2;
-            }
+		.tg-register-btn:hover {
+			opacity: 0.9;
+		}
 
-        .social-auth-section {
-            margin-top: 1.5rem;
-        }
+	.tg-login-link {
+		color: var(--tg-primary-color);
+		text-decoration: none;
+	}
 
-        .card-header {
-            padding: 1.5rem;
-        }
+		.tg-login-link:hover {
+			text-decoration: underline;
+		}
 
-        .card-footer {
-            background-color: transparent;
-            border-top: none;
-            padding: 1.5rem;
-        }
+	.tg-verification-group {
+		display: flex;
+		gap: 10px;
+		align-items: stretch; /* Изменено с center на stretch */
+	}
 
-        .code-input-group {
-            margin-bottom: 1rem;
-        }
+		.tg-verification-group input {
+			flex: 1;
+			margin-bottom: 0; /* Убираем margin-bottom для input внутри группы */
+		}
 
-        .send-code-btn {
-            white-space: nowrap;
-            margin-left: 0.5rem;
-        }
-    </style>
-    <script>
-        async function sendVerificationCode() {
-            const email = document.getElementById('Email').value;
-            const btn = document.querySelector('.send-code-btn');
+	.tg-send-code-btn {
+		padding: 0 16px; /* Уменьшаем вертикальные отступы */
+		background-color: var(--tg-primary-color);
+		color: white;
+		border: none;
+		border-radius: 8px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: opacity 0.2s;
+		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 120px; /* Добавляем минимальную ширину */
+	}
 
-            if (!email) {
-                alert('@Loc["Enter_Email_First"]');
-                return;
-            }
+		.tg-send-code-btn:hover {
+			opacity: 0.9;
+		}
+</style>
+<script>
+	async function sendVerificationCode() {
+		const email = document.getElementById('Email').value;
+		const btn = document.querySelector('.send-code-btn');
 
-            btn.disabled = true;
-            let seconds = 60;
+		if (!email) {
+			alert('@Loc["Enter_Email_First"]');
+			return;
+		}
 
-            const timer = setInterval(() => {
-                btn.textContent = `@Loc["Resend_In"] (${seconds})`;
-                seconds--;
+		btn.disabled = true;
+		let seconds = 60;
 
-                if (seconds < 0) {
-                    clearInterval(timer);
-                    btn.disabled = false;
-                    btn.textContent = '@Loc["Send_Code"]';
-                }
-            }, 1000);
+		const timer = setInterval(() => {
+			btn.textContent = `@Loc["Resend_In"] (${seconds})`;
+			seconds--;
 
-            try {
-                const response = await fetch(`?handler=SendVerifyMessage&email=${encodeURIComponent(email)}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                });
+			if (seconds < 0) {
+				clearInterval(timer);
+				btn.disabled = false;
+				btn.textContent = '@Loc["Send_Code"]';
+			}
+		}, 1000);
 
-            } catch (error) {
-                console.error('Error:', error);
-                alert('@Loc["SendError"]');
-            }
-        }
-    </script>
-</head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header text-center bg-primary text-white">
-                    <h4>@Loc["Create"]</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" asp-page-handler="Register">
-                        <div class="mb-3">
-                            <label for="Username" class="form-label">@Loc["Username"]</label>
-                            <input type="text" id="Username" name="Username" class="form-control" placeholder=@Loc["Enter_username"] required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="Email" class="form-label">@Loc["Email"]</label>
-                            <input type="email" id="Email" name="Email" class="form-control" placeholder=@Loc["Input_Email"] required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="VerificationCode" class="form-label">Проверочный код</label>
-                            <div class="d-flex gap-2">
-                                <input type="text"
-                                       id="VerificationCode"
-                                       name="VerificationCode"
-                                       class="form-control"
-                                       placeholder="Введите полученый код"
-                                       required
-                                       maxlength="6">
-                                <button type="button"
-                                        class="btn btn-outline-primary send-code-btn"
-                                        onclick="sendVerificationCode()">
-                                    @Loc["Send_Code"]
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="Role" class="form-label">@Loc["Select_Role"]</label>
-                            <select id="Role" name="SelectedRole" class="form-select" required>
-                                @foreach (var role in roles)
-                                {
-                                    <option value="@role">@role</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="Password" class="form-label">@Loc["Password"]</label>
-                            <input type="password" id="Password" name="Password" class="form-control" placeholder=@Loc["Create_password"] required>
-                        </div>
-                        <div asp-validation-summary="All" class="text-danger"></div>
-                        <button type="submit" class="btn btn-primary w-100">@Loc["Register"]</button>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <p>
-                        @Loc["Already_Account"]<a href="/Account/Login" class="text-decoration-none">@Loc["Login_here"]</a>
-                    </p>
-                </div>
-                @await Html.PartialAsync("_ExternalLoginButtons")
-            </div>
-        </div>
-    </div>
+		try {
+			const response = await fetch(`?handler=SendVerifyMessage&email=${encodeURIComponent(email)}`, {
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' },
+			});
+
+		} catch (error) {
+			console.error('Error:', error);
+			alert('@Loc["SendError"]');
+		}
+	}
+</script>
+<div class="tg-container">
+	<div class="tg-card">
+		<h3 class="tg-card-title">@Loc["Create"]</h3>
+
+		<form method="post" asp-page-handler="Register" class="tg-register-form">
+			<div>
+				<label for="Username" class="tg-form-label">@Loc["Username"]</label>
+				<input type="text" id="Username" name="Username" class="tg-form-input" placeholder="@Loc["Enter_username"]" required>
+			</div>
+			<div>
+				<label for="Email" class="tg-form-label">@Loc["Email"]</label>
+				<input type="email" id="Email" name="Email" class="tg-form-input" placeholder="@Loc["Input_Email"]" required>
+			</div>
+			<div>
+				<label for="VerificationCode" class="tg-form-label">@Loc["Enter_Code"]</label>
+				<div class="tg-verification-group">
+					<input type="text"
+						   id="VerificationCode"
+						   name="VerificationCode"
+						   class="tg-form-input"
+						   placeholder="@Loc["Enter_Code"]"
+						   required
+						   maxlength="6">
+					<button type="button"
+							class="tg-send-code-btn"
+							onclick="sendVerificationCode()">
+						@Loc["Send_Code"]
+					</button>
+				</div>
+			</div>
+			<div>
+				<label for="Role" class="tg-form-label">@Loc["Select_Role"]</label>
+				<select id="Role" name="SelectedRole" class="tg-form-input" required>
+					@foreach (var role in roles)
+					{
+						<option value="@role">@role</option>
+					}
+				</select>
+			</div>
+			<div>
+				<label for="Password" class="tg-form-label">@Loc["Password"]</label>
+				<input type="password" id="Password" name="Password" class="tg-form-input" placeholder="@Loc["Create_password"]" required>
+			</div>
+			<div asp-validation-summary="All" class="tg-error-summary"></div>
+			<button type="submit" class="tg-register-btn">@Loc["Register"]</button>
+		</form>
+
+		<div class="tg-text-center" style="margin-top: 20px; text-align: center;">
+			<p>
+				@Loc["Already_Account"] <a href="/Account/Login" class="tg-login-link">@Loc["Login_here"]</a>
+			</p>
+		</div>
+
+		<div class="tg-social-auth" style="margin: 10px 0;" >
+			@await Html.PartialAsync("_ExternalLoginButtons")
+		</div>
+	</div>
 </div>
-</body>
-</html>

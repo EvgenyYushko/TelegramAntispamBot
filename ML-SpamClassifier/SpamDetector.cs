@@ -46,6 +46,7 @@ namespace ML_SpamClassifier
 
 		public async Task TrainModelAsync()
 		{
+			Log("TrainModelAsync - Start");
 			if (!File.Exists(_dataSetPath))
 			{
 				throw new FileNotFoundException($"Файл {_dataSetPath} с данными не найден");
@@ -64,6 +65,7 @@ namespace ML_SpamClassifier
 
 			CreatePredictor();
 			Log(GetModelStatus());
+			Log("TrainModelAsync - End");
 		}
 
 		private void CreatePredictor()

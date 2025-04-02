@@ -25,5 +25,10 @@ namespace DomainLayer.Models
 
 		[Required]
 		public DateTime CreatedAt { get; set; } = DateTimeNow; // Дата и время создания записи
+
+		public override string ToString()
+		{
+			return $"Id = {Id}, Text = {Text}, NeedsManualReview ={NeedsManualReview}";
+		}
 	}
 }

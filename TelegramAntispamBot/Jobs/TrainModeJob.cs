@@ -20,7 +20,6 @@ namespace TelegramAntispamBot.Jobs
 		public override async Task Execute(IJobExecutionContext context)
 		{
 			await _mLFacade.RetrainModel();
-			await base.Execute(context);
 		}
 	}
 }

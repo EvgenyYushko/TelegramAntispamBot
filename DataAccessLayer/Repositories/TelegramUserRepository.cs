@@ -53,8 +53,12 @@ namespace DataAccessLayer.Repositories
 			var msg = await _context.SuspiciousMessages
 				.FirstOrDefaultAsync(m => m.Id.Equals(message.Id));
 
+			Log(msg);
+
 			msg.IsSpamByUser = message.IsSpamByUser;
 			msg.NeedsManualReview = message.NeedsManualReview;
+
+			Log(msg);
 
 			await _context.SaveChangesAsync();
 		}

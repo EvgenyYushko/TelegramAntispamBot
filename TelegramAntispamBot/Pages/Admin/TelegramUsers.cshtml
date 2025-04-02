@@ -2,133 +2,49 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @model TelegramUsersModel
 @{
+	Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 @inject IViewLocalizer Loc
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>---</title>
-    <style>
-        /* Общие стили */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #212529;
-        }
+<style>
+	/* Специфичные стили только для этой страницы */
+	.tg-user-row {
+		display: flex;
+		align-items: center;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+		cursor: pointer;
+	}
 
-        h1 {
-            text-align: center;
-            margin: 20px 0;
-            font-size: 2rem;
-            color: #343a40;
-        }
+		.tg-user-row:hover {
+			background-color: rgba(255, 255, 255, 0.05);
+		}
 
-        /* Таблица */
-        .table-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow-x: auto; /* Для горизонтальной прокрутки на маленьких экранах */
-        }
+	.tg-user-name {
+		flex-grow: 1;
+	}
+</style>
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 1rem;
-        }
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>@Loc["PageName"]</h1>
+	</div>
 
-        table, th, td {
-            border: 1px solid #dee2e6;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-
-        tr:nth-child(odd) {
-            background-color: #f8f9fa;
-        }
-
-        tr:hover {
-            background-color: #e9ecef;
-            cursor: pointer;
-        }
-
-        td {
-            word-wrap: break-word; /* Перенос слов */
-        }
-
-        /* Кнопки */
-        .button-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .button-container button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: white;
-            background-color: #28a745;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .button-container button:hover {
-            background-color: #218838;
-        }
-
-        table td:nth-child(4) {
-            word-break: break-all;
-        }
-
-    </style>
-    <script>
-        function goToUser(userId, chatId) {
-            window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
-        }
-    </script>
-</head>
-<body>
-<h1>@Loc["PageName"]</h1>
-<div class="table-container">
-    <table>
-        <thead>
-        <tr>
-            @* <th>@Loc["UserId"]</th> *@
-            <th>@Loc["Name"]</th>
-            @* <th>@Loc["CreateDate"]</th> *@
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var user in Model.TelegramUsers)
-        {
-            <tr onclick="goToUser(@user.UserId, null)">
-                @* <td>@user.UserId</td> *@
-                <td>@user.Name</td>
-                @* <td>@user.CreateDate</td> *@
-            </tr>
-        }
-        </tbody>
-    </table>
+	<div class="tg-card">
+		<h3 class="tg-card-title">@Loc["UsersList"]</h3>
+		<div class="tg-button-grid">
+			@foreach (var user in Model.TelegramUsers)
+			{
+				<div class="tg-user-row" onclick="goToUser(@user.UserId, null)">
+					<span class="tg-user-name">@user.Name</span>
+				</div>
+			}
+		</div>
+	</div>
 </div>
-</body>
-</html>
+
+<script>
+	function goToUser(userId, chatId) {
+		window.location.href = '/TelegramUserProfile?userId=' + userId +'&chatId='+ chatId;
+	}
+</script>

@@ -38,8 +38,6 @@ namespace TelegramAntispamBot.Jobs
 			{
 				Log(ex);
 			}
-
-			await base.Execute(context);
 		}
 	}
 }

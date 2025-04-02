@@ -1,148 +1,194 @@
 ﻿@page
 @model TelegramUserProfileModel
 @{
-    ViewData["Title"] = "User Profile";
-    var tgUser = Model.TgUser;
-    var chatLocal = tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)).Select(p => p.Chanel).FirstOrDefault();
+	Layout = "~/Pages/Shared/_Layout.cshtml";
+	ViewData["Title"] = "User Profile";
+	var tgUser = Model.TgUser;
+	var chatLocal = tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)).Select(p => p.Chanel).FirstOrDefault();
 }
 
-<div class="container mt-5">
-    <div class="card shadow-lg border-0">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">@tgUser.Name</h2>
-            <span class="badge bg-info text-white">User ID: @tgUser.UserId</span>
-        </div>
-
-        <div class="card-body">
-            <div class="row">
-                <div class="col-lg-6">
-                    <h5 class="text-primary">User Details</h5>
-                    <dl class="row">
-                        @* <dt class="col-sm-4">User ID:</dt> *@
-                        @* <dd class="col-sm-8">@tgUser.UserId</dd> *@
-                        <dt class="col-sm-4">Username:</dt>
-                        <dd class="col-sm-8">@tgUser.Name</dd>
-                        @* <dt class="col-sm-4">Join Date:</dt> *@
-                        @* <dd class="col-sm-8">@tgUser.CreateDate.ToString("yyyy-MM-dd HH:mm")</dd> *@
-                    </dl>
-                </div>
-                @if (Model.ChatId != 0)
-                {
-                    <div class="col-lg-6">
-                        <h5 class="text-success">Role in Chat</h5>
-                        <div class="p-3 border rounded bg-light">
-                            <p class="mb-0">
-                                <strong>Role:</strong> @chatLocal?.Title
-                            </p>
-                        </div>
-                    </div>
-                }
-            </div>
-            <div id="message-container-@tgUser.UserId" class="message-container">
-                <textarea class="message-input"
-                id="message-input-@tgUser.UserId"
-                rows="2"></textarea>
-                <button class="send-btn" onclick="sendMessage(@tgUser.UserId)">
-                    Отправить
-                </button>
-            </div>
-            @if (Model.ChatId != 0)
-            {
-                <div class="table-responsive mt-4">
-                    <h5 class="text-danger">Recent Messages</h5>
-                    <table class="table table-hover table-bordered">
-                        <thead class="bg-dark text-white">
-                        <tr>
-                            <th>Type right</th>
-                            <th>Allow</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var permisson in tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)))
-                        {
-                            <tr>
-                                <td>SendLinks</td>
-                                <td>
-                                    <input type="checkbox" @(permisson.SendLinks ? "checked" : "")
-                                           onchange="toggleSendLinks(@permisson.UserId, this, @permisson.ChatId)">
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-<script>
-    async function toggleSendLinks(userId, checkbox, chatId) {
-           const sendLinks = checkbox.checked;
-
-           const response = await fetch(`TelegramUserProfile?handler=SetRightLiks&userId=${userId}&sendLinks=${sendLinks}&chatId=${chatId}`, {
-               method: 'GET',
-               headers: { 'Content-Type': 'application/json' },
-           });
-
-           if (!response.ok) {
-               alert('Ошибка выполнения toggleSendLinks');
-               checkbox.checked = !sendLinks;
-           }
-       }
-     async function sendMessage(userId) {
-            const input = document.getElementById(`message-input-${userId}`);
-            const message = input.value.trim();
-
-            if (!message) {
-                alert('Error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`TelegramUserProfile?handler=SendMessage&userId=${userId}&message=${message}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                });
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error');
-            }
-        }
-</script>
 <style>
-    .card {
-        border-radius: 10px;
-        overflow: hidden;
-    }
+	/* Специфичные стили для этой страницы */
+	.tg-user-details {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 16px;
+	}
 
-    .table th, .table td {
-        text-align: left;
-        padding: 12px;
-    }
+	.tg-user-id {
+		color: var(--tg-hint-color);
+		font-size: 14px;
+	}
 
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 123, 255, 0.1);
-    }
+	.tg-permission-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+	}
 
-    .message-input {
-        flex: 1;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        min-width: 200px;
-    }
+	.tg-message-input {
+		width: 100%;
+		padding: 12px;
+		margin-top: 16px;
+		background-color: var(--tg-secondary-bg);
+		border: 1px solid var(--tg-border-color);
+		border-radius: 8px;
+		color: var(--tg-text-color);
+		resize: vertical;
+	}
 
-    .send-btn {
-        padding: 8px 15px;
-        background-color: #28a745;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+	.tg-send-btn {
+		margin-top: 8px;
+		padding: 10px 16px;
+		background-color: var(--tg-success-color);
+		color: white;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
 
-        .send-btn:hover {
-            background-color: #218838;
-        }
+		.tg-send-btn:hover {
+			background-color: var(--tg-success-color);
+			opacity: 0.9;
+		}
+
+	.tg-permission-switch {
+		position: relative;
+		display: inline-block;
+		width: 40px;
+		height: 20px;
+	}
+
+	.tg-permission-slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: var(--tg-border-color);
+		transition: .4s;
+		border-radius: 20px;
+	}
+
+		.tg-permission-slider:before {
+			position: absolute;
+			content: "";
+			height: 16px;
+			width: 16px;
+			left: 2px;
+			bottom: 2px;
+			background-color: white;
+			transition: .4s;
+			border-radius: 50%;
+		}
+
+	input:checked + .tg-permission-slider {
+		background-color: var(--tg-success-color);
+	}
+
+		input:checked + .tg-permission-slider:before {
+			transform: translateX(20px);
+		}
 </style>
+
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>@tgUser.Name</h1>
+		<p class="tg-user-id">User ID: @tgUser.UserId</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">User Details</h3>
+		<div class="tg-user-details">
+			<div>
+				<span class="tg-profile-label">Username:</span>
+				<span class="tg-profile-value">@tgUser.Name</span>
+			</div>
+			@if (Model.ChatId != 0)
+			{
+				<div>
+					<span class="tg-profile-label">Role in Chat:</span>
+					<span class="tg-profile-value">@chatLocal?.Title</span>
+				</div>
+			}
+		</div>
+
+		<div>
+			<textarea class="tg-message-input"
+					  id="message-input-@tgUser.UserId"
+					  rows="3"
+					  placeholder="Type your message..."></textarea>
+			<button class="tg-send-btn" onclick="sendMessage(@tgUser.UserId)">
+				Send Message
+			</button>
+		</div>
+	</div>
+
+	@if (Model.ChatId != 0)
+	{
+		<div class="tg-card">
+			<h3 class="tg-card-title">Permissions</h3>
+			<div class="tg-button-grid">
+				@foreach (var permission in tgUser.Permissions.Where(p => p.ChatId.Equals(Model.ChatId)))
+				{
+					<div class="tg-permission-item">
+						<span>Send Links</span>
+						<label class="tg-permission-switch">
+							<input type="checkbox" @(permission.SendLinks ? "checked" : "")
+								   onchange="toggleSendLinks(@permission.UserId, this, @permission.ChatId)">
+							<span class="tg-permission-slider"></span>
+						</label>
+					</div>
+				}
+			</div>
+		</div>
+	}
+</div>
+
+<script>
+	async function toggleSendLinks(userId, checkbox, chatId) {
+		const sendLinks = checkbox.checked;
+
+		const response = await fetch(`TelegramUserProfile?handler=SetRightLiks&userId=${userId}&sendLinks=${sendLinks}&chatId=${chatId}`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+		});
+
+		if (!response.ok) {
+			alert('Error updating permissions');
+			checkbox.checked = !sendLinks;
+		}
+	}
+
+	async function sendMessage(userId) {
+		const input = document.getElementById(`message-input-${userId}`);
+		const message = input.value.trim();
+
+		if (!message) {
+			alert('Please enter a message');
+			return;
+		}
+
+		try {
+			const response = await fetch(`TelegramUserProfile?handler=SendMessage&userId=${userId}&message=${encodeURIComponent(message)}`, {
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' },
+			});
+
+			if (response.ok) {
+				input.value = '';
+				alert('Message sent successfully');
+			} else {
+				alert('Error sending message');
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			alert('Error sending message');
+		}
+	}
+</script>

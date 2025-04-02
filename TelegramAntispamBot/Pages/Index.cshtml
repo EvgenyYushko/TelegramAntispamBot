@@ -3,57 +3,159 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @using static Infrastructure.Common.BotSettings
 @{
-    var botName = Loc["Header"];
-    var botLink = $"https://t.me/{BOT_USER_NAME}";
-    var botOwner = "https://t.me/EvgenyYushko";
+	var botName = Loc["Header"];
+	var botLink = $"https://t.me/{BOT_USER_NAME}";
+	var botOwner = "https://t.me/EvgenyYushko";
 
-    ViewData["Title"] = botName;
+	ViewData["Title"] = botName;
 }
 @inject IViewLocalizer Loc
 
-<div class="container my-5">
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white text-center py-4">
-            <h1 class="display-5">🤖 @botName</h1>
-            <p class="mb-0">@Loc["Header1"]</p>
-        </div>
-        <div class="card-body">
-            <h3 class="text-center mb-4">📚 @Loc["Description"]</h3>
-            <p>@Loc["Description_Text"]</p>
-            <hr/>
-            <h3 class="text-center mb-4">✨ @Loc["Possibilities"]</h3>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">🚫 @Loc["Delete"]</li>
-                <li class="list-group-item">🚫 @Loc["Delete_Text"]</li>
-                <li class="list-group-item">✅ @Loc["White"]</li>
-                <li class="list-group-item">📋 @Loc["White_Text"]</li>
-                <li class="list-group-item">🔒 @Loc["Disables"]</li>
-                <li class="list-group-item">✅ @Loc["Hellow_Text"]</li>
-            </ul>
-            <hr/>
-            <h3 class="text-center mb-4">🚀 @Loc["Quick_start"]</h3>
-            <p>@Loc["Instructions"]</p>
-            <ol class="list-group list-group-numbered">
-                <li class="list-group-item">
-                    @Loc["Instructions_1"]<a href="@botLink" target="_blank">@botName</a>
-                </li>
-                <li class="list-group-item">@Loc["Instructions_2"]</li>
-                <li class="list-group-item">@Loc["Instructions_3"]</li>
-                <li class="list-group-item">@Loc["Instructions_4"]</li>
-                <li class="list-group-item">@Loc["Instructions_5"]</li>
-            </ol>
-            <hr/>
-            <h3 class="text-center mb-4">🔒 @Loc["Settings"]</h3>
-            <ol class="list-group list-group-numbered">
-                <li class="list-group-item">@Loc["Settings_1"]</li>
-                <li class="list-group-item">@Loc["Settings_2"]</li>
-                <li class="list-group-item">@Loc["Settings_3"]</li>
-            </ol>
-            <h3 class="text-center mb-4">🔗 @Loc["Useful_links"]</h3>
-            <div class="d-flex justify-content-center gap-4">
-                <a class="btn btn-primary" href="https://core.telegram.org/bots/api" target="_blank">Telegram API</a>
-                <a class="btn btn-secondary" href="https://docs.microsoft.com/aspnet/core" target="_blank">ASP.NET Core Docs</a>
-            </div>
-        </div>
-    </div>
+<style>
+	/* Специфичные стили для главной страницы */
+	.tg-feature-item {
+		display: flex;
+		align-items: flex-start;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+		gap: 12px;
+	}
+
+	.tg-feature-icon {
+		font-size: 1.2em;
+		flex-shrink: 0;
+	}
+
+	.tg-feature-text {
+		flex-grow: 1;
+	}
+
+	.tg-numbered-item {
+		display: flex;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+		gap: 12px;
+	}
+
+	.tg-number {
+		color: var(--tg-primary-color);
+		font-weight: 500;
+		flex-shrink: 0;
+	}
+
+	.tg-links {
+		display: flex;
+		gap: 12px;
+		justify-content: center;
+		margin-top: 16px;
+		flex-wrap: wrap;
+	}
+
+	.tg-link-btn {
+		padding: 10px 16px;
+		border-radius: 8px;
+		background-color: var(--tg-primary-color);
+		color: white;
+		text-decoration: none;
+		transition: opacity 0.2s;
+	}
+
+		.tg-link-btn:hover {
+			opacity: 0.9;
+			color: white;
+		}
+
+	.tg-secondary-btn {
+		background-color: var(--tg-secondary-bg);
+		color: var(--tg-text-color);
+	}
+</style>
+
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>🤖 @botName</h1>
+		<p>@Loc["Header1"]</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">📚 @Loc["Description"]</h3>
+		<p>@Loc["Description_Text"]</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">✨ @Loc["Possibilities"]</h3>
+		<div class="tg-button-grid">
+			<div class="tg-feature-item">
+				<span class="tg-feature-icon">🚫</span>
+				<span class="tg-feature-text">@Loc["Delete_Text"]</span>
+			</div>
+			<div class="tg-feature-item">
+				<span class="tg-feature-icon">✅</span>
+				<span class="tg-feature-text">@Loc["White_Text"]</span>
+			</div>
+			<div class="tg-feature-item">
+				<span class="tg-feature-icon">🔒</span>
+				<span class="tg-feature-text">@Loc["Disables"]</span>
+			</div>
+			<div class="tg-feature-item">
+				<span class="tg-feature-icon">✅</span>
+				<span class="tg-feature-text">@Loc["Hellow_Text"]</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">🚀 @Loc["Quick_start"]</h3>
+		<p>@Loc["Instructions"]</p>
+		<div class="tg-button-grid">
+			<div class="tg-numbered-item">
+				<span class="tg-number">1.</span>
+				<span class="tg-feature-text">
+					@Loc["Instructions_1"]<a href="@botLink" target="_blank" style="color: var(--tg-primary-color);">@botName</a>
+				</span>
+			</div>
+			<div class="tg-numbered-item">
+				<span class="tg-number">2.</span>
+				<span class="tg-feature-text">@Loc["Instructions_2"]</span>
+			</div>
+			<div class="tg-numbered-item">
+				<span class="tg-number">3.</span>
+				<span class="tg-feature-text">@Loc["Instructions_3"]</span>
+			</div>
+			<div class="tg-numbered-item">
+				<span class="tg-number">4.</span>
+				<span class="tg-feature-text">@Loc["Instructions_4"]</span>
+			</div>
+			<div class="tg-numbered-item">
+				<span class="tg-number">5.</span>
+				<span class="tg-feature-text">@Loc["Instructions_5"]</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">🔒 @Loc["Settings"]</h3>
+		<div class="tg-button-grid">
+			<div class="tg-numbered-item">
+				<span class="tg-number">1.</span>
+				<span class="tg-feature-text">@Loc["Settings_1"]</span>
+			</div>
+			<div class="tg-numbered-item">
+				<span class="tg-number">2.</span>
+				<span class="tg-feature-text">@Loc["Settings_2"]</span>
+			</div>
+			<div class="tg-numbered-item">
+				<span class="tg-number">3.</span>
+				<span class="tg-feature-text">@Loc["Settings_3"]</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">🔗 @Loc["Useful_links"]</h3>
+		<div class="tg-links">
+			<a class="tg-link-btn" href="https://core.telegram.org/bots/api" target="_blank">Telegram API</a>
+			<a class="tg-link-btn tg-secondary-btn" href="https://docs.microsoft.com/aspnet/core" target="_blank">ASP.NET Core Docs</a>
+		</div>
+	</div>
 </div>

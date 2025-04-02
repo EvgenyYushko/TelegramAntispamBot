@@ -2,37 +2,78 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @model PrivacyModel
 @{
-    var msg = Loc["Privacy_Policy"];
-    ViewData["Title"] = msg;
-    var botOwner = "https://t.me/EvgenyYushko";
+	var msg = Loc["Privacy_Policy"];
+	ViewData["Title"] = msg;
+	var botOwner = "https://t.me/EvgenyYushko";
 }
 @inject IViewLocalizer Loc
 
-<div class="container my-5">
-    <div class="card shadow-lg">
-        <div class="card-header bg-secondary text-white text-center py-4">
-            <h1 class="display-5">🔒 @msg</h1>
-            <p class="mb-0">@Loc["Data_Safe"]</p>
-        </div>
-        <div class="card-body">
-            <h3 class="text-center mb-4">📜 @Loc["Provisions"]</h3>
-            <p>@Loc["We_Respect"]</p>
-            <hr/>
-            <h3 class="text-center mb-4">📂 @Loc["Collect"]</h3>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">🧾 @Loc["Username"]</li>
-                <li class="list-group-item">💬 @Loc["Contents"]</li>
-                <li class="list-group-item">🌐 @Loc["Metadata"]</li>
-            </ul>
-            <hr/>
-            <h3 class="text-center mb-4">🛡️ @Loc["How_Protect"]</h3>
-            <p>@Loc["All_Data"]</p>
-            <hr/>
-            <h3 class="text-center mb-4">📤 @Loc["Transfer"]</h3>
-            <p>@Loc["Your_Data"]</p>
-            <hr/>
-            <h3 class="text-center mb-4">📞 @Loc["Contacts"]</h3>
-            <p>@Loc["Questions"]</p>
-        </div>
-    </div>
+<style>
+	/* Специфичные стили для страницы приватности */
+	.tg-privacy-item {
+		display: flex;
+		align-items: flex-start;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+		gap: 12px;
+	}
+
+	.tg-privacy-icon {
+		font-size: 1.2em;
+		flex-shrink: 0;
+	}
+
+	.tg-contact-link {
+		color: var(--tg-primary-color);
+		text-decoration: none;
+	}
+
+		.tg-contact-link:hover {
+			text-decoration: underline;
+		}
+</style>
+
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>🔒 @msg</h1>
+		<p>@Loc["Data_Safe"]</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">📜 @Loc["Provisions"]</h3>
+		<p>@Loc["We_Respect"]</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">📂 @Loc["Collect"]</h3>
+		<div class="tg-button-grid">
+			<div class="tg-privacy-item">
+				<span class="tg-privacy-icon">🧾</span>
+				<span>@Loc["Username"]</span>
+			</div>
+			<div class="tg-privacy-item">
+				<span class="tg-privacy-icon">💬</span>
+				<span>@Loc["Contents"]</span>
+			</div>
+			<div class="tg-privacy-item">
+				<span class="tg-privacy-icon">🌐</span>
+				<span>@Loc["Metadata"]</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">🛡️ @Loc["How_Protect"]</h3>
+		<p>@Loc["All_Data"]</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">📤 @Loc["Transfer"]</h3>
+		<p>@Loc["Your_Data"]</p>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">📞 @Loc["Contacts"]</h3>
+		<p>@Loc["Questions"] <a href="@botOwner" class="tg-contact-link" target="_blank">@Loc["Contact_Us"]</a></p>
+	</div>
 </div>

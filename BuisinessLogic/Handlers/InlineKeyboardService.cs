@@ -11,6 +11,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using static Infrastructure.Common.BotSettings;
+using static Infrastructure.Helpers.Logger;
 
 namespace BuisinessLogic.Handlers
 {
@@ -117,8 +118,10 @@ namespace BuisinessLogic.Handlers
 		private async Task ChekedSpamMsg(bool isSpam, Update update, CallbackQuery callbackQuery,
 			CancellationToken cancellationToken)
 		{
+			Log("ChekedSpamMsg - Start");
 			var parts = callbackQuery.Data.Split('_');
 			var messageId = Guid.Parse(parts[1]); // Получаем msg.Id
+			Log($"ChekedSpamMsg - Proc 1 {messageId}");
 
 			await _mLService.UpdateSuspiciousMessages(new SuspiciousMessageDto
 			{
@@ -126,7 +129,10 @@ namespace BuisinessLogic.Handlers
 				IsSpamByUser = isSpam,
 				NeedsManualReview = false
 			});
+			Log("ChekedSpamMsg - Proc 2");
+
 			await SendHelpChats(_telegramClient, update, cancellationToken);
+			Log("ChekedSpamMsg - End");
 		}
 
 		private async Task SendChoseChats(ITelegramBotClient botClient, Update update, CancellationToken token,

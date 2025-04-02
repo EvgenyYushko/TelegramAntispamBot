@@ -1,115 +1,60 @@
 ﻿@page
 @model AllUsersModel
 @{
+	Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
 <style>
-    /* Общие стили */
-    body {
-        font-family: 'Arial', sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f8f9fa;
-        color: #212529;
-    }
+	/* Специфичные стили только для этой страницы */
+	.tg-user-card {
+		display: flex;
+		flex-direction: column;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--tg-border-color);
+	}
 
-    h1 {
-        text-align: center;
-        margin: 20px 0;
-        font-size: 2rem;
-        color: #343a40;
-    }
+	.tg-user-info {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
 
-    /* Таблица */
-    .table-container {
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 20px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow-x: auto; /* Для горизонтальной прокрутки на маленьких экранах */
-    }
+	.tg-user-name {
+		font-weight: 500;
+		color: var(--tg-primary-color);
+	}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 1rem;
-    }
+	.tg-user-email {
+		color: var(--tg-text-color);
+		font-size: 14px;
+	}
 
-    table, th, td {
-        border: 1px solid #dee2e6;
-    }
-
-    th, td {
-        padding: 15px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #007bff;
-        color: white;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-
-    tr:nth-child(odd) {
-        background-color: #f8f9fa;
-    }
-
-    tr:hover {
-        background-color: #e9ecef;
-        cursor: pointer;
-    }
-
-    td {
-        word-wrap: break-word; /* Перенос слов */
-    }
-
-    /* Кнопки */
-    .button-container {
-        text-align: center;
-        margin: 20px 0;
-    }
-
-        .button-container button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: white;
-            background-color: #28a745;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-            .button-container button:hover {
-                background-color: #218838;
-            }
-
-    table td:nth-child(3) {
-        word-break: break-all;
-    }
+	.tg-user-roles {
+		color: var(--tg-hint-color);
+		font-size: 13px;
+	}
 </style>
-<div policy="Admin" class="table-container">
-    <table>
-        <thead>
-        <tr>
-            <th>User Name</th>
-            <th>Email</th>
-            <th>Roles</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var user in Model.UsersAccount)
-        {
-            <tr>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
-                <td>@string.Join(", ", user.Roles.FirstOrDefault())</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+
+<div class="tg-container">
+	<div class="tg-header">
+		<h1>Users Management</h1>
+	</div>
+
+	<div class="tg-card">
+		<h3 class="tg-card-title">Registered Users</h3>
+		<div class="tg-button-grid">
+			@foreach (var user in Model.UsersAccount)
+			{
+				<div class="tg-user-card">
+					<div class="tg-user-info">
+						<span class="tg-user-name">@user.UserName</span>
+						<span class="tg-user-email">@user.Email</span>
+					</div>
+					<div class="tg-user-roles">
+						Roles: @string.Join(", ", user.Roles.FirstOrDefault())
+					</div>
+				</div>
+			}
+		</div>
+	</div>
 </div>
