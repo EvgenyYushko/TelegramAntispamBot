@@ -68,7 +68,7 @@ namespace BuisinessLogic.Handlers
 			if (update.Message?.Text is not null && !update.Message.Text.StartsWith("/"))
 			{
 				string comment = null;
-				var isSpam = _spamDetector.IsSpam(update.Message.Text, ref comment);
+				var isSpam = _spamDetector.IsSpam(update.Message.Text, update.Message.Chat.Title, ref comment);
 				if (isSpam && comment is not null)
 				{
 					//await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
