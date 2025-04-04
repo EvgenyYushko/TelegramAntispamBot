@@ -137,11 +137,11 @@ namespace BuisinessLogic.Handlers
 			{
 				//await HandleChatMemberUpdateAsync(_telegramClient, update, cancellationToken);
 				return;
-			}
+			}					
 
 			switch (type)
 			{
-				case UpdateType.Message when update.Message.Text.Equals("/start"):
+				case UpdateType.Message when update.GetMsgText().Equals("/start"):
 				{
 					await using (new WaitDialog(_telegramClient, update.Message.From.Id).Show())
 					{
@@ -153,7 +153,7 @@ namespace BuisinessLogic.Handlers
 					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId,
 						cancellationToken);
 					break;
-				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.Message.Text):
+				case UpdateType.Message when _profanityCheckerService.ContainsProfanity(update.GetMsgText()):
 					await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId,
 						cancellationToken);
 					if (!await _telegramUserService.CheckReputation(update.Message))
@@ -162,12 +162,12 @@ namespace BuisinessLogic.Handlers
 					}
 
 					break;
-				case UpdateType.Message when update.Message?.Text is not null && !update.Message.Text.StartsWith("/"):
+				case UpdateType.Message when update.Message?.Text is not null && !update.GetMsgText().StartsWith("/"):
 				{
 					var chat = await _telegramClient.GetChatAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
 
 					string comment = null;
-					var isSpam = _spamDetector.IsSpam(update.Message.Text, chat.Description, update.Message.Chat.Title, ref comment);
+					var isSpam = _spamDetector.IsSpam(update.GetMsgText(), chat.Description, update.Message.Chat.Title, ref comment);
 					if (isSpam && comment is not null)
 					{
 						//await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
@@ -183,7 +183,7 @@ namespace BuisinessLogic.Handlers
 				}
 				// Disable comments if new post contains no-comment word
 				case UpdateType.Message when update.Message.From.IsChannel() &&
-											update.Message.Text.Contains(NoCommentWord):
+											update.GetMsgText().Contains(NoCommentWord):
 				// Delete new comment with link if user not in white-list
 				case UpdateType.Message when update.Message.ContainsUrls() &&
 											!update.Message.From.IsBot &&
@@ -195,16 +195,16 @@ namespace BuisinessLogic.Handlers
 					await _deleteMessageService.DeleteMessageAsync(_telegramClient, update.Message, cancellationToken,
 						InfoMessage, LinkButton);
 					break;
-				case UpdateType.Message when update.Message.Text.Equals("/help") ||
-											update.Message.Text.Equals($"/help@{BOT_USER_NAME}"):
+				case UpdateType.Message when update.GetMsgText().Equals("/help") ||
+											update.GetMsgText().Equals($"/help@{BOT_USER_NAME}"):
 					await SendWelcomeMessage(_telegramClient, update, cancellationToken, update.Message.From);
 					break;
-				case UpdateType.Message when update.Message.Text.Equals("/allbannedusers") ||
-											update.Message.Text.Equals($"/allbannedusers@{BOT_USER_NAME}"):
+				case UpdateType.Message when update.GetMsgText().Equals("/allbannedusers") ||
+											update.GetMsgText().Equals($"/allbannedusers@{BOT_USER_NAME}"):
 					await GetAllBannedUsers(_telegramClient, update, cancellationToken, update.Message.From);
 					break;
-				case UpdateType.Message when update.Message.Text.Equals("/banrequest") ||
-											update.Message.Text.Equals($"/banrequest@{BOT_USER_NAME}"):
+				case UpdateType.Message when update.GetMsgText().Equals("/banrequest") ||
+											update.GetMsgText().Equals($"/banrequest@{BOT_USER_NAME}"):
 					await SendPull(botClient, update, update.Message.From);
 					break;
 				//case UpdateType.PollAnswer:

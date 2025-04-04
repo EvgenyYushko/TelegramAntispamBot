@@ -166,7 +166,15 @@ namespace ML_SpamClassifier.Helpers
 			// Прогрессивная шкала начисления баллов
 			double modifier = 0;
 
-			if (emojiCount >= 10) // Очень много эмодзи
+			if (emojiCount >= 50) // Очень много эмодзи
+				modifier = 0.9;
+			else if (emojiCount >= 40) 
+				modifier = 0.8;
+			else if (emojiCount >= 30) 
+				modifier = 0.7;
+			else if (emojiCount >= 20)
+				modifier = 0.6;
+			else if (emojiCount >= 10) 
 				modifier = 0.5;
 			else if (emojiCount >= 5)
 				modifier = 0.3;
@@ -178,7 +186,15 @@ namespace ML_SpamClassifier.Helpers
 			// Дополнительный процентный бонус за концентрацию эмодзи
 			double emojiDensity = (double)emojiCount / message.Length;
 
-			if (emojiDensity > 0.3) // Если более 30% текста - эмодзи
+			if (emojiDensity > 0.7) // Если более 70% текста - эмодзи
+				modifier += 0.65;
+			if (emojiDensity > 0.6) 
+				modifier += 0.55;
+			if (emojiDensity > 0.5) 
+				modifier += 0.45;
+			if (emojiDensity > 0.4) 
+				modifier += 0.35;
+			if (emojiDensity > 0.3) 
 				modifier += 0.25;
 			else if (emojiDensity > 0.2)
 				modifier += 0.15;
@@ -186,7 +202,7 @@ namespace ML_SpamClassifier.Helpers
 				modifier += 0.05;
 
 			// Ограничиваем максимальный модификатор
-			return Math.Min(modifier, 0.75);
+			return Math.Min(modifier, 1.55);
 		}
 
 		internal static string EscapePromptInjection(this string input)

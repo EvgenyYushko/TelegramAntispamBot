@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Infrastructure.Models;
+using Telegram.Bot.Types;
 
 namespace Infrastructure.Helpers
 {
@@ -24,6 +25,11 @@ namespace Infrastructure.Helpers
 					yield return element;
 				}
 			}
+		}
+
+		public static string GetMsgText(this Update update)
+		{
+			return update.Message.Text ?? update.Message.Caption;
 		}
 	}
 }
