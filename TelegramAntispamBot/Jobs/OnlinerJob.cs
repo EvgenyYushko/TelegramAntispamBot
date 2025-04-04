@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BuisinessLogic.Services.Parsers;
 using Infrastructure.InjectSettings;
+using Infrastructure.Models.AI;
 using ServiceLayer.Services.Telegram;
 using TelegramAntispamBot.Jobs.Base;
 
@@ -17,7 +18,7 @@ namespace TelegramAntispamBot.Jobs
 		}
 
 		/// <inheritdoc />
-		protected override Task<string> Parse()
+		protected override Task<string> Parse(ParseParams parseParams)
 		{
 			return _onlinerParser.ParseLatestPostAsync();
 		}

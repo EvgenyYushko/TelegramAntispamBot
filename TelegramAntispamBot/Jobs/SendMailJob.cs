@@ -29,9 +29,16 @@ namespace TelegramAntispamBot.Jobs
 
 				foreach (var user in users.Where(u => u.UserSite is not null))
 				{
-					//var copies = new List<string>() { "yushkoevgeny@gmail.com" };
-					var body = HtmlHelper.GetWeeklyReportHtml("много", 2, 3, 4, 5, "cahts", 6, 7, 8, 9, "aaa", "dsds");
-					Task.Run(async () => await _mailService.Send(user.UserSite.Email, body, "testTheme", isBodyHtml: true)).Wait();
+					try
+					{
+						//var copies = new List<string>() { "yushkoevgeny@gmail.com" };
+						var body = HtmlHelper.GetWeeklyReportHtml("много", 2, 3, 4, 5, "cahts", 6, 7, 8, 9, "aaa", "dsds");
+						await _mailService.Send(user.UserSite.Email, body, "testTheme", isBodyHtml: true);
+					}
+					catch (Exception e)
+					{
+						Log(e);
+					}
 				}
 			}
 			catch (Exception ex)

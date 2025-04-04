@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.InjectSettings;
+using Infrastructure.Models.AI;
 using Quartz;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
@@ -25,29 +27,54 @@ namespace TelegramAntispamBot.Jobs.Base
 		{
 			try
 			{
-				var content = await Parse();
-				if (content == null)
-					return;
-
-				var allChats = _telegramUserService.GetAllChats();
-				var tasks = allChats
+				var allChats = _telegramUserService.GetAllChats()
 					.Where(c => c.ChatPermission.SendNews)
-					.Select(channel => _telegramClient.SendTextMessageAsync(
-						channel.TelegramChatId,
-						content,
-						parseMode: ParseMode.Markdown))
-					.Cast<Task>()
-					.ToArray();
+					.ToList();
 
-				await Task.WhenAll(tasks);
+				var exceptions = new ConcurrentQueue<Exception>();
+
+				Parallel.ForEach(allChats, new ParallelOptions { MaxDegreeOfParallelism = 5 }, channel =>
+				{
+					try
+					{
+						// Для синхронного выполнения внутри Parallel.ForEach
+						var content = Parse(new ParseParams { ChatTitle = channel.Title }).GetAwaiter().GetResult();
+
+						if (content != null)
+						{
+							_telegramClient.SendTextMessageAsync(
+								channel.TelegramChatId,
+								content,
+								parseMode: ParseMode.Markdown).GetAwaiter().GetResult();
+						}
+					}
+					catch (Exception ex)
+					{
+						exceptions.Enqueue(ex);
+						Log($"Error processing chat {channel.Title}: {ex}");
+					}
+				});
+
+				// Если были ошибки - бросаем агрегированное исключение
+				if (!exceptions.IsEmpty)
+				{
+					throw new AggregateException(exceptions);
+				}
+			}
+			catch (AggregateException ae)
+			{
+				foreach (var ex in ae.InnerExceptions)
+				{
+					Log($"Parallel error: {ex}");
+				}
 			}
 			catch (Exception ex)
 			{
-				Log(ex.ToString());
+				Log($"Global error: {ex}");
 			}
 		}
 
-		protected virtual Task<string> Parse()
+		protected virtual Task<string> Parse(ParseParams parseParams)
 		{
 			throw new NotImplementedException();
 		}

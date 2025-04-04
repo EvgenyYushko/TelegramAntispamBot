@@ -19,6 +19,7 @@ using Infrastructure.Common;
 using Infrastructure.Enumerations;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models;
+using Infrastructure.Models.AI;
 using MailSenderService.BuisinessLogic.Services;
 using MailSenderService.ServiceLayer.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -41,6 +42,7 @@ using ML_SpamClassifier;
 using ML_SpamClassifier.Interfaces;
 using Quartz;
 using QuartzHostedService;
+using ServiceLayer.Services.AI;
 using ServiceLayer.Services.Authorization;
 using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
@@ -50,8 +52,8 @@ using TelegramAntispamBot.Filters;
 using TelegramAntispamBot.Jobs;
 using TelegramAntispamBot.Jobs.Base;
 using static Infrastructure.Constants.TelegramConstatns;
-using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 using static Infrastructure.Helpers.Logger;
+using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
 
 namespace TelegramAntispamBot
 {
@@ -138,6 +140,7 @@ namespace TelegramAntispamBot
 				services.AddScoped<MLFacade>();
 			}
 			services.AddSingleton<IMailService, MailService>();
+			services.AddSingleton<INewsParserServiceAI, NewsParserServiceAI>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 
 			services.AddScoped<IUserRepository, UserRepository>();
@@ -342,6 +345,10 @@ namespace TelegramAntispamBot
 					var telegreamUserService = new TelegramUserService(new TelegramUserRepository(dbContext));
 					var ml = scope.ServiceProvider.GetRequiredService<MLFacade>();
 					//Task.Run(async () => await ml.LoadModel()).Wait();
+
+					//var aiService = scope.ServiceProvider.GetRequiredService<INewsParserServiceAI>();
+					//var h = new HabrParser(aiService);
+					//var res = Task.Run(async ()=> await h.ParseLatestPostAsync(new ParseParams { ChatTitle = "Здоровое питание" })).Result;
 
 					var testController = new BotController
 						(

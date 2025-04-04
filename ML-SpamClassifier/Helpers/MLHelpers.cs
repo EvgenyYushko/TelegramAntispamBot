@@ -188,5 +188,14 @@ namespace ML_SpamClassifier.Helpers
 			// Ограничиваем максимальный модификатор
 			return Math.Min(modifier, 0.75);
 		}
+
+		internal static string EscapePromptInjection(this string input)
+		{
+			// Экранируем попытки вставки промпта
+			return input
+				.Replace("###", "[REDACTED]")
+				.Replace("```", "[TRIPLE_BACKTICK]")
+				.Replace("\"\"\"", "[TRIPLE_QUOTE]");
+		}
 	}
 }

@@ -124,6 +124,7 @@ namespace ML_SpamClassifier
 		public async Task<(bool IsSpam, string Details)> CheckSpamWithScoringAsync(string message, string theme)
 		{
 			var criteria = GetDefaultSpamCriteria(theme);
+			message = message.EscapePromptInjection();
 
 			// Быстрая предварительная проверка
 			var totalScore = QuickSpamCheck(message, criteria);
