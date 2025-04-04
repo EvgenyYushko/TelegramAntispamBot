@@ -341,7 +341,7 @@ namespace TelegramAntispamBot
 					var mlService = scope.ServiceProvider.GetRequiredService<IMLService>();
 					var telegreamUserService = new TelegramUserService(new TelegramUserRepository(dbContext));
 					var ml = scope.ServiceProvider.GetRequiredService<MLFacade>();
-					Task.Run(async () => await ml.LoadModel()).Wait();
+					//Task.Run(async () => await ml.LoadModel()).Wait();
 
 					var testController = new BotController
 						(

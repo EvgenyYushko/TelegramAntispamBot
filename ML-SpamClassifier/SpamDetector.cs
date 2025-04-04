@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Text;
 using System.Threading.Tasks;
 using GoogleServices.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.ML;
+using ML_SpamClassifier.Helpers;
 using ML_SpamClassifier.Interfaces;
 using ML_SpamClassifier.Models;
+using ML_SpamClassifier.Models.Gemini;
+using ML_SpamClassifier.Models.Gemini.Criteries;
+using Newtonsoft.Json;
 using ServiceLayer.Models;
 using ServiceLayer.Services.Telegram;
 using static Infrastructure.Common.TimeZoneHelper;
@@ -88,12 +92,10 @@ namespace ML_SpamClassifier
 			//if (0.10 < prediction.Probability && prediction.Probability < 0.90) // сохраним для анализа
 			//{
 
-			var criteria = GetDefaultSpamCriteria(chatTheme);
-			var (isSpamByGemini, score) = Task.Run(async () => await CheckSpamWithScoringAsync(text, chatTheme, criteria)).Result;
+			var (isSpamByGemini, details) = Task.Run(async () => await CheckSpamWithScoringAsync(text, chatTheme)).Result;
 			if (isSpamByGemini)
 			{
-				var geminiExplanation = Task.Run(async () => await GetDetailedSpamExplanationAsync(text, chatTheme, criteria)).Result;
-				comment = geminiExplanation;
+				comment = details;
 			}
 
 			Log($"IsSpam = {prediction.IsSpam}, Probability = {prediction.Probability}, isSpamByGemini = {isSpamByGemini}");
@@ -119,23 +121,48 @@ namespace ML_SpamClassifier
 			//return prediction.IsSpam;
 		}
 
-
-		public async Task<(bool IsSpam, double SpamScore)> CheckSpamWithScoringAsync(string message, string theme, List<SpamCriterion> criteria)
+		public async Task<(bool IsSpam, string Details)> CheckSpamWithScoringAsync(string message, string theme)
 		{
+			var criteria = GetDefaultSpamCriteria(theme);
+
 			// Быстрая предварительная проверка
-			var quickCheck = QuickSpamCheck(message, criteria);
-			if (quickCheck.IsSpam)
-				return (true, quickCheck.Score);
+			var totalScore = QuickSpamCheck(message, criteria);
+			if (totalScore.IsSpam)
+			{
+				var geminiExplanation = await GetDetailedSpamExplanationAsync(message, theme, criteria);
+				return (true, geminiExplanation);
+			}
 
 			// Подробный анализ через Gemini
 			var prompt = BuildSpamDetectionPrompt(message, theme, criteria);
 			var response = await _generativeLanguageModel.AskGemini(prompt);
+			var result = ParseGeminiResponse(response);
+			if (result.Details.Contains("Ошибка"))
+			{
+				var jsonStart = response.IndexOf('{');
+				var jsonEnd = response.LastIndexOf('}');
+				if (jsonStart >= 0 && jsonEnd > jsonStart)
+				{
+					var json = response.Substring(jsonStart, jsonEnd - jsonStart + 1);
+					result = ParseGeminiResponse(json);
+					if (result.Details.Contains("Ошибка"))
+					{
+						return (false, null);
+					}
+				}
+			}
 
-			return (ParseGeminiResponse(response), quickCheck.Score);
+			return (result.IsSpam, result.Details);
 		}
 
 		private (bool IsSpam, double Score) QuickSpamCheck(string message, List<SpamCriterion> criteria)
 		{
+			// Проверка ссылок
+			if (ContainsSuspiciousLinks(message))
+			{
+				return (true, 0);
+			}
+
 			double totalScore = 0;
 			var lowerMessage = message.ToLower();
 
@@ -147,149 +174,47 @@ namespace ML_SpamClassifier
 					totalScore += criterion.Weight;
 					continue;
 				}
-
-				// Проверка ссылок (если требуется)
-				if (criterion.CheckLinks && ContainsSuspiciousLinks(message))
-				{
-					totalScore += 1.6/*criterion.Weight*/;
-					break;
-				}
 			}
+
+			totalScore = CalculateModifiers(message, totalScore);
 
 			return (totalScore > 1.5, totalScore);
 		}
 
-		private bool ContainsSuspiciousLinks(string message)
+		private static double CalculateModifiers(string message, double totalScore)
 		{
-			var urls = ExtractAllUrls(message);
+			// Эмодзи
+			totalScore += CalculateEmojiModifier(message/*, userInfo*/);
 
-			// Домены для проверки
-			// Популярные сокращатели ссылок
-			var urlShorteners = new[]
-			{
-				"bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "buff.ly",
-				"adf.ly", "shorte.st", "cutt.ly", "bit.do", "cli.re", "is.gd",
-				"v.gd", "bc.vc", "ouo.io", "zzb.bz", "shrink.me", "link.tl",
-				"click.ru", "shorturl.at", "tiny.cc", "rb.gy", "soo.gd", "ity.im"
-			};
+			// CAPSLOCK
+			var capsCount = message.Count(char.IsUpper);
+			if ((double)capsCount / message.Length > 0.3)
+				totalScore += 0.3;
 
-			//Фишинговые/мошеннические домены
-			var phishingDomains = new[]
-			{
-				"paypal-verify.com", "appleid-verify.net", "steamcommunity.ru",
-				"facebook-security.xyz", "whatsapp-activate.com", "binance-support.org",
-				"amazon-refund.pro", "microsoft-update.live", "instagram-help.xyz"
-			};
+			var analyzer = new TextRepetitionAnalyzer();
+			totalScore += analyzer.CalculateRepetitionScore(message);
 
-			// Домены для обхода блокировок
-			var bypassDomains = new[]
+			if (message.Length > 100)
 			{
-				"xn--90ais", "xn--p1ai", "xn--80aesf", "xn--80asehdb", // IDN-домены
-				"top", "gq", "ml", "cf", "tk", "ga", // Бесплатные доменные зоны
-				"xyz", "online", "live", "site", "space", "webcam"
-			};
-
-			// Взрослый контент/порно-спам
-			var adultDomains = new[]
-			{
-				"dating24.ru", "flirt4free.com", "webcamteens.xyz",
-				"hotgirls.live", "cam4.com", "myfreecams.com",
-				"brazzers.com", "pornhub.com", "xvideos.com"
-			};
-
-			// Крипто-мошенничество
-			var cryptoScam = new[]
-			{
-				"binance-airdrop.com", "eth-giveaway.xyz", "free-bitcoin.pro",
-				"coinbase-rewards.com", "tether-free.io", "walletconnect-scam.com"
-			};
-
-			// Вредоносные/эксплойт домены
-			var malwareDomains = new[]
-			{
-				"exploit.in", "malware-distribution.com", "ransomware-decrypt.xyz",
-				"virus-download.net", "trojan-horse.pro", "keylogger.space"
-			};
-			// Домены для обмана (scam)
-			var scamDomains = new[]
-			{
-				"free-iphone15.ru", "win-prize-now.com", "million-dollar-giveaway.xyz",
-				"you-won-gift.com", "free-gift-cards.pro", "job-from-home-999k.com"
-			};
-
-			var suspiciousDomains = urlShorteners
-				.Concat(phishingDomains)
-				.Concat(bypassDomains)
-				.Concat(adultDomains)
-				.Concat(cryptoScam)
-				.Concat(malwareDomains)
-				.Concat(scamDomains)
-				.Distinct()
-				.ToArray();
-
-			foreach (var url in urls)
-			{
-				if (suspiciousDomains.Any(d =>
-					url.Contains($".{d}") || // Поддомены
-					url.Contains($"{d}/"))  // Прямое совпадение
-					)
-				{
-					return true;
-				}
+				var lengthFactor = Math.Min(message.Length / 500.0, 1.0);
+				totalScore *= lengthFactor;
 			}
 
-			return false;
+			//// Повтор сообщения
+			//if (_messageHistory.IsMessageRepeated(message, user.Id))
+			//	score += 0.3;
+
+			//// Первое сообщение
+			//if (_userService.IsFirstMessage(user.Id))
+			//	score += 0.15;
+
+			return totalScore;
 		}
 
-		private List<string> ExtractAllUrls(string message)
-		{
-			// Улучшенное регулярное выражение для всех типов ссылок
-			var urlRegex = new Regex(@"
-        (?:                         # Несохраняющая группа
-            https?://               # http:// или https://
-            |                       # ИЛИ
-            ftp://                 # ftp://
-            |                       # ИЛИ
-            www\.                   # www.
-            |                       # ИЛИ
-            [a-z0-9-]+\.(?:[a-z]{2,}|[a-z]{2}\.[a-z]{2})/  # Домен с путем
-            |                       # ИЛИ
-            [a-z0-9-]+\.(?:[a-z]{2,}|[a-z]{2}\.[a-z]{2})\b # Просто домен
-            |                       # ИЛИ
-            \b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b         # IPv4
-            |                       # ИЛИ
-            \[[a-f0-9:]+\]          # IPv6 в квадратных скобках
-        )
-        (?:                         # Необязательные части URL
-            /[^\s]*                 # Путь
-            |                       # ИЛИ
-            \?[^\s]*               # Query-параметры
-            |                       # ИЛИ
-            \#[^\s]*               # Якорь
-        )?",
-				RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
-
-			var matches = urlRegex.Matches(message);
-
-			// Нормализация найденных URL
-			return matches.Select(m =>
-			{
-				var url = m.Value;
-				// Добавляем http:// если нужно
-				if (!url.StartsWith("http") && !url.StartsWith("ftp") && !url.StartsWith("www"))
-				{
-					return "http://" + url;
-				}
-				return url;
-			})
-			.Distinct()
-			.ToList();
-		}
-
-		public string BuildSpamDetectionPrompt(string message, string theme, List<SpamCriterion> criteria)
+		private string BuildSpamDetectionPrompt(string message, string theme, List<SpamCriterion> criteria)
 		{
 			var criteriaText = string.Join("\n",
-				criteria.Select((c, i) => $"{i + 1}. {c.Description} (вес: {c.Weight})"));
+				criteria.Select((c, i) => $"{i + 1}. {c.Description} (вес:  0 - {c.Weight})"));
 
 			var examples = string.Join("\n",
 				new[]
@@ -299,16 +224,43 @@ namespace ML_SpamClassifier
 					"- Не спам: \"Как подключить Gemini API в C#?\""
 				});
 
-			return "### Контекст чата\n" +
+			return
+					"### Задача\n" +
+					"Оцени сообщение чата в телеграмм по критериям и верни JSON.\n\n" +
+
+					"### Контекст чата\n" +
 				   $"Тематика: \"{theme}\"\n\n" +
 
-				   "### Критерии спама (с весами)\n" +
+				   "### Критерии\n" +
 				   $"{criteriaText}\n\n" +
+
+					"Модификаторы:\n" +
+					"- Наличие эмодзи: +0.2 за > 3\n" +
+					"- Повтор сообщения: +0.3\n" +
+					"- CAPSLOCK: +0.3 если >30% текста\n" +
+
+					"### Формула расчета\n" +
+					$"total = sum(Критерии) + Модификаторы > 1.5 → спам\n" +
 
 				   "### Важные указания\n" +
 				   "1. Если сообщение попадает под несколько критериев - учитывай их суммарный вес\n" +
 				   "2. При весе > 1.5 считай сообщение спамом, иначе полагайся на своё решение\n" +
-				   "3. Ссылки проверяй особенно тщательно\n\n" +
+				   "3. Ссылки проверяй особенно тщательно" +
+				   "4. Ответ должен содержать ТОЛЬКО валидный JSON\n" +
+				   "5. Не включай никакого текста кроме JSON\n" +
+				   "6. Все строковые значения должны быть в двойных кавычках\n" +
+				   "7. Не используй ```json или другие маркеры\n" +
+
+				   "### Анализ вложений\n" +
+					"Если сообщение содержит вложения:\n" +
+					"- Проверь расширения файлов (опасные: .exe, .scr)\n" +
+					"- Ищи упоминания файлов в тексте\n" +
+					"- Анализируй подписи к изображениям\n\n" +
+
+					"### Лингвистические маркеры\n" +
+					"- Избыточная пунктуация (более 3 ! или ?)\n" +
+					"- Смешанные языки в одном сообщении\n" +
+					"- Шаблонные фразы типа 'Уникальная возможность' и тд\n\n" +
 
 				   "### Примеры\n" +
 				   $"{examples}\n\n" +
@@ -316,23 +268,40 @@ namespace ML_SpamClassifier
 				   "### Анализируемое сообщение\n" +
 				   $"\"{message}\"\n\n" +
 
-				   "### Формат ответа\n" +
-				   "Только \"да\" или \"нет\" без пояснений";
+					"### Ответ в формате JSON:\n" +
+				   "{\n" +
+				   "  \"analysis\": {\n" +
+				   "    \"criteria\": [\n" +
+				   "      { \"id\": 1, \"score\": 0.9, \"reason\": \"...\" },\n" +
+				   "      ...\n" +
+				   "    ],\n" +
+				   "    \"modifiers\": [\n" +
+				   "      { \"type\": \"emojis\", \"score\": 0.2 }\n" +
+				   "    ],\n" +
+				   "    \"total\": 2.1,\n" +
+				   "    \"is_spam\": true\n" +
+				   "  }\n" +
+				   "}";
 		}
 
-		public async Task<string> GetDetailedSpamExplanationAsync(string message, string theme, List<SpamCriterion> criteria)
+		private async Task<string> GetDetailedSpamExplanationAsync(string message, string theme, List<SpamCriterion> criteria)
 		{
 			var criteriaList = string.Join("\n",
 				criteria.Select(c => $"- {c.Description} (вес: {c.Weight})"));
 
 			var prompt = "### Задача\n" +
-						 "Дай развернутое объяснение по критериям с указанием весов.\n\n" +
+						 "Дай краткое объяснение по критериям с указанием весов.\n\n" +
 
 						 "### Сообщение\n" +
 						 $"\"{message}\"\n\n" +
 
 						 "### Критерии\n" +
 						 $"{criteriaList}\n\n" +
+
+						 "Модификаторы:\n" +
+						"- Наличие эмодзи: +0.2 за > 3\n" +
+						"- Повтор сообщения: +0.3\n" +
+						"- CAPSLOCK: +0.3 если >30% текста\n" +
 
 						 "### Формат ответа\n" +
 						 "Пример:\n" +
@@ -341,77 +310,111 @@ namespace ML_SpamClassifier
 						 "2. Подозрительная ссылка (1.0)\n" +
 						 "3. Призыв к действию (0.4)\"\n\n" +
 
+						 "### Лингвистические маркеры\n" +
+						"- Избыточная пунктуация (более 3 ! или ?)\n" +
+						"- Смешанные языки в одном сообщении\n" +
+						"- Шаблонные фразы типа 'Уникальная возможность' и тд\n\n" +
+
 						 "Твой анализ:\n" +
 						 "#Постарайся отвечать как можно кратко. По существу и без лишней воды.";
 
 			return await _generativeLanguageModel.AskGemini(prompt);
 		}
 
-		private bool ParseGeminiResponse(string response)
+		private (bool IsSpam, string Details) ParseGeminiResponse(string jsonResponse)
 		{
-			if (string.IsNullOrWhiteSpace(response))
-				return false; // Пустой ответ → не спам
-
-			// Нормализация строки (удаляем всё, кроме букв/цифр)
-			var normalized = Regex.Replace(response, @"[^\w\d]", "").ToLower();
-
-			// Проверка на спам через regex
-			if (Regex.IsMatch(normalized, @"^(да|yes|spam|1|true|y|д)$"))
-				return true;
-
-			// Проверка на НЕ спам
-			if (Regex.IsMatch(normalized, @"^(нет|no|ham|0|false|n|н)$"))
-				return false;
-
-			// Анализ по первым 3 символам (для ответов типа "Да, это спам")
-			var firstChars = normalized[..Math.Min(3, normalized.Length)];
-			return firstChars switch
+			try
 			{
-				"да" or "yes" or "spa" => true,
-				"нет" or "no" or "ham" => false,
-				_ => false // По умолчанию считаем не спамом
-			};
+				// Удаляем возможные форматирующие символы в начале/конце
+				jsonResponse = jsonResponse.Trim('`', ' ', '\n', '\r', '\t');
+
+				// Удаляем маркер "json" если есть
+				if (jsonResponse.StartsWith("json", StringComparison.OrdinalIgnoreCase))
+				{
+					jsonResponse = jsonResponse.Substring(4).TrimStart();
+				}
+
+				// Десериализация с обработкой ошибок
+				var response = JsonConvert.DeserializeObject<GeminiAnalysisResponse>(jsonResponse, new JsonSerializerSettings
+				{
+					Error = (sender, args) =>
+					{
+						args.ErrorContext.Handled = true;
+						Log($"JSON parse error: {args.ErrorContext.Error.Message}");
+					},
+					MissingMemberHandling = MissingMemberHandling.Ignore
+				});
+
+				if (response?.Analysis == null)
+				{
+					Log("Invalid response format or empty analysis");
+					return (false, "Ошибка анализа: неверный формат ответа");
+				}
+
+				var details = new StringBuilder();
+				details.AppendLine("Детализация оценки спама:");
+
+				foreach (var criterion in response.Analysis.Criteria.Where(c => c.Score > 0))
+				{
+					details.AppendLine($"- Критерий {criterion.Id}: {criterion.Score:0.##} балла");
+					details.AppendLine($"  Причина: {criterion.Reason}");
+				}
+
+				foreach (var modifier in response.Analysis.Modifiers.Where(m => m.Score > 0))
+				{
+					details.AppendLine($"- Модификатор '{modifier.Type}': {modifier.Score:0.##} балла");
+					if (!string.IsNullOrEmpty(modifier.Reason))
+						details.AppendLine($"  Причина: {modifier.Reason}");
+				}
+
+				details.AppendLine($"\nИтоговый балл: {response.Analysis.Total:0.##} (порог: 1.5)");
+				details.AppendLine($"Решение: {(response.Analysis.IsSpam ? "СПАМ" : "Не спам")}");
+
+				return (response.Analysis.IsSpam, details.ToString());
+			}
+			catch (Exception ex)
+			{
+				Log(ex);
+				return (false, $"Ошибка при анализе ответа: {ex.Message}");
+			}
 		}
 
-		public class SpamCriterion
-		{
-			public string Description { get; set; }
-			public double Weight { get; set; } // Важность критерия (0.1 - 1.0)
-			public string[] Keywords { get; set; } // Ключевые фразы для быстрой проверки
-			public bool CheckLinks { get; set; } // Требуется ли проверка ссылок
-		}
-
-		// Пример инициализации критериев
-		public static List<SpamCriterion> GetDefaultSpamCriteria(string chatTheme)
+		private static List<SpamCriterion> GetDefaultSpamCriteria(string chatTheme)
 		{
 			return new List<SpamCriterion>
 			{
 				new() {
+					Id = "C1",
 					Description = "Коммерческие предложения вне контекста",
 					Weight = 0.9,
 					Keywords = new[] { "купите", "акция", "скидка", "только сегодня", "предложение" }
 				},
 				new() {
+					Id = "C2",
 					Description = "Подозрительные ссылки",
 					Weight = 1.0, // Максимальный вес
 					CheckLinks = true
 				},
 				new() {
+					Id = "C3",
 					Description = "Призывы к срочным действиям",
 					Weight = 0.7,
 					Keywords = new[] { "срочно", "быстро", "успей", "последний шанс" }
 				},
 				new() {
+					Id = "C4",
 					Description = $"Несоответствие тематике \"{chatTheme}\"",
 					Weight = 0.6,
 					Keywords = Array.Empty<string>() // Специфично для чата
 				},
 				new() {
+					Id = "C5",
 					Description = "Грамматические аномалии",
 					Weight = 0.4,
 					Keywords = new[] { "!!!!!!", "?????", "ВСЕМ СРОЧНО" }
 				},
 				new() {
+					Id = "C6",
 					Description = "Финансовые схемы",
 					Weight = 0.8,
 					Keywords = new[] { "заработок", "гарантия", "прибыль", "криптовалюта" }
