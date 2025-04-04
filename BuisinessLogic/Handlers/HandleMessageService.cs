@@ -6,6 +6,7 @@ using BuisinessLogic.Services;
 using BuisinessLogic.Services.Facades;
 using Infrastructure.Enumerations;
 using Infrastructure.Extentions;
+using Infrastructure.Helpers;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models;
 using ML_SpamClassifier.Interfaces;
@@ -17,8 +18,6 @@ using Telegram.Bot.Types.Enums;
 using static Infrastructure.Common.BotSettings;
 using static Infrastructure.Common.TimeZoneHelper;
 using static Infrastructure.Helpers.TelegramUserHelper;
-using static Infrastructure.Helpers.Logger;
-using Infrastructure.Helpers;
 
 namespace BuisinessLogic.Handlers
 {
@@ -63,23 +62,6 @@ namespace BuisinessLogic.Handlers
 			{
 				await _telegramUserService.UpdateLocalStorage();
 				_firstRunBot = false;
-			}
-
-			if (update.Message?.Text is not null && !update.Message.Text.StartsWith("/"))
-			{
-				string comment = null;
-				var isSpam = _spamDetector.IsSpam(update.Message.Text, update.Message.Chat.Title, ref comment);
-				if (isSpam && comment is not null)
-				{
-					//await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
-					await _telegramClient.SendTextMessageAsync(
-						update.Message.Chat.Id,
-						comment,
-						replyToMessageId: update.Message.MessageId, // Цитируем сообщение пользователя
-						cancellationToken: cancellationToken);
-
-					return;
-				}
 			}
 
 			//var me = await _telegramClient.GetMeAsync();
@@ -180,6 +162,25 @@ namespace BuisinessLogic.Handlers
 					}
 
 					break;
+				case UpdateType.Message when update.Message?.Text is not null && !update.Message.Text.StartsWith("/"):
+				{
+					var chat = await _telegramClient.GetChatAsync(new ChatId(update.Message.Chat.Id), cancellationToken);
+
+					string comment = null;
+					var isSpam = _spamDetector.IsSpam(update.Message.Text, chat.Description, update.Message.Chat.Title, ref comment);
+					if (isSpam && comment is not null)
+					{
+						//await _telegramClient.DeleteMessageAsync(update.Message.Chat.Id, update.Message.MessageId, cancellationToken);
+						await _telegramClient.SendTextMessageAsync(
+							update.Message.Chat.Id,
+							comment,
+							replyToMessageId: update.Message.MessageId, // Цитируем сообщение пользователя
+							cancellationToken: cancellationToken);
+
+						return;
+					}
+					break;
+				}
 				// Disable comments if new post contains no-comment word
 				case UpdateType.Message when update.Message.From.IsChannel() &&
 											update.Message.Text.Contains(NoCommentWord):

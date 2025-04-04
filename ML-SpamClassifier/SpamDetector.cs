@@ -80,7 +80,7 @@ namespace ML_SpamClassifier
 			_predictor = _mlContext.Model.CreatePredictionEngine<MessageData, PredictionResult>(_model);
 		}
 
-		public bool IsSpam(string text, string chatTheme, ref string comment)
+		public bool IsSpam(string text, string chatTheme, string chatDescription, ref string comment)
 		{
 			if (_env.IsDevelopment())
 			{
@@ -92,7 +92,7 @@ namespace ML_SpamClassifier
 			//if (0.10 < prediction.Probability && prediction.Probability < 0.90) // сохраним для анализа
 			//{
 
-			var (isSpamByGemini, details) = Task.Run(async () => await CheckSpamWithScoringAsync(text, chatTheme)).Result;
+			var (isSpamByGemini, details) = Task.Run(async () => await CheckSpamWithScoringAsync(text, chatTheme, chatDescription)).Result;
 			if (isSpamByGemini)
 			{
 				comment = details;
@@ -121,21 +121,21 @@ namespace ML_SpamClassifier
 			//return prediction.IsSpam;
 		}
 
-		public async Task<(bool IsSpam, string Details)> CheckSpamWithScoringAsync(string message, string theme)
+		public async Task<(bool IsSpam, string Details)> CheckSpamWithScoringAsync(string message, string theme, string chatDescription)
 		{
-			var criteria = GetDefaultSpamCriteria(theme);
+			var criteria = GetDefaultSpamCriteria(theme, chatDescription);
 			message = message.EscapePromptInjection();
 
 			// Быстрая предварительная проверка
 			var totalScore = QuickSpamCheck(message, criteria);
 			if (totalScore.IsSpam)
 			{
-				var geminiExplanation = await GetDetailedSpamExplanationAsync(message, theme, criteria);
+				var geminiExplanation = await GetDetailedSpamExplanationAsync(message, theme, chatDescription, criteria);
 				return (true, geminiExplanation);
 			}
 
 			// Подробный анализ через Gemini
-			var prompt = BuildSpamDetectionPrompt(message, theme, criteria);
+			var prompt = BuildSpamDetectionPrompt(message, theme, chatDescription, criteria);
 			var response = await _generativeLanguageModel.AskGemini(prompt);
 			var result = ParseGeminiResponse(response);
 			if (result.Details.Contains("Ошибка"))
@@ -212,7 +212,7 @@ namespace ML_SpamClassifier
 			return totalScore;
 		}
 
-		private string BuildSpamDetectionPrompt(string message, string theme, List<SpamCriterion> criteria)
+		private string BuildSpamDetectionPrompt(string message, string theme, string chatDescription, List<SpamCriterion> criteria)
 		{
 			var criteriaText = string.Join("\n",
 				criteria.Select((c, i) => $"{i + 1}. {c.Description} (вес:  0 - {c.Weight})"));
@@ -230,7 +230,8 @@ namespace ML_SpamClassifier
 					"Оцени сообщение чата в телеграмм по критериям и верни JSON.\n\n" +
 
 					"### Контекст чата\n" +
-				   $"Тематика: \"{theme}\"\n\n" +
+				   $"Тематика чата: \"{theme}\"\n" +
+				   $"{(chatDescription is null ? "" : $"Оисание чата:{chatDescription}")}\n\n" +
 
 				   "### Критерии\n" +
 				   $"{criteriaText}\n\n" +
@@ -285,13 +286,17 @@ namespace ML_SpamClassifier
 				   "}";
 		}
 
-		private async Task<string> GetDetailedSpamExplanationAsync(string message, string theme, List<SpamCriterion> criteria)
+		private async Task<string> GetDetailedSpamExplanationAsync(string message, string theme, string chatDescription, List<SpamCriterion> criteria)
 		{
 			var criteriaList = string.Join("\n",
 				criteria.Select(c => $"- {c.Description} (вес: {c.Weight})"));
 
 			var prompt = "### Задача\n" +
 						 "Дай краткое объяснение по критериям с указанием весов.\n\n" +
+
+						 "### Контекст чата\n" +
+						$"Тематика: \"{theme}\"\n" +
+						$"{(chatDescription is null ? "" : $"Оисание чата:{chatDescription}")}\n\n" +
 
 						 "### Сообщение\n" +
 						 $"\"{message}\"\n\n" +
@@ -380,7 +385,7 @@ namespace ML_SpamClassifier
 			}
 		}
 
-		private static List<SpamCriterion> GetDefaultSpamCriteria(string chatTheme)
+		private static List<SpamCriterion> GetDefaultSpamCriteria(string chatTheme, string chatDescription)
 		{
 			return new List<SpamCriterion>
 			{
@@ -404,7 +409,7 @@ namespace ML_SpamClassifier
 				},
 				new() {
 					Id = "C4",
-					Description = $"Несоответствие тематике \"{chatTheme}\"",
+					Description = $"Несоответствие тематике чата \"{chatTheme}\"{(chatDescription is null ? "" : $" и его описаню \"{chatDescription}\"")}",
 					Weight = 0.6,
 					Keywords = Array.Empty<string>() // Специфично для чата
 				},

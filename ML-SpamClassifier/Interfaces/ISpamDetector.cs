@@ -8,6 +8,6 @@ namespace ML_SpamClassifier.Interfaces
 
 		Task TrainModelAsync();
 
-		bool IsSpam(string text, string chatTheme, ref string comment);
+		bool IsSpam(string text, string chatTheme, string chatDescription, ref string comment);
 	}
 }
