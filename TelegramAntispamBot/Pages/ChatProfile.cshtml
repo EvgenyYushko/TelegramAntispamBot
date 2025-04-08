@@ -3,7 +3,7 @@
 @{
 	ViewData["Title"] = "Telegram Chat Profile";
 }
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
 <style>
 	.tg-chat-member {
 		display: flex;
@@ -24,11 +24,11 @@
 		height: 24px;
 	}
 
-	.tg-permission-switch input {
-		opacity: 0;
-		width: 0;
-		height: 0;
-	}
+		.tg-permission-switch input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
 
 	.tg-permission-slider {
 		position: absolute;
@@ -61,6 +61,107 @@
 		input:checked + .tg-permission-slider:before {
 			transform: translateX(26px);
 		}
+
+	.tg-profile-items-vertical {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+	}
+
+	.tg-permission-item {
+		display: flex;
+		flex-direction: row; /* Changed to row */
+		align-items: center; /* Align items vertically in the center */
+		gap: 10px; /* Spacing between elements */
+		margin-bottom: 10px; /* Add margin between each permission block */
+	}
+
+	.tg-permission-control {
+		display: flex;
+		flex-direction: row; /* Changed to row */
+		align-items: center; /* Vertically align items to the center */
+		gap: 10px;
+		flex: 1; /* Allow this section to take available space */
+	}
+
+	.tg-cron-input {
+		width: 100%;
+	}
+
+	.tg-profile-label {
+		white-space: nowrap; /* Prevent the label from wrapping */
+	}
+
+		.tg-cron-input:focus {
+			outline: none;
+			border-color: #4a90e2;
+			box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+		}
+
+	.cron-tutorial-tooltip {
+		max-width: 400px;
+		border-radius: 8px;
+		box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+	}
+
+		.cron-tutorial-tooltip h3 {
+			color: #4a6baf;
+			margin-top: 0;
+		}
+
+		.cron-tutorial-tooltip table.cron-format-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 10px 0;
+		}
+
+			.cron-tutorial-tooltip table.cron-format-table td,
+			.cron-tutorial-tooltip table.cron-format-table th {
+				padding: 6px;
+				border: 1px solid #eee;
+			}
+
+		.cron-tutorial-tooltip code {
+			background: #f5f5f5;
+			padding: 2px 4px;
+			border-radius: 3px;
+			font-family: monospace;
+		}
+
+	/* Кнопка "Помощь" */
+	.cron-help-button {
+		background: #4a6baf;
+		color: white;
+		border: none;
+		padding: 5px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+		margin-left: 10px;
+		font-size: 12px;
+	}
+
+	.cron-input-container {
+		display: flex;
+		align-items: center;
+		width: 50%; /* added width */
+	}
+
+	@@keyframes pulse {
+		0%
+
+	{
+		box-shadow: 0 0 0 0 rgba(74, 107, 175, 0.4);
+	}
+
+	70% {
+		box-shadow: 0 0 0 10px rgba(74, 107, 175, 0);
+	}
+
+	100% {
+		box-shadow: 0 0 0 0 rgba(74, 107, 175, 0);
+	}
+
+	}
 </style>
 
 <div class="tg-container">
@@ -100,13 +201,84 @@
 
 	<div class="tg-card">
 		<h3 class="tg-card-title">Permissions</h3>
-		<div class="tg-profile-item" style="align-items: center;">
-			<span class="tg-profile-label">Allow sending news:</span>
-			<label class="tg-permission-switch">
-				<input type="checkbox" @(Model.Chat.ChatPermission.SendNews ? "checked" : "")
-					   onchange="toggleSendLinks(this, @Model.Chat.TelegramChatId)">
-				<span class="tg-permission-slider"></span>
-			</label>
+		<div class="tg-profile-items-vertical">
+
+
+			<!-- News Permission -->
+			<div class="tg-permission-item">
+				<div class="tg-permission-control">
+					<label class="tg-permission-switch">
+						<input type="checkbox" @(Model.Chat.ChatPermission.SendNews ? "checked" : "")
+							   onchange="togglePermission(this, 'SetAllowSendNews', @Model.Chat.TelegramChatId)">
+						<span class="tg-permission-slider"></span>
+					</label>
+					<span class="tg-profile-label">Allow sending news</span>
+				</div>
+				<div class="cron-input-container">
+					<input type="text" class="tg-cron-input"
+						   value="@Model.Chat.ChatPermission.SendNews"
+						   placeholder="0 9 * * * (9:00 daily)"
+						   id="newsCron_@Model.Chat.TelegramChatId">
+					<button class="cron-help-button" onclick="showCronHelp('newsCron_@Model.Chat.TelegramChatId')">?</button>
+				</div>
+			</div>
+
+			<!-- Currency Permission -->
+			<div class="tg-permission-item">
+				<div class="tg-permission-control">
+					<label class="tg-permission-switch">
+						<input type="checkbox" @(Model.Chat.ChatPermission.SendCurrency ? "checked" : "")
+							   onchange="togglePermission(this, 'SetAllowCurrency', @Model.Chat.TelegramChatId)">
+						<span class="tg-permission-slider"></span>
+					</label>
+					<span class="tg-profile-label">Allow sending currency</span>
+				</div>
+				<div class="cron-input-container">
+					<input type="text" class="tg-cron-input"
+						   value="@Model.Chat.ChatPermission.CurrencyCronExpression"
+						   placeholder="0 12 * * * (12:00 daily)"
+						   id="currencyCron_@Model.Chat.TelegramChatId">
+					<button class="cron-help-button" onclick="showCronHelp('currencyCron_@Model.Chat.TelegramChatId')">?</button>
+				</div>
+			</div>
+
+			<!-- Habr Permission -->
+			<div class="tg-permission-item">
+				<div class="tg-permission-control">
+					<label class="tg-permission-switch">
+						<input type="checkbox" @(Model.Chat.ChatPermission.SendHabr ? "checked" : "")
+							   onchange="togglePermission(this, 'SetAllowHabrNews', @Model.Chat.TelegramChatId)">
+						<span class="tg-permission-slider"></span>
+					</label>
+					<span class="tg-profile-label">Allow sending Habr</span>
+				</div>
+				<div class="cron-input-container">
+					<input type="text" class="tg-cron-input"
+						   value="@Model.Chat.ChatPermission.HabrCronExpression"
+						   placeholder="0 11 * * * (11:00 daily)"
+						   id="habrCron_@Model.Chat.TelegramChatId">
+					<button class="cron-help-button" onclick="showCronHelp('habrCron_@Model.Chat.TelegramChatId')">?</button>
+				</div>
+			</div>
+
+			<!-- Onliner Permission -->
+			<div class="tg-permission-item">
+				<div class="tg-permission-control">
+					<label class="tg-permission-switch">
+						<input type="checkbox" @(Model.Chat.ChatPermission.SendOnliner ? "checked" : "")
+							   onchange="togglePermission(this, 'SetAllowOnlinerNews', @Model.Chat.TelegramChatId)">
+						<span class="tg-permission-slider"></span>
+					</label>
+					<span class="tg-profile-label">Allow sending Onliner</span>
+				</div>
+				<div class="cron-input-container">
+					<input type="text" class="tg-cron-input"
+						   value="@Model.Chat.ChatPermission.OnlinerCronExpression"
+						   placeholder="0 13 * * * (13:00 daily)"
+						   id="onlinerCron_@Model.Chat.TelegramChatId">
+					<button class="cron-help-button" onclick="showCronHelp('onlinerCron_@Model.Chat.TelegramChatId')">?</button>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -123,22 +295,105 @@
 	</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 <script>
+	function initCronTutorial(elementId) {
+		const element = document.getElementById(elementId);
+
+		introJs().setOptions({
+			nextLabel: 'Next →',
+			prevLabel: '← Back',
+			doneLabel: 'Got it',
+			skipLabel: 'Skip',
+			steps: [
+				{
+					element: '#' + elementId,
+					intro: `
+						<h3>Cron Format</h3>
+						<p>Use 5 space-separated values:</p>
+						<table class="cron-format-table">
+							<tr><th>Field</th><th>Example</th></tr>
+							<tr><td>Minutes (0-59)</td><td><code>0</code></td></tr>
+							<tr><td>Hours (0-23)</td><td><code>9</code> (9:00 AM)</td></tr>
+							<tr><td>Day of month (1-31)</td><td><code>*</code> (any)</td></tr>
+							<tr><td>Month (1-12)</td><td><code>*</code></td></tr>
+							<tr><td>Day of week (0-6)</td><td><code>*</code> (0=Sunday)</td></tr>
+						</table>
+					`,
+					position: 'right'
+				},
+				{
+					element: '#' + elementId,
+					intro: `
+						<h3>Examples</h3>
+						<ul>
+							<li><code>0 9 * * *</code> - Daily at 9:00 AM</li>
+							<li><code>0 */2 * * *</code> - Every 2 hours</li>
+							<li><code>0 12 * * 1-5</code> - Weekdays at noon</li>
+							<li><code>0 9,18 * * *</code> - 9 AM and 6 PM daily</li>
+						</ul>
+					`,
+					position: 'right'
+				}
+			],
+			tooltipClass: 'cron-tutorial-tooltip'
+		}).start();
+	}
+
+	function showCronHelp(elementId) {
+		initCronTutorial(elementId);
+	}
+
 	function goToUser(userId, chatId) {
 		window.location.href = '/TelegramUserProfile?userId=' + userId + '&chatId=' + chatId;
 	}
 
-	async function toggleSendLinks(checkbox, chatId) {
-		const allowSendNews = checkbox.checked;
+	async function togglePermission(checkbox, methodName, chatId) {
+		const isAllowed = checkbox.checked;
+		let cronExpression = '';
 
-		const response = await fetch(`ChatProfile?handler=SetAllowSendNews&allowSendNews=${allowSendNews}&chatId=${chatId}`, {
+		// Get corresponding cron expression
+		switch(methodName) {
+			case 'SetAllowSendNews':
+				cronExpression = document.getElementById(`newsCron_${chatId}`).value;
+				break;
+			case 'SetAllowCurrency':
+				cronExpression = document.getElementById(`currencyCron_${chatId}`).value;
+				break;
+			case 'SetAllowHabrNews':
+				cronExpression = document.getElementById(`habrCron_${chatId}`).value;
+				break;
+			case 'SetAllowOnlinerNews':
+				cronExpression = document.getElementById(`onlinerCron_${chatId}`).value;
+				break;
+		}
+
+		// Update permission
+		const response = await fetch(`ChatProfile?handler=${methodName}&isAllowed=${isAllowed}&cronExpression=${encodeURIComponent(cronExpression)}&chatId=${chatId}`, {
 			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
+			headers: {
+				'Content-Type': 'application/json',
+				'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+			},
 		});
 
 		if (!response.ok) {
 			alert('Error updating permission');
-			checkbox.checked = !allowSendNews;
+			checkbox.checked = !isAllowed;
 		}
 	}
+
+	// Initialize tutorial on first cron field focus
+		document.addEventListener('DOMContentLoaded', function() {
+	  const cronInputs = document.querySelectorAll('.tg-cron-input');
+
+	  cronInputs.forEach(input => {
+		input.addEventListener('focus', function() {
+		  if (!localStorage.getItem('cronTutorialCompleted')) {
+			initCronTutorial(this.id);
+			localStorage.setItem('cronTutorialCompleted', 'true');
+		  }
+		}, { once: true });
+	  });
+	});
 </script>

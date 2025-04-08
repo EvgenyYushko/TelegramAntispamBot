@@ -49,7 +49,7 @@ namespace BuisinessLogic.Services.Parsers
 
 					// Фильтр и сортировка валют
 					var selectedCurrencies = currencies
-						.Where(c => new[] { "EUR", "USD", "RUB", "CNY" }.Contains(c.Cur_Abbreviation))
+						.Where(c => new[] { "EUR", "USD", "RUB" }.Contains(c.Cur_Abbreviation))
 						.OrderByDescending(c => c.Cur_Abbreviation)
 						.ToList();
 
@@ -70,8 +70,8 @@ namespace BuisinessLogic.Services.Parsers
 						sb.AppendLine($"`{currency.Cur_Scale} {currency.Cur_Abbreviation}` = *{currency.Cur_OfficialRate:0.0000} BYN*\n");
 					}
 
-					sb.AppendLine("—————————————");
-					sb.AppendLine($"🕒 _Обновлено: {DateTimeNow:HH:mm}_");
+					//sb.AppendLine("—————————————");
+					//sb.AppendLine($"🕒 _Обновлено: {DateTimeNow:HH:mm}_");
 
 					return sb.ToString();
 				}

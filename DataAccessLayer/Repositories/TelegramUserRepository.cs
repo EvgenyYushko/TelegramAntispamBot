@@ -383,7 +383,13 @@ namespace DataAccessLayer.Repositories
 					{
 						Id = u.Channel.ChatPermissions.Id,
 						ChatId = u.Channel.ChatPermissions.ChatId,
-						SendNews = u.Channel.ChatPermissions.SendNews
+						SendNews = u.Channel.ChatPermissions.SendNews,
+						SendCurrency = u.Channel.ChatPermissions.SendCurrency,
+						CurrencyCronExpression = u.Channel.ChatPermissions.CurrencyCronExpression,
+						SendHabr = u.Channel.ChatPermissions.SendHabr,
+						HabrCronExpression = u.Channel.ChatPermissions.HabrCronExpression,
+						SendOnliner = u.Channel.ChatPermissions.SendOnliner,
+						OnlinerCronExpression = u.Channel.ChatPermissions.OnlinerCronExpression
 					}
 				}
 			).ToList();
@@ -455,7 +461,13 @@ namespace DataAccessLayer.Repositories
 				{
 					Id = chat.ChatPermissions.Id,
 					ChatId = chat.ChatPermissions.ChatId,
-					SendNews = chat.ChatPermissions.SendNews
+					SendNews = chat.ChatPermissions.SendNews,
+					SendCurrency = chat.ChatPermissions.SendCurrency,
+					CurrencyCronExpression = chat.ChatPermissions.CurrencyCronExpression,
+					SendHabr = chat.ChatPermissions.SendHabr,
+					HabrCronExpression = chat.ChatPermissions.HabrCronExpression,
+					SendOnliner = chat.ChatPermissions.SendOnliner,
+					OnlinerCronExpression = chat.ChatPermissions.OnlinerCronExpression
 				}
 			};
 		}
@@ -562,6 +574,12 @@ namespace DataAccessLayer.Repositories
 				.FirstOrDefaultAsync(c => c.ChatId.Equals(chatPermissions.ChatId));
 
 			per.SendNews = chatPermissions.SendNews;
+			per.SendCurrency = chatPermissions.SendCurrency;
+			per.CurrencyCronExpression= chatPermissions.CurrencyCronExpression;
+			per.SendHabr = chatPermissions.SendHabr;
+			per.HabrCronExpression= chatPermissions.HabrCronExpression;
+			per.SendOnliner= chatPermissions.SendOnliner;
+			per.OnlinerCronExpression= chatPermissions.OnlinerCronExpression;
 
 			await _context.SaveChangesAsync();
 		}

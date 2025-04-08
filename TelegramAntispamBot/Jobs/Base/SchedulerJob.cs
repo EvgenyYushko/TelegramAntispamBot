@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models.AI;
@@ -9,6 +7,7 @@ using ServiceLayer.Services.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using static Infrastructure.Helpers.Logger;
+using JobHelper = TelegramAntispamBot.Jobs.Helpers.JobHelper;
 
 namespace TelegramAntispamBot.Jobs.Base
 {
@@ -25,52 +24,28 @@ namespace TelegramAntispamBot.Jobs.Base
 
 		public async virtual Task Execute(IJobExecutionContext context)
 		{
+			var chatIdStr = context.JobDetail.JobDataMap.GetString(JobHelper.ChatId);
+			if (!long.TryParse(chatIdStr, out var chatId))
+			{
+				throw new ArgumentException("chatId not exists");
+			}
+
 			try
 			{
-				var allChats = _telegramUserService.GetAllChats()
-					.Where(c => c.ChatPermission.SendNews)
-					.ToList();
+				var chat = _telegramUserService.GetChatById(chatId);
+				var content = await Parse(new ParseParams { ChatTitle = chat.Title });
 
-				var exceptions = new ConcurrentQueue<Exception>();
-
-				Parallel.ForEach(allChats, new ParallelOptions { MaxDegreeOfParallelism = 5 }, channel =>
+				if (content != null)
 				{
-					try
-					{
-						// Для синхронного выполнения внутри Parallel.ForEach
-						var content = Parse(new ParseParams { ChatTitle = channel.Title }).GetAwaiter().GetResult();
-
-						if (content != null)
-						{
-							_telegramClient.SendTextMessageAsync(
-								channel.TelegramChatId,
-								content,
-								parseMode: ParseMode.Markdown).GetAwaiter().GetResult();
-						}
-					}
-					catch (Exception ex)
-					{
-						exceptions.Enqueue(ex);
-						Log($"Error processing chat {channel.Title}: {ex}");
-					}
-				});
-
-				// Если были ошибки - бросаем агрегированное исключение
-				if (!exceptions.IsEmpty)
-				{
-					throw new AggregateException(exceptions);
-				}
-			}
-			catch (AggregateException ae)
-			{
-				foreach (var ex in ae.InnerExceptions)
-				{
-					Log($"Parallel error: {ex}");
+					await _telegramClient.SendTextMessageAsync(
+						chat.TelegramChatId,
+						content,
+						parseMode: ParseMode.Markdown);
 				}
 			}
 			catch (Exception ex)
 			{
-				Log($"Global error: {ex}");
+				Log($"Error processing chat: {ex}");
 			}
 		}
 

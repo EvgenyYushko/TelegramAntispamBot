@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,6 +55,7 @@ using TelegramAntispamBot.Jobs.Base;
 using static Infrastructure.Constants.TelegramConstatns;
 using static Infrastructure.Helpers.Logger;
 using AuthorizationOptions = DomainLayer.Models.Authorization.AuthorizationOptions;
+using static TelegramAntispamBot.Jobs.Helpers.JobHelper;
 
 namespace TelegramAntispamBot
 {
@@ -155,27 +157,21 @@ namespace TelegramAntispamBot
 				q.SchedulerId = "MainScheduler";
 				q.UseMicrosoftDependencyInjectionJobFactory();
 
-				var jobs = new[]
-				{
-					new { Type = typeof(HabrJob), Key = "Habr", Time = "0 0 11 * * ?" },
-					new { Type = typeof(OnlinerJob), Key = "Onliner", Time = "0 0 13 * * ?" },
-					new { Type = typeof(CurrencyJob), Key = "Currency", Time = "0 0 9 * * ?" },
-					new { Type = typeof(TrainModeJob), Key = "TrainMode", Time = "0 0 23 * * ?" },
-					new { Type = typeof(SendMailJob), Key = "SendMail", Time = "0 0 10 ? * MON" }, // Каждый понедельник в 10:00
-				};
-
 				var timeZone = TimeZoneHelper.GetTimeZoneInfo();
 
-				foreach (var job in jobs)
+				foreach (var job in JobSettings)
 				{
 					var jobKey = new JobKey($"{job.Key}Job");
 					q.AddJob(job.Type, jobKey, j => j.StoreDurably());
 
-					q.AddTrigger(t => t
-						.WithIdentity($"{job.Key}Trigger")
-						.ForJob(jobKey)
-						.WithCronSchedule($"{job.Time}", x => x.InTimeZone(timeZone))
-					);
+					if (!job.Castum)
+					{
+						q.AddTrigger(t => t
+							.WithIdentity($"{job.Key}Trigger")
+							.ForJob(jobKey)
+							.WithCronSchedule($"{job.Time}", x => x.InTimeZone(timeZone))
+						);
+					}
 				}
 			});
 
@@ -189,12 +185,6 @@ namespace TelegramAntispamBot
 				return schedulerFactory.GetScheduler().GetAwaiter().GetResult();
 			});
 			services.AddTransient<ScheduleInspectorService>();
-
-			//var googleFoldrId = Configuration.GetValue<string>(GOOGLE_SPAM_ML_FOLDER_ID) ?? Environment.GetEnvironmentVariable(GOOGLE_SPAM_ML_FOLDER_ID);
-			//services.AddSingleton<ISpamDetector>(provider =>
-			//{
-			//	return new SpamDetector(googleFoldrId);
-			//});
 
 			var serviceAccountJson = Configuration.GetValue<string>(GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON) ?? Environment.GetEnvironmentVariable(GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON);
 			services.AddSingleton<IGoogleDriveUploader>(provider =>
@@ -324,6 +314,7 @@ namespace TelegramAntispamBot
 			using (var scope = app.ApplicationServices.CreateScope())
 			{
 				var inspector = scope.ServiceProvider.GetRequiredService<ScheduleInspectorService>();
+				Task.Run(async () => await inspector.InitializeAsync()).Wait();
 				Task.Run(async () => await inspector.PrintScheduleInfo()).Wait();
 
 				if (!local)

@@ -1,19 +1,105 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Infrastructure.Common;
 using Quartz;
 using Quartz.Impl.Matchers;
+using ServiceLayer.Services.Telegram;
 using static Infrastructure.Helpers.Logger;
+using static TelegramAntispamBot.Jobs.Helpers.JobHelper;
 
 namespace TelegramAntispamBot.Jobs.Base
 {
 	public class ScheduleInspectorService
 	{
 		private readonly IScheduler _scheduler;
+		private readonly ITelegramUserService _telegramUserService;
 
-		public ScheduleInspectorService(IScheduler scheduler)
+		public ScheduleInspectorService(IScheduler scheduler, ITelegramUserService telegramUserService)
 		{
 			_scheduler = scheduler;
+			_telegramUserService = telegramUserService;
+		}
+
+		private TriggerKey GetTriggerKey(string key, long chatId) => new TriggerKey($"{key}Trigger_{chatId}", "Chats");
+
+		public  bool ValidateCronExpression(string expression)
+		{
+			try
+			{
+				new CronExpression(expression);
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		public async Task InitializeAsync()
+		{
+			var chats = _telegramUserService.GetAllChats();
+
+			foreach (var chat in chats)
+			{
+				if (chat.ChatPermission.SendHabr)
+				{
+
+					await UpdateChatScheduleAsync(chat.TelegramChatId, HabrKey, chat.ChatPermission.HabrCronExpression);
+				}
+
+				if (chat.ChatPermission.SendCurrency)
+				{
+					await UpdateChatScheduleAsync(chat.TelegramChatId, CurrencyKey, chat.ChatPermission.CurrencyCronExpression);
+				}
+
+				if (chat.ChatPermission.SendOnliner)
+				{
+					await UpdateChatScheduleAsync(chat.TelegramChatId, OnlinerKey, chat.ChatPermission.OnlinerCronExpression);
+				}
+			}
+		}
+
+		public async Task UpdateChatScheduleAsync(long chatId, string key, string cronExpression)
+		{
+			var triggerKey = GetTriggerKey(key, chatId);
+
+			// Проверяем существующий триггер
+			var oldTrigger = await _scheduler.GetTrigger(triggerKey);
+
+			if (oldTrigger != null)
+			{
+				// Обновляем триггер
+				var newTrigger = TriggerBuilder.Create()
+					.WithIdentity(triggerKey)
+					.ForJob($"{key}Job") // Привязываем к шаблону джобы
+					.WithCronSchedule(cronExpression, x => x.InTimeZone(TimeZoneHelper.GetTimeZoneInfo()))
+					.UsingJobData(ChatId, chatId) // Передаем chatId в JobDataMap
+					.Build();
+
+				await _scheduler.RescheduleJob(triggerKey, newTrigger);
+			}
+			else
+			{
+				// Создаем новый триггер
+				var trigger = TriggerBuilder.Create()
+					.WithIdentity(triggerKey)
+					.ForJob($"{key}Job")
+					.WithCronSchedule(cronExpression, x => x.InTimeZone(TimeZoneHelper.GetTimeZoneInfo()))
+					.UsingJobData(ChatId, chatId)
+					.Build();
+
+				await _scheduler.ScheduleJob(trigger);
+			}
+		}
+
+		public async Task RemoveChatTrigger(string key, long chatId)
+		{
+			var triggerKey = GetTriggerKey(key, chatId);
+
+			if (await _scheduler.CheckExists(triggerKey))
+			{
+				// Удаляем только триггер (сама джоба останется)
+				await _scheduler.UnscheduleJob(triggerKey);
+			}
 		}
 
 		public async Task PrintScheduleInfo()
