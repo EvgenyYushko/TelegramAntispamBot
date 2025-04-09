@@ -158,11 +158,93 @@
 		border-radius: 12px !important;
 		box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 		color: #e1e9f1 !important;
-		max-width: 500px !important; /* Увеличено с 380px */
-		min-width: 400px !important; /* Добавлено минимальное значение */
+		max-width: 500px !important; /* Ширина по умолчанию */
+		min-width: 300px !important; /* Добавлено минимальное значение */
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+		width: auto !important;
+		box-sizing: border-box !important;
+		margin: 0 auto; /* Центрирование */
 	}
 
+	.mobile-tooltip {
+		font-size: 14px !important;
+		line-height: 1.4 !important;
+	}
+
+		.mobile-tooltip .tooltip-content {
+			max-height: 60vh !important;
+			overflow-y: auto !important;
+		}
+
+		.mobile-tooltip .introjs-tooltipbuttons {
+			flex-wrap: wrap !important;
+			justify-content: center !important;
+		}
+
+		.mobile-tooltip .introjs-button {
+			margin: 4px !important;
+			flex-grow: 1 !important;
+		}
+
+	 /* Мобильная адаптация */
+	@@media (max-width: 768px) {
+		.introjs-tooltip
+
+	{
+			width: auto !important;
+		max-width: 92vw !important;
+		left: 50% !important;
+		right: auto !important;
+		transform: translateX(-50%) !important; /* Идеальное центрирование */
+		position: fixed !important;
+		margin: 0 !important;
+	}
+
+	.introjs-arrow {
+		display: none !important; /* Скрываем стрелку на мобильных */
+	}
+
+	}
+
+	/* Стили для мобильного списка */
+	.mobile-list div {
+		margin-bottom: 10px;
+		line-height: 1.4;
+	}
+
+	/* Убираем лишние отступы на мобильных */
+	.mobile-optimized .tooltip-header {
+		margin-bottom: 12px !important;
+		font-size: 18px !important;
+	}
+
+	/* Оптимизация кнопок */
+	.mobile-optimized .introjs-button {
+		padding: 10px 16px !important;
+		font-size: 15px !important;
+		margin: 0 8px 8px 0 !important;
+	}
+
+	.mobile-centered {
+  left: 4vw !important;
+  right: 4vw !important;
+  margin: 0 auto !important;
+  transform: none !important;
+}
+
+.mobile-tooltip-content {
+  padding: 12px;
+}
+
+.mobile-tooltip-content h3 {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.mobile-tooltip-content ul {
+  padding-left: 20px;
+  margin: 0;
+}
 
 	.introjs-tooltip-header {
 		font-size: 17px !important;
@@ -256,6 +338,28 @@
 		min-width: 60px !important;
 		padding: 6px 10px !important;
 		font-size: 12px !important;
+	}
+
+	/* Мобильная адаптация тултипа */
+	.mobile-tooltip.introjs-tooltip {
+		width: 94vw !important;
+		max-width: 94vw !important;
+		left: 3vw !important;
+		right: 3vw !important;
+		transform: none !important;
+		position: fixed !important;
+		bottom: 20px !important;
+		top: auto !important;
+		margin: 0 !important;
+	}
+
+	.mobile-tooltip .introjs-tooltipbuttons {
+		justify-content: space-around !important;
+	}
+
+	.mobile-tooltip .introjs-button {
+		flex-grow: 1;
+		max-width: 45%;
 	}
 </style>
 
@@ -374,7 +478,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 <script>
 
-	function initCronTutorial(elementId) {
+		const isMobile = window.innerWidth <= 768;
+		function initCronTutorial(elementId) {
 		const element = document.getElementById(elementId);
 
 		const switchCronId = elementId.replace(/-?\d+$/, '');
@@ -387,7 +492,7 @@
 			exitOnOverlayClick: true,
 			exitOnEsc: true,
 			overlayOpacity: 0.9,
-			tooltipClass: 'compact-tooltip',
+			tooltipClass: 'custom-tooltip' + (isMobile ? ' mobile-tooltip' : ''),
 			highlightClass: 'tg-highlight',
 			steps: [
 				{
@@ -397,19 +502,18 @@
 							описания и недавних сообщений. Это помогает автоматически определять, какие новости будут наиболее
 							полезными и интересными для участников.</div>
 					`,
-					position: 'down'
+					position: isMobile ? 'bottom' : 'down'
 				},
 				{
 					element: '#' + switchCronId,
 					intro: `
-						<div class="tooltip-header">Включает отправку сообщений в чат согласно распианию</div>
+						<div class="tooltip-header">Включает отправку сообщений в чат согласно расписанию</div>
 						<div class="tooltip-content">
-							<p>Перед включением, нужно <b>задать распиание.</b></p>
-							<p>Если расписание было указано не корректно, то вы получите <s>люлей</s> подробное описание от ИИ, 
-								где вы ошиблись, что вы мели ввиду и пример как может выглядеть ваше cron выражение.</b></p>
+							<p>Перед включением нужно <b>задать расписание.</b></p>
+							<p>Если расписание указано некорректно, вы получите подробное описание от ИИ с объяснением ошибки и примером правильного cron-выражения.</p>
 						</div>
 					`,
-					position: 'right'
+					position: isMobile ? 'bottom' : 'right'
 				},
 				{
 					element: '#' + elementId,
@@ -426,7 +530,7 @@
 							<div><b>7.</b> Год (опционально): <code>1970-2099</code></div>
 						</div>
 					`,
-					position: 'left'
+					position: isMobile ? 'bottom' : 'left'
 				},
 				{
 					element: '#' + elementId,
@@ -434,12 +538,12 @@
 						<div class="tooltip-header">Специальные символы</div>
 						<div class="tooltip-content">
 							<div><code>*</code> - Любое значение</div>
-							<div><code>?</code> - Нет конкретного значения (только для дня месяца/недели)</div>
+							<div><code>?</code> - Нет конкретного значения</div>
 							<div><code>*/5</code> - Каждые 5 единиц</div>
-							<div><code>1,3,5</code> - Конкретные значения через запятую</div>
+							<div><code>1,3,5</code> - Конкретные значения</div>
 							<div><code>10-20</code> - Диапазон значений</div>
-							<div><code>L</code> - Последний день месяца/недели</div>
-							<div><code>#</code> - N-ый день недели (например, 2#1 - первый понедельник)</div>
+							<div><code>L</code> - Последний день</div>
+							<div><code>#</code> - N-ый день недели</div>
 						</div>
 					`,
 					position: 'left'
@@ -452,14 +556,13 @@
 							<div><code>0 0 9 * * ?</code> - Каждый день в 9:00</div>
 							<div><code>0 0/30 * * * ?</code> - Каждые 30 минут</div>
 							<div><code>0 0 12 ? * MON-FRI</code> - В будни в 12:00</div>
-							<div><code>0 0 9 15 * ?</code> - 15-го числа каждого месяца в 9:00</div>
-							<div><code>0 0 9 ? * 2#1</code> - Первый понедельник месяца в 9:00</div>
+							<div><code>0 0 9 15 * ?</code> - 15-го числа в 9:00</div>
+							<div><code>0 0 9 ? * 2#1</code> - Первый понедельник в 9:00</div>
 							<div><code>0 0 9 L * ?</code> - В последний день месяца в 9:00</div>
 						</div>
 					`,
-					position: 'left'
+					position: isMobile ? 'bottom' : 'left'
 				}
-				
 			]
 		}).onexit(() => {
 			localStorage.setItem('cronTutorialCompleted', 'true');
@@ -509,6 +612,11 @@
 				checkbox.checked = !isAllowed;
 			}
 		}
+
+		// document.body.style.overflow = 'hidden';
+		// 	introJs().oncomplete(() => {
+		// 	  document.body.style.overflow = '';
+		// 	});
 
 		// Инициализация при первом фокусе
 		document.addEventListener('DOMContentLoaded', function() {
