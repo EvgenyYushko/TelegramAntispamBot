@@ -72,7 +72,7 @@ namespace TelegramAntispamBot.Jobs.Base
 					.WithIdentity(triggerKey)
 					.ForJob($"{key}Job") // Привязываем к шаблону джобы
 					.WithCronSchedule(cronExpression, x => x.InTimeZone(TimeZoneHelper.GetTimeZoneInfo()))
-					.UsingJobData(ChatId, chatId) // Передаем chatId в JobDataMap
+					.UsingJobData(ChatId, chatId.ToString()) // Передаем chatId в JobDataMap
 					.Build();
 
 				await _scheduler.RescheduleJob(triggerKey, newTrigger);
@@ -84,7 +84,7 @@ namespace TelegramAntispamBot.Jobs.Base
 					.WithIdentity(triggerKey)
 					.ForJob($"{key}Job")
 					.WithCronSchedule(cronExpression, x => x.InTimeZone(TimeZoneHelper.GetTimeZoneInfo()))
-					.UsingJobData(ChatId, chatId)
+					.UsingJobData(ChatId, chatId.ToString())
 					.Build();
 
 				await _scheduler.ScheduleJob(trigger);

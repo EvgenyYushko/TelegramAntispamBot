@@ -84,6 +84,125 @@
 				margin: 0.2rem 0;
 			}
 		}
+
+		/* стили для формы ошибки */
+		.tg-modal {
+			position: fixed;
+			z-index: 9999;
+			inset: 0;
+			background-color: rgba(0, 0, 0, 0.65);
+			backdrop-filter: blur(2px);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-family: 'Segoe UI', sans-serif;
+		}
+
+		.tg-modal-content {
+			background-color: #2a2e33;
+			color: #fff;
+			border: 1px solid #ff4c4c;
+			border-radius: 16px;
+			width: 90%;
+			max-width: 500px;
+			padding: 20px;
+			box-shadow: 0 0 30px rgba(255, 76, 76, 0.3);
+			animation: tgFadeScaleIn 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+		}
+
+		.tg-modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 10px;
+		}
+
+		.tg-modal-icon {
+			font-size: 24px;
+			margin-right: 8px;
+		}
+
+		.tg-modal-title {
+			flex-grow: 1;
+			font-size: 18px;
+			font-weight: bold;
+			color: #ff6e6e;
+		}
+
+		.tg-close-button {
+			font-size: 24px;
+			color: #bbb;
+			cursor: pointer;
+		}
+
+			.tg-close-button:hover {
+				color: #fff;
+			}
+
+		.tg-modal-body {
+			font-size: 14px;
+			white-space: pre-wrap;
+			background: #1f2227;
+			padding: 12px;
+			border-radius: 10px;
+			border-left: 4px solid #ff4c4c;
+			overflow-x: auto;
+		}
+
+		.tg-modal-footer {
+			margin-top: 16px;
+			text-align: right;
+		}
+
+		.tg-modal-button {
+			background-color: #2f8cff;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			padding: 8px 16px;
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: background-color 0.2s ease;
+		}
+
+			.tg-modal-button:hover {
+				background-color: #1e72d0;
+			}
+
+		@@keyframes fadeIn {
+			from
+
+		{
+			opacity: 0;
+			transform: scale(0.95);
+		}
+
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+
+		}
+
+		@@keyframes tgFadeScaleIn {
+			0%
+
+		{
+			opacity: 0;
+			transform: scale(0.92);
+		}
+
+		60% {
+			opacity: 1;
+			transform: scale(1.02);
+		}
+
+		100% {
+			transform: scale(1);
+		}
+
+		}
 	</style>
 </head>
 <body class="tg-theme">
@@ -148,4 +267,21 @@
 
 	@await RenderSectionAsync("Scripts", false)
 </body>
+@* форма с ошибкой *@
+<div id="cronModal" class="tg-modal" style="display:none;">
+	<div class="tg-modal-content">
+		<div class="tg-modal-header">
+			<span class="tg-modal-icon">⚠️</span>
+			<span class="tg-modal-title">Ошибка Cron-выражения</span>
+			<span class="tg-close-button" onclick="closeCronModal()">&times;</span>
+		</div>
+		<div class="tg-modal-body">
+			<pre id="cronModalText"></pre>
+		</div>
+		<div class="tg-modal-footer">
+			<button class="tg-modal-button" onclick="closeCronModal()">Понятно</button>
+		</div>
+	</div>
+</div>
 </html>
+

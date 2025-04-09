@@ -24,7 +24,7 @@ namespace TelegramAntispamBot.Jobs.Base
 
 		public async virtual Task Execute(IJobExecutionContext context)
 		{
-			var chatIdStr = context.JobDetail.JobDataMap.GetString(JobHelper.ChatId);
+			var chatIdStr = context.MergedJobDataMap.GetString(JobHelper.ChatId);
 			if (!long.TryParse(chatIdStr, out var chatId))
 			{
 				throw new ArgumentException("chatId not exists");

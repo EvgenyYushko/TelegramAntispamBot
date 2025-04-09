@@ -143,6 +143,7 @@ namespace TelegramAntispamBot
 			}
 			services.AddSingleton<IMailService, MailService>();
 			services.AddSingleton<INewsParserServiceAI, NewsParserServiceAI>();
+			services.AddSingleton<IValidationErrorServiceAI, ValidationErrorServiceAI>();
 			services.AddHostedService<HealthCheckBackgroundService>();
 
 			services.AddScoped<IUserRepository, UserRepository>();

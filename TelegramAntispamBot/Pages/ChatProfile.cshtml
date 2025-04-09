@@ -5,6 +5,7 @@
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
 <style>
+	/* Основные стили остаются без изменений */
 	.tg-chat-member {
 		display: flex;
 		align-items: center;
@@ -62,34 +63,46 @@
 			transform: translateX(26px);
 		}
 
+	/* Обновленные стили для выравнивания */
 	.tg-profile-items-vertical {
 		display: flex;
 		flex-direction: column;
-		gap: 15px;
+		gap: 16px;
 	}
 
 	.tg-permission-item {
 		display: flex;
-		flex-direction: row; /* Changed to row */
-		align-items: center; /* Align items vertically in the center */
-		gap: 10px; /* Spacing between elements */
-		margin-bottom: 10px; /* Add margin between each permission block */
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px;
+		border-bottom: 1px solid var(--tg-border-color);
 	}
 
 	.tg-permission-control {
 		display: flex;
-		flex-direction: row; /* Changed to row */
-		align-items: center; /* Vertically align items to the center */
-		gap: 10px;
-		flex: 1; /* Allow this section to take available space */
+		align-items: center;
+		gap: 12px;
+		flex: 1;
+		min-width: 200px;
+	}
+
+	.cron-input-container {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 300px;
+		justify-content: flex-end;
 	}
 
 	.tg-cron-input {
-		width: 100%;
-	}
-
-	.tg-profile-label {
-		white-space: nowrap; /* Prevent the label from wrapping */
+		width: 180px;
+		background: var(--tg-bg-color);
+		border: 1px solid var(--tg-border-color);
+		color: var(--tg-text-color);
+		padding: 8px 12px;
+		border-radius: 8px;
+		font-size: 14px;
+		transition: all 0.2s;
 	}
 
 		.tg-cron-input:focus {
@@ -98,37 +111,11 @@
 			box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 		}
 
-	.cron-tutorial-tooltip {
-		max-width: 400px;
-		border-radius: 8px;
-		box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+	.tg-profile-label {
+		white-space: nowrap;
+		padding: 8px;
 	}
 
-		.cron-tutorial-tooltip h3 {
-			color: #4a6baf;
-			margin-top: 0;
-		}
-
-		.cron-tutorial-tooltip table.cron-format-table {
-			width: 100%;
-			border-collapse: collapse;
-			margin: 10px 0;
-		}
-
-			.cron-tutorial-tooltip table.cron-format-table td,
-			.cron-tutorial-tooltip table.cron-format-table th {
-				padding: 6px;
-				border: 1px solid #eee;
-			}
-
-		.cron-tutorial-tooltip code {
-			background: #f5f5f5;
-			padding: 2px 4px;
-			border-radius: 3px;
-			font-family: monospace;
-		}
-
-	/* Кнопка "Помощь" */
 	.cron-help-button {
 		background: #4a6baf;
 		color: white;
@@ -136,31 +123,133 @@
 		padding: 5px 10px;
 		border-radius: 4px;
 		cursor: pointer;
-		margin-left: 10px;
 		font-size: 12px;
+		flex-shrink: 0;
 	}
 
-	.cron-input-container {
-		display: flex;
-		align-items: center;
-		width: 50%; /* added width */
+	/* Адаптивность */
+	@@media (max-width: 768px) {
+		.tg-permission-item {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 8px;
+		}
+
+		.cron-input-container {
+			width: 100%;
+			justify-content: flex-start;
+		}
+
+		.tg-cron-input {
+			width: 100%;
+			max-width: 260px;
+		}
 	}
 
-	@@keyframes pulse {
-		0%
-
-	{
-		box-shadow: 0 0 0 0 rgba(74, 107, 175, 0.4);
+	/* Стили для обучения остаются без изменений */
+	.introjs-overlay {
+		background-color: rgba(23, 33, 43, 0.85) !important;
+		backdrop-filter: blur(2px);
 	}
 
-	70% {
-		box-shadow: 0 0 0 10px rgba(74, 107, 175, 0);
+	.introjs-tooltip {
+		background: #2e3d4f !important;
+		border: 1px solid #3e5365 !important;
+		border-radius: 12px !important;
+		box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+		color: #e1e9f1 !important;
+		max-width: 380px !important;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 	}
 
-	100% {
-		box-shadow: 0 0 0 0 rgba(74, 107, 175, 0);
+
+	.introjs-tooltip-header {
+		font-size: 17px !important;
+		font-weight: 500 !important;
+		color: #2ea6ff !important;
+		margin-bottom: 12px !important;
+		padding-bottom: 8px;
+		border-bottom: 1px solid #3e5365;
 	}
 
+	.introjs-tooltiptext {
+		font-size: 14px !important;
+		line-height: 1.5 !important;
+		color: #e1e9f1 !important;
+	}
+
+	.introjs-button {
+		background: #2ea6ff !important;
+		color: white !important;
+		border-radius: 8px !important;
+		text-shadow: none !important;
+		font-weight: 500 !important;
+		padding: 8px 14px !important;
+		font-size: 13px !important;
+		border: none !important;
+	}
+
+		.introjs-button.introjs-prevbutton {
+			background: transparent !important;
+			color: #7d8b99 !important;
+			border: 1px solid #3e5365 !important;
+		}
+
+		.introjs-button.introjs-skipbutton {
+			background: transparent !important;
+			color: #7d8b99 !important;
+			padding: 6px 10px !important;
+			font-size: 12px !important;
+		}
+
+	.introjs-arrow {
+		border-color: #2e3d4f transparent transparent transparent !important;
+	}
+
+	.introjs-bullets ul li a {
+		background: #3e5365 !important;
+	}
+
+		.introjs-bullets ul li a.active {
+			background: #2ea6ff !important;
+		}
+
+	.compact-tooltip {
+		max-width: 280px !important;
+		padding: 10px 12px !important;
+		border-radius: 10px !important;
+	}
+
+	.tooltip-header {
+		font-weight: 600;
+		font-size: 15px;
+		margin-bottom: 8px;
+		color: var(--tg-accent-color);
+	}
+
+	.tooltip-content {
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+		.tooltip-content div {
+			margin-bottom: 6px;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.tooltip-content code {
+			background: rgba(255,255,255,0.1);
+			padding: 2px 4px;
+			border-radius: 4px;
+			font-family: monospace;
+		}
+
+	.introjs-button {
+		min-width: 60px !important;
+		padding: 6px 10px !important;
+		font-size: 12px !important;
 	}
 </style>
 
@@ -172,9 +261,10 @@
 
 	<div class="tg-card">
 		<h3 class="tg-card-title">Chat Details</h3>
-		<div class="tg-profile-item">
-			<span class="tg-profile-label">Creator:</span>
-			<span class="tg-profile-value">@Model.Chat.Creator.Name</span>
+		<div class="tg-button-grid">
+		<div class="tg-chat-member" onclick="goToUser(@Model.Chat.Creator.UserId, @Model.Chat.TelegramChatId)">
+			@Model.Chat.Creator.Name
+			</div>
 		</div>
 	</div>
 
@@ -202,26 +292,6 @@
 	<div class="tg-card">
 		<h3 class="tg-card-title">Permissions</h3>
 		<div class="tg-profile-items-vertical">
-
-
-			<!-- News Permission -->
-			<div class="tg-permission-item">
-				<div class="tg-permission-control">
-					<label class="tg-permission-switch">
-						<input type="checkbox" @(Model.Chat.ChatPermission.SendNews ? "checked" : "")
-							   onchange="togglePermission(this, 'SetAllowSendNews', @Model.Chat.TelegramChatId)">
-						<span class="tg-permission-slider"></span>
-					</label>
-					<span class="tg-profile-label">Allow sending news</span>
-				</div>
-				<div class="cron-input-container">
-					<input type="text" class="tg-cron-input"
-						   value="@Model.Chat.ChatPermission.SendNews"
-						   placeholder="0 9 * * * (9:00 daily)"
-						   id="newsCron_@Model.Chat.TelegramChatId">
-					<button class="cron-help-button" onclick="showCronHelp('newsCron_@Model.Chat.TelegramChatId')">?</button>
-				</div>
-			</div>
 
 			<!-- Currency Permission -->
 			<div class="tg-permission-item">
@@ -297,52 +367,71 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 <script>
-	function initCronTutorial(elementId) {
+
+		function initCronTutorial(elementId) {
 		const element = document.getElementById(elementId);
 
 		introJs().setOptions({
-			nextLabel: 'Next →',
-			prevLabel: '← Back',
-			doneLabel: 'Got it',
-			skipLabel: 'Skip',
+			nextLabel: 'Next',
+			prevLabel: 'Before',
+			doneLabel: '✓ Got it',
+			skipLabel: '×',
+			exitOnOverlayClick: true,
+			exitOnEsc: true,
+			overlayOpacity: 0.9,
+			tooltipClass: 'compact-tooltip',
+			highlightClass: 'tg-highlight',
 			steps: [
 				{
 					element: '#' + elementId,
 					intro: `
-						<h3>Cron Format</h3>
-						<p>Use 5 space-separated values:</p>
-						<table class="cron-format-table">
-							<tr><th>Field</th><th>Example</th></tr>
-							<tr><td>Minutes (0-59)</td><td><code>0</code></td></tr>
-							<tr><td>Hours (0-23)</td><td><code>9</code> (9:00 AM)</td></tr>
-							<tr><td>Day of month (1-31)</td><td><code>*</code> (any)</td></tr>
-							<tr><td>Month (1-12)</td><td><code>*</code></td></tr>
-							<tr><td>Day of week (0-6)</td><td><code>*</code> (0=Sunday)</td></tr>
-						</table>
+						<div class="tooltip-header">Cron Format</div>
+						<div class="tooltip-content">
+							<div><b>1.</b> Minutes: <code>0-59</code></div>
+							<div><b>2.</b> Hours: <code>0-23</code></div>
+							<div><b>3.</b> Day: <code>1-31</code></div>
+							<div><b>4.</b> Month: <code>1-12</code></div>
+							<div><b>5.</b> Weekday: <code>0-6</code> (0=Sun)</div>
+						</div>
 					`,
 					position: 'right'
 				},
 				{
 					element: '#' + elementId,
 					intro: `
-						<h3>Examples</h3>
-						<ul>
-							<li><code>0 9 * * *</code> - Daily at 9:00 AM</li>
-							<li><code>0 */2 * * *</code> - Every 2 hours</li>
-							<li><code>0 12 * * 1-5</code> - Weekdays at noon</li>
-							<li><code>0 9,18 * * *</code> - 9 AM and 6 PM daily</li>
-						</ul>
+						<div class="tooltip-header">Special Chars</div>
+						<div class="tooltip-content">
+							<div><code>*</code> = any value</div>
+							<div><code>*/5</code> = every 5</div>
+							<div><code>1,3,5</code> = specific</div>
+							<div><code>9-18</code> = range</div>
+							<div><code>?</code> = no value</div>
+						</div>
+					`,
+					position: 'right'
+				},
+				{
+					element: '#' + elementId,
+					intro: `
+						<div class="tooltip-header">Examples</div>
+						<div class="tooltip-content">
+							<div><code>0 9 * * *</code> = 9:00 daily</div>
+							<div><code>0 */2 * * *</code> = every 2h</div>
+							<div><code>0 12 * * 1-5</code> = weekdays noon</div>
+							<div><code>*/30 * * * *</code> = every 30m</div>
+						</div>
 					`,
 					position: 'right'
 				}
-			],
-			tooltipClass: 'cron-tutorial-tooltip'
+			]
+		}).onexit(() => {
+			localStorage.setItem('cronTutorialCompleted', 'true');
 		}).start();
 	}
 
-	function showCronHelp(elementId) {
+	window.showCronHelp = function(elementId) {
 		initCronTutorial(elementId);
-	}
+	};
 
 	function goToUser(userId, chatId) {
 		window.location.href = '/TelegramUserProfile?userId=' + userId + '&chatId=' + chatId;
@@ -367,33 +456,31 @@
 				cronExpression = document.getElementById(`onlinerCron_${chatId}`).value;
 				break;
 		}
-
-		// Update permission
+		
 		const response = await fetch(`ChatProfile?handler=${methodName}&isAllowed=${isAllowed}&cronExpression=${encodeURIComponent(cronExpression)}&chatId=${chatId}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-			},
-		});
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+						},
+					});
 
-		if (!response.ok) {
-			alert('Error updating permission');
-			checkbox.checked = !isAllowed;
+			if (!response.ok) 
+			{
+				const errorText = await response.text(); // тут будет "Ошибка: ..."
+				showCronModal(errorText);
+				checkbox.checked = !isAllowed;
+			}
 		}
-	}
 
-	// Initialize tutorial on first cron field focus
+		// Инициализация при первом фокусе
 		document.addEventListener('DOMContentLoaded', function() {
-	  const cronInputs = document.querySelectorAll('.tg-cron-input');
-
-	  cronInputs.forEach(input => {
-		input.addEventListener('focus', function() {
-		  if (!localStorage.getItem('cronTutorialCompleted')) {
-			initCronTutorial(this.id);
-			localStorage.setItem('cronTutorialCompleted', 'true');
-		  }
-		}, { once: true });
-	  });
+		document.querySelectorAll('.tg-cron-input').forEach(input => {
+			input.addEventListener('focus', function() {
+				if (!localStorage.getItem('cronTutorialCompleted')) {
+					initCronTutorial(this.id);
+				}
+			}, { once: true });
+		});
 	});
 </script>
