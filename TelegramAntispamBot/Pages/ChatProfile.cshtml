@@ -158,7 +158,8 @@
 		border-radius: 12px !important;
 		box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 		color: #e1e9f1 !important;
-		max-width: 380px !important;
+		max-width: 500px !important; /* Увеличено с 380px */
+		min-width: 400px !important; /* Добавлено минимальное значение */
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 	}
 
@@ -239,9 +240,14 @@
 			gap: 6px;
 		}
 
+		.tooltip-content b {
+			white-space: nowrap; /* Номер пункта не переносится */
+		}
+
 		.tooltip-content code {
 			background: rgba(255,255,255,0.1);
 			padding: 2px 4px;
+			white-space: nowrap; /* Код не переносится */
 			border-radius: 4px;
 			font-family: monospace;
 		}
@@ -290,23 +296,23 @@
 	</div>
 
 	<div class="tg-card">
-		<h3 class="tg-card-title">Permissions</h3>
+		<h3 id="permissions" class="tg-card-title">Permissions</h3>
 		<div class="tg-profile-items-vertical">
 
 			<!-- Currency Permission -->
 			<div class="tg-permission-item">
 				<div class="tg-permission-control">
-					<label class="tg-permission-switch">
+					<label id="currencyCron_" class="tg-permission-switch">
 						<input type="checkbox" @(Model.Chat.ChatPermission.SendCurrency ? "checked" : "")
 							   onchange="togglePermission(this, 'SetAllowCurrency', @Model.Chat.TelegramChatId)">
 						<span class="tg-permission-slider"></span>
 					</label>
-					<span class="tg-profile-label">Allow sending currency</span>
+					<span class="tg-profile-label">Получать курсы валют</span>
 				</div>
 				<div class="cron-input-container">
 					<input type="text" class="tg-cron-input"
 						   value="@Model.Chat.ChatPermission.CurrencyCronExpression"
-						   placeholder="0 12 * * * (12:00 daily)"
+						   placeholder="0 0 9 * * ? (9:00 ежедневно)"
 						   id="currencyCron_@Model.Chat.TelegramChatId">
 					<button class="cron-help-button" onclick="showCronHelp('currencyCron_@Model.Chat.TelegramChatId')">?</button>
 				</div>
@@ -315,17 +321,17 @@
 			<!-- Habr Permission -->
 			<div class="tg-permission-item">
 				<div class="tg-permission-control">
-					<label class="tg-permission-switch">
+					<label id="habrCron_" class="tg-permission-switch">
 						<input type="checkbox" @(Model.Chat.ChatPermission.SendHabr ? "checked" : "")
 							   onchange="togglePermission(this, 'SetAllowHabrNews', @Model.Chat.TelegramChatId)">
 						<span class="tg-permission-slider"></span>
 					</label>
-					<span class="tg-profile-label">Allow sending Habr</span>
+					<span class="tg-profile-label">Получать новости с Habr</span>
 				</div>
 				<div class="cron-input-container">
 					<input type="text" class="tg-cron-input"
 						   value="@Model.Chat.ChatPermission.HabrCronExpression"
-						   placeholder="0 11 * * * (11:00 daily)"
+						   placeholder="0 0 11 * * ? (11:00 ежедневно)"
 						   id="habrCron_@Model.Chat.TelegramChatId">
 					<button class="cron-help-button" onclick="showCronHelp('habrCron_@Model.Chat.TelegramChatId')">?</button>
 				</div>
@@ -334,17 +340,17 @@
 			<!-- Onliner Permission -->
 			<div class="tg-permission-item">
 				<div class="tg-permission-control">
-					<label class="tg-permission-switch">
+					<label id="onlinerCron_" class="tg-permission-switch">
 						<input type="checkbox" @(Model.Chat.ChatPermission.SendOnliner ? "checked" : "")
 							   onchange="togglePermission(this, 'SetAllowOnlinerNews', @Model.Chat.TelegramChatId)">
 						<span class="tg-permission-slider"></span>
 					</label>
-					<span class="tg-profile-label">Allow sending Onliner</span>
+					<span class="tg-profile-label">Получать новости с Onliner</span>
 				</div>
 				<div class="cron-input-container">
 					<input type="text" class="tg-cron-input"
 						   value="@Model.Chat.ChatPermission.OnlinerCronExpression"
-						   placeholder="0 13 * * * (13:00 daily)"
+						   placeholder="0 0 13 * * ? (13:00 ежедневно)"
 						   id="onlinerCron_@Model.Chat.TelegramChatId">
 					<button class="cron-help-button" onclick="showCronHelp('onlinerCron_@Model.Chat.TelegramChatId')">?</button>
 				</div>
@@ -368,13 +374,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 <script>
 
-		function initCronTutorial(elementId) {
+	function initCronTutorial(elementId) {
 		const element = document.getElementById(elementId);
 
+		const switchCronId = elementId.replace(/-?\d+$/, '');
+
 		introJs().setOptions({
-			nextLabel: 'Next',
-			prevLabel: 'Before',
-			doneLabel: '✓ Got it',
+			nextLabel: 'Далее →',
+			prevLabel: '← Назад',
+			doneLabel: 'Понятно ✓',
 			skipLabel: '×',
 			exitOnOverlayClick: true,
 			exitOnEsc: true,
@@ -383,15 +391,22 @@
 			highlightClass: 'tg-highlight',
 			steps: [
 				{
-					element: '#' + elementId,
+					element: '#permissions',
 					intro: `
-						<div class="tooltip-header">Cron Format</div>
+						<div class="tooltip-header">🤖 Мы используем искусственный интеллект для анализа контекста чата: его названия,
+							описания и недавних сообщений. Это помогает автоматически определять, какие новости будут наиболее
+							полезными и интересными для участников.</div>
+					`,
+					position: 'down'
+				},
+				{
+					element: '#' + switchCronId,
+					intro: `
+						<div class="tooltip-header">Включает отправку сообщений в чат согласно распианию</div>
 						<div class="tooltip-content">
-							<div><b>1.</b> Minutes: <code>0-59</code></div>
-							<div><b>2.</b> Hours: <code>0-23</code></div>
-							<div><b>3.</b> Day: <code>1-31</code></div>
-							<div><b>4.</b> Month: <code>1-12</code></div>
-							<div><b>5.</b> Weekday: <code>0-6</code> (0=Sun)</div>
+							<p>Перед включением, нужно <b>задать распиание.</b></p>
+							<p>Если расписание было указано не корректно, то вы получите <s>люлей</s> подробное описание от ИИ, 
+								где вы ошиблись, что вы мели ввиду и пример как может выглядеть ваше cron выражение.</b></p>
 						</div>
 					`,
 					position: 'right'
@@ -399,30 +414,52 @@
 				{
 					element: '#' + elementId,
 					intro: `
-						<div class="tooltip-header">Special Chars</div>
+						<div class="tooltip-header">Формат Cron в Quartz</div>
 						<div class="tooltip-content">
-							<div><code>*</code> = any value</div>
-							<div><code>*/5</code> = every 5</div>
-							<div><code>1,3,5</code> = specific</div>
-							<div><code>9-18</code> = range</div>
-							<div><code>?</code> = no value</div>
+							<p>Quartz использует <b>6-позиционный формат</b> (с секундами):</p>
+							<div><b>1.</b> Секунды: <code>0-59</code></div>
+							<div><b>2.</b> Минуты: <code>0-59</code></div>
+							<div><b>3.</b> Часы: <code>0-23</code></div>
+							<div><b>4.</b> День месяца: <code>1-31</code></div>
+							<div><b>5.</b> Месяц: <code>1-12</code> или <code>JAN-DEC</code></div>
+							<div><b>6.</b> День недели: <code>1-7</code> (1=Вс, 7=Сб) или <code>SUN-SAT</code></div>
+							<div><b>7.</b> Год (опционально): <code>1970-2099</code></div>
 						</div>
 					`,
-					position: 'right'
+					position: 'left'
 				},
 				{
 					element: '#' + elementId,
 					intro: `
-						<div class="tooltip-header">Examples</div>
+						<div class="tooltip-header">Специальные символы</div>
 						<div class="tooltip-content">
-							<div><code>0 9 * * *</code> = 9:00 daily</div>
-							<div><code>0 */2 * * *</code> = every 2h</div>
-							<div><code>0 12 * * 1-5</code> = weekdays noon</div>
-							<div><code>*/30 * * * *</code> = every 30m</div>
+							<div><code>*</code> - Любое значение</div>
+							<div><code>?</code> - Нет конкретного значения (только для дня месяца/недели)</div>
+							<div><code>*/5</code> - Каждые 5 единиц</div>
+							<div><code>1,3,5</code> - Конкретные значения через запятую</div>
+							<div><code>10-20</code> - Диапазон значений</div>
+							<div><code>L</code> - Последний день месяца/недели</div>
+							<div><code>#</code> - N-ый день недели (например, 2#1 - первый понедельник)</div>
 						</div>
 					`,
-					position: 'right'
+					position: 'left'
+				},
+				{
+					element: '#' + elementId,
+					intro: `
+						<div class="tooltip-header">Примеры для Quartz</div>
+						<div class="tooltip-content">
+							<div><code>0 0 9 * * ?</code> - Каждый день в 9:00</div>
+							<div><code>0 0/30 * * * ?</code> - Каждые 30 минут</div>
+							<div><code>0 0 12 ? * MON-FRI</code> - В будни в 12:00</div>
+							<div><code>0 0 9 15 * ?</code> - 15-го числа каждого месяца в 9:00</div>
+							<div><code>0 0 9 ? * 2#1</code> - Первый понедельник месяца в 9:00</div>
+							<div><code>0 0 9 L * ?</code> - В последний день месяца в 9:00</div>
+						</div>
+					`,
+					position: 'left'
 				}
+				
 			]
 		}).onexit(() => {
 			localStorage.setItem('cronTutorialCompleted', 'true');
