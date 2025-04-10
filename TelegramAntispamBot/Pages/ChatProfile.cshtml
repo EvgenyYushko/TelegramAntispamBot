@@ -403,6 +403,25 @@
 		<h3 id="permissions" class="tg-card-title">Permissions</h3>
 		<div class="tg-profile-items-vertical">
 
+			<!-- AllNews Permission -->
+			<div class="tg-permission-item">
+				<div class="tg-permission-control">
+					<label id="allNewsCron_" class="tg-permission-switch">
+						<input type="checkbox" @(Model.Chat.ChatPermission.SendNews ? "checked" : "")
+							   onchange="togglePermission(this, 'SetAllowAllNews', @Model.Chat.TelegramChatId)">
+						<span class="tg-permission-slider"></span>
+					</label>
+					<span class="tg-profile-label">Получать AI новости</span>
+				</div>
+				<div class="cron-input-container">
+					<input type="text" class="tg-cron-input"
+						   value="@Model.Chat.ChatPermission.AllNewsCronExpression"
+						   placeholder="0 0 9 * * ? (9:00 ежедневно)"
+						   id="allNewsCron_@Model.Chat.TelegramChatId">
+					<button class="cron-help-button" onclick="showCronHelp('allNewsCron_@Model.Chat.TelegramChatId')">?</button>
+				</div>
+			</div>
+
 			<!-- Currency Permission -->
 			<div class="tg-permission-item">
 				<div class="tg-permission-control">
@@ -594,6 +613,9 @@
 				break;
 			case 'SetAllowOnlinerNews':
 				cronExpression = document.getElementById(`onlinerCron_${chatId}`).value;
+				break;
+			case 'SetAllowAllNews':
+				cronExpression = document.getElementById(`allNewsCron_${chatId}`).value;
 				break;
 		}
 		

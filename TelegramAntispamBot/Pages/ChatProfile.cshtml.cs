@@ -61,6 +61,36 @@ namespace TelegramAntispamBot.Pages
 			return _scheduleInspectorService.ValidateCronExpression(cronExpression);
 		}
 
+		public async Task<IActionResult> OnGetSetAllowAllNews(bool isAllowed, string cronExpression, long chatId)
+		{
+			_chatId = chatId;
+
+			if (isAllowed)
+			{
+				if (!ValidateCronExpression(cronExpression))
+				{
+					var explaidText = await _validationErrorServiceAI.ExplainInvalidCronExpression(cronExpression);
+					return BadRequest($"{(explaidText is null ? "Не корректное cron выражение" : $"{explaidText}")}");
+				}
+
+				await _scheduleInspectorService.UpdateChatScheduleAsync(chatId, AllNewsKey, cronExpression);
+			}
+			else
+			{
+				await _scheduleInspectorService.RemoveChatTrigger(AllNewsKey, chatId);
+			}
+			
+			await _scheduleInspectorService.PrintScheduleInfo();
+
+			var chat = _telegramUserService.GetChatById(chatId);
+			chat.ChatPermission.SendNews = isAllowed;
+			chat.ChatPermission.AllNewsCronExpression = cronExpression;
+
+			await _telegramUserService.UpdateChatPermissions(chat.ChatPermission);
+
+			return new JsonResult(new { success = true }); // для успешного ответа
+		}
+
 		public async Task<IActionResult> OnGetSetAllowCurrency(bool isAllowed, string cronExpression, long chatId)
 		{
 			_chatId = chatId;

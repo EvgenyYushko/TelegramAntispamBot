@@ -384,6 +384,7 @@ namespace DataAccessLayer.Repositories
 						Id = u.Channel.ChatPermissions.Id,
 						ChatId = u.Channel.ChatPermissions.ChatId,
 						SendNews = u.Channel.ChatPermissions.SendNews,
+						AllNewsCronExpression = u.Channel.ChatPermissions.AllNewsCronExpression,
 						SendCurrency = u.Channel.ChatPermissions.SendCurrency,
 						CurrencyCronExpression = u.Channel.ChatPermissions.CurrencyCronExpression,
 						SendHabr = u.Channel.ChatPermissions.SendHabr,
@@ -419,6 +420,7 @@ namespace DataAccessLayer.Repositories
 			var chat = _context.TelegramChanel
 				.Include(c => c.Members)
 				.ThenInclude(c => c.User)
+				.Include(c => c.Creator)
 				.Include(c => c.Admins)
 				.ThenInclude(m => m.User)
 				.Include(c => c.ChatPermissions)
@@ -462,6 +464,7 @@ namespace DataAccessLayer.Repositories
 					Id = chat.ChatPermissions.Id,
 					ChatId = chat.ChatPermissions.ChatId,
 					SendNews = chat.ChatPermissions.SendNews,
+					AllNewsCronExpression = chat.ChatPermissions.AllNewsCronExpression,
 					SendCurrency = chat.ChatPermissions.SendCurrency,
 					CurrencyCronExpression = chat.ChatPermissions.CurrencyCronExpression,
 					SendHabr = chat.ChatPermissions.SendHabr,
@@ -574,6 +577,7 @@ namespace DataAccessLayer.Repositories
 				.FirstOrDefaultAsync(c => c.ChatId.Equals(chatPermissions.ChatId));
 
 			per.SendNews = chatPermissions.SendNews;
+			per.AllNewsCronExpression = chatPermissions.AllNewsCronExpression;
 			per.SendCurrency = chatPermissions.SendCurrency;
 			per.CurrencyCronExpression= chatPermissions.CurrencyCronExpression;
 			per.SendHabr = chatPermissions.SendHabr;

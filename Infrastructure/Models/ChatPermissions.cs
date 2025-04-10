@@ -12,6 +12,8 @@ namespace Infrastructure.Models
 
 		public bool SendNews { get; set; }
 
+		public string AllNewsCronExpression { get; set; }
+
 		public bool SendCurrency { get; set; }
 
 		public string CurrencyCronExpression { get; set; }

@@ -33,7 +33,12 @@ namespace TelegramAntispamBot.Jobs.Base
 			try
 			{
 				var chat = _telegramUserService.GetChatById(chatId);
-				var content = await Parse(new ParseParams { ChatTitle = chat.Title });
+				var content = await Parse(new ParseParams 
+				{ 
+					ChatTitle = chat.Title
+					, ChatDescription = null
+					, lastMessages = null
+				});
 
 				if (content != null)
 				{

@@ -40,9 +40,13 @@ namespace TelegramAntispamBot.Jobs.Base
 
 			foreach (var chat in chats)
 			{
+				if (chat.ChatPermission.SendNews)
+				{
+					await UpdateChatScheduleAsync(chat.TelegramChatId, AllNewsKey, chat.ChatPermission.AllNewsCronExpression);
+				}
+
 				if (chat.ChatPermission.SendHabr)
 				{
-
 					await UpdateChatScheduleAsync(chat.TelegramChatId, HabrKey, chat.ChatPermission.HabrCronExpression);
 				}
 

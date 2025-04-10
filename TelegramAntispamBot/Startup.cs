@@ -202,6 +202,7 @@ namespace TelegramAntispamBot
 			services.AddSingleton<NbrbCurrencyParser>();
 			services.AddSingleton<HabrParser>();
 			services.AddSingleton<OnlinerParser>();
+			services.AddSingleton<AllNewsParser>();
 			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 			var botToken = Configuration.GetValue<string>(TELEGRAM_ANTISPAM_BOT_KEY) ?? Environment.GetEnvironmentVariable(TELEGRAM_ANTISPAM_BOT_KEY);
@@ -341,6 +342,17 @@ namespace TelegramAntispamBot
 					//var aiService = scope.ServiceProvider.GetRequiredService<INewsParserServiceAI>();
 					//var h = new HabrParser(aiService);
 					//var res = Task.Run(async ()=> await h.ParseLatestPostAsync(new ParseParams { ChatTitle = "Здоровое питание" })).Result;
+
+					//var parser = new AllNewsParser(aiService);
+					//var s = Task.Run(async ()=> await parser.ParseAllNewsRss(new ParseParams 
+					//{ 
+					//	ChatTitle = "Политика"
+					//	, lastMessages = new System.Collections.Generic.List<string>()
+					//	{
+					//		"Трамп и его ации",
+					//		"Кто призедент нашей страны??"
+					//	} 
+					//})).Result;
 
 					var testController = new BotController
 						(
