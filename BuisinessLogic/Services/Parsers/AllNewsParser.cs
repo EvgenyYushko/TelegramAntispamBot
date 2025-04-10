@@ -25,19 +25,21 @@ namespace BuisinessLogic.Services.Parsers
 
 			var rssfeed = await _newsParserServiceAI.SelectMostRelevantFeedAsync(parseParams.ChatTitle, parseParams.ChatDescription, parseParams.lastMessages, allFeeds);
 
-			SyndicationItem item;
+			SyndicationFeed feed;
 			using (var reader = XmlReader.Create(rssfeed.Url))
 			{
-				var feed = SyndicationFeed.Load(reader);
+				feed = SyndicationFeed.Load(reader);
 				Console.WriteLine($"Канал: {feed.Title.Text}");
 
-				item = feed.Items.OrderBy(f => f.PublishDate).FirstOrDefault();
+				//item = feed.Items.OrderBy(f => f.PublishDate).FirstOrDefault();
 
-				Console.WriteLine($"\nЗаголовок: {item.Title.Text}");
-				Console.WriteLine($"Ссылка: {item.Links[0].Uri}");
-				Console.WriteLine($"Дата: {item.PublishDate.DateTime}");
-				Console.WriteLine($"Кратко: {item.Summary?.Text}");
+				//Console.WriteLine($"\nЗаголовок: {item.Title.Text}");
+				//Console.WriteLine($"Ссылка: {item.Links[0].Uri}");
+				//Console.WriteLine($"Дата: {item.PublishDate.DateTime}");
+				//Console.WriteLine($"Кратко: {item.Summary?.Text}");
 			}
+
+			var item = await _newsParserServiceAI.GetMostRelevantNewsItemAsync(feed, parseParams.ChatTitle, parseParams.ChatDescription, parseParams.lastMessages);
 
 			var title = item.Title.Text;
 			var link = item.Links[0].Uri.ToString();

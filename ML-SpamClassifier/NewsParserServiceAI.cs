@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using GoogleServices.Interfaces;
 using Newtonsoft.Json.Linq;
@@ -37,15 +38,15 @@ namespace ML_SpamClassifier
 				"- Последние сообщения:\n" +
 				(lastMessages is null ? "нету сообщений" : string.Join("\n", lastMessages.TakeLast(10).Select((m, i) => $"  {i + 1}. {m}")))
 				+ "\n\n" +
-    
+
 				"### Доступные RSS-ленты (используй ТОЧНО эти названия):\n" +
 				string.Join("\n", _availableFeeds.Select(f => $"ТОЧНОЕ_НАЗВАНИЕ_НОВОСТИ: \"" + f.Name + "\" (её категория: \"" + f.Category + "\", её описание: \"" + f.Description + ")")) + "\"\n\n" +
-    
+
 				"### Задача:\n" +
 				"1. Проанализируй тематику чата\n" +
 				"2. Выбери 3 наиболее релевантных ленты ИЗ ПРЕДОСТАВЛЕННОГО СПИСКА\n" +
 				"3. Используй ТОЧНЫЕ названия лент как они указаны выше\n\n" +
-    
+
 				"### Формат ответа (строго JSON):\n" +
 				"{\n" +
 				"  \"reason\": \"анализ тематики и обоснование выбора\",\n" +
@@ -85,6 +86,75 @@ namespace ML_SpamClassifier
 			// Возвращаем фид по умолчанию (например, общие новости)
 			return _availableFeeds.FirstOrDefault(f => f.Name == "РИА Новости")
 				   ?? _availableFeeds[0];
+		}
+
+		public async Task<SyndicationItem> GetMostRelevantNewsItemAsync(SyndicationFeed feed, string chatTitle
+			, string chatDescription = null
+			, List<string> lastMessages = null)
+		{
+			// 1.Подготовка данных для анализа
+			var newsTitles = feed.Items
+				.Select(item => item.Title.Text)
+				.Take(20) // Ограничиваем количество для анализа
+				.ToList();
+
+			// 2. Формируем промпт для Gemini
+			var prompt = "Анализ новостей для выбора наиболее релевантной:\n\n" +
+				"### Контекст чата:\n" +
+				"- Название: " + chatTitle + "\n" +
+				"- Описание: " + (string.IsNullOrEmpty(chatDescription) ? "нет описания" : chatDescription) + "\n" +
+				"- Последние сообщения: " + (lastMessages != null && lastMessages.Any() ? string.Join("\n", lastMessages.TakeLast(5)) : "нет сообщений") + "\n\n" +
+
+				"### Список новостей (выбери 3 наиболее релевантных):\n" +
+				string.Join("\n", newsTitles.Select((t, i) => (i + 1) + ". " + t)) + "\n\n" +
+
+				"### Задача:\n" +
+				"1. Проанализируй тематику чата\n" +
+				"2. Выбери 3 наиболее релевантных новости из списка\n" +
+				"3. Укажи номера выбранных новостей (только цифры)\n\n" +
+
+				"### Формат ответа (строго JSON):\n" +
+				"{\n" +
+				"  \"reason\": \"анализ тематики и обоснование выбора\",\n" +
+				"  \"selected_news\": [1, 3, 5] // номера выбранных новостей\n" +
+				"}";
+
+			// 3. Отправляем запрос к Gemini API
+			var response = await _generativeLanguageModel.AskGemini(prompt);
+
+			// 4. Парсим ответ и выбираем новость
+			return ParseGeminiResponse(feed, response);
+		}
+
+		private SyndicationItem ParseGeminiResponse(SyndicationFeed feed, string response)
+		{
+			try
+			{
+				// Очистка ответа от markdown обертки
+				var jsonStr = response.Replace("```json", "").Replace("```", "").Trim();
+				var json = JObject.Parse(jsonStr);
+
+				// Получаем индексы выбранных новостей
+				var selectedIndices = json["selected_news"]?.ToObject<List<int>>() ?? new List<int>();
+
+				// Берем первую наиболее релевантную новость
+				if (selectedIndices.Any())
+				{
+					// Корректируем индекс (в ответе 1-based)
+					var firstIndex = selectedIndices[0] - 1;
+					if (firstIndex >= 0 && firstIndex < feed.Items.Count())
+					{
+						return feed.Items.ElementAt(firstIndex);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log($"Ошибка парсинга ответа Gemini: {ex.Message}");
+			}
+
+			// Fallback: возвращаем первую новость, если не удалось распарсить ответ
+			return feed.Items.FirstOrDefault();
 		}
 
 		public async Task<List<string>> GetRelevantTagsAsync(string chatTheme, List<string> availableTags)
