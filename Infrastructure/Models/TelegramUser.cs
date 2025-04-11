@@ -43,6 +43,8 @@ namespace Infrastructure.Models
 
 		public string Title { get; set; }
 
+		public string Description { get; set; }
+
 		public string ChatType { get; set; }
 
 		public TelegramUser Creator { get; set; }

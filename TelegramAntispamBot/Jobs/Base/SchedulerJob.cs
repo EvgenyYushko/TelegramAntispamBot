@@ -37,7 +37,7 @@ namespace TelegramAntispamBot.Jobs.Base
 				var content = await Parse(new ParseParams 
 				{ 
 					ChatTitle = chat.Title
-					, ChatDescription = null
+					, ChatDescription = chat.Description
 					, lastMessages = chat.ChatMessages
 						.OrderByDescending(m => m.CreatedAt)
 						.Select(m => m.Text)

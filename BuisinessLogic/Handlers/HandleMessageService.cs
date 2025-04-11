@@ -106,6 +106,7 @@ namespace BuisinessLogic.Handlers
 							TelegramChatId = update.Message.Chat.Id,
 							ChatType = update.Message.Chat.Type.ToString(),
 							Title = update.Message.Chat.Title,
+							Description = update.Message.Chat.Description,
 							Creator = creator,
 							CreatorId = creator.UserId,
 							AdminsMembers = adminsMember,

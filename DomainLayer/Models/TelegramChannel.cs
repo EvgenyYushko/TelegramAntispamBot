@@ -12,6 +12,8 @@ namespace DomainLayer.Models
 
 		public string Title { get; set; } // Название
 
+		public string Description { get; set; }
+
 		public string ChatType { get; set; } // "channel", "group", "supergroup"
 
 		public DateTime AddedDate { get; set; } = DateTime.UtcNow;

@@ -86,7 +86,8 @@ namespace DataAccessLayer.Repositories
 						Chanel = new Chanel
 						{
 							TelegramChatId = p.Chat.Id,
-							Title = p.Chat.Title
+							Title = p.Chat.Title,
+							Description = p.Chat.Description
 						}
 					}).ToList(),
 				UserSiteId = userDb.UserSiteId ?? default
@@ -119,6 +120,7 @@ namespace DataAccessLayer.Repositories
 							Chanel = new Chanel
 							{
 								TelegramChatId = p.Chat.Id,
+								Description = p.Chat.Description,
 								Title = p.Chat.Title
 							}
 						}).ToList(),
@@ -301,6 +303,7 @@ namespace DataAccessLayer.Repositories
 			{
 				Id = chat.TelegramChatId,
 				Title = chat.Title,
+				Description = chat.Description,
 				ChatType = chat.ChatType,
 				CreatorId = chat.CreatorId
 			};
@@ -376,6 +379,7 @@ namespace DataAccessLayer.Repositories
 						Name = u.Channel.Creator.Name
 					},
 					ChatType = u.Channel.ChatType,
+					Description = u.Channel.Description,
 					TelegramChatId = u.Channel.Id,
 					Title = u.Channel.Title,
 					AdminsIds = u.Channel.Admins.Select(a => a.UserId).ToList(),
@@ -408,6 +412,7 @@ namespace DataAccessLayer.Repositories
 				{
 					CreatorId = u.Channel.CreatorId,
 					ChatType = u.Channel.ChatType,
+					Description = u.Channel.Description,
 					TelegramChatId = u.Channel.Id,
 					Title = u.Channel.Title,
 					AdminsIds = u.Channel.Admins.Select(a => a.UserId).ToList()
