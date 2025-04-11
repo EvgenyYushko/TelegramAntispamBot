@@ -124,5 +124,6 @@ namespace DataAccessLayer
 		public DbSet<UserChannelMembership> UserChannelMembership { get; set; }
 
 		public DbSet<SuspiciousMessage> SuspiciousMessages { get; set; } // Таблица для хранения сообщений
+		public DbSet<ChatMessagesEntity> ChatMessages { get; set; }
 	}
 }

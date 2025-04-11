@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel.Syndication;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Infrastructure.Models.AI;
@@ -43,15 +43,16 @@ namespace BuisinessLogic.Services.Parsers
 
 			var title = item.Title.Text;
 			var link = item.Links[0].Uri.ToString();
+			string fixedUrl = CleanUrl(link); 
 
-			if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(link))
+			if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(fixedUrl))
 				return "❌ Не удалось извлечь данные статьи.";
 
 			// 7. Форматируем сообщение
 			var message = new System.Text.StringBuilder();
 			message.AppendLine($"📌 *{title}*");
 			//message.AppendLine($"🏷️ Теги: {string.Join(", ", latestArticle.Tags.Intersect(relevantTags))}");
-			message.AppendLine($"🔗 [Читать статью]({link})");
+			message.AppendLine($"🔗 [Читать статью]({fixedUrl})");
 			//message.AppendLine($"\nФильтрация по темам: {string.Join(", ", relevantTags)}");
 
 			return message.ToString();
@@ -95,6 +96,17 @@ namespace BuisinessLogic.Services.Parsers
 
 			return null;
 		}
+
+		public static string CleanUrl(string url)
+		{
+			var sb = new StringBuilder();
+			foreach (char c in url)
+			{
+				if (!char.IsControl(c) && c != '\u200E') // Удаляем управляющие символы и U+200E
+					sb.Append(c);
+			}
+			return sb.ToString();
+		}
 	}
 
 	public static class RssFeeds
@@ -104,7 +116,23 @@ namespace BuisinessLogic.Services.Parsers
 			return new List<RssFeed>
 		{
             // 1. Новости и СМИ
-            new RssFeed
+			new RssFeed
+			{
+				Name = "Onliner auto",
+				Url = "https://rss.app/feeds/pIBSlFgadQRwYyuG.xml",
+				Description = "Медиакомпания в Минске с новостями об автомобилях",
+				Category = "Новости",
+				RequiresVpn = false
+			},
+			new RssFeed
+			{
+				Name = "Onliner",
+				Url = "https://rss.app/feeds/AACxt9fRfZNPyXyg.xml",
+				Description = "Медиакомпания в Минске",
+				Category = "Новости",
+				RequiresVpn = false
+			},
+			new RssFeed
 			{
 				Name = "РИА Новости",
 				Url = "https://ria.ru/export/rss2/index.xml",

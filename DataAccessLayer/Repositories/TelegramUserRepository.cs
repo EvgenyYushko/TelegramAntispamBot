@@ -424,6 +424,7 @@ namespace DataAccessLayer.Repositories
 				.Include(c => c.Admins)
 				.ThenInclude(m => m.User)
 				.Include(c => c.ChatPermissions)
+				.Include(c => c.ChatMessages)
 				//.AsNoTracking()
 				.First(m => m.Id.Equals(id));
 
@@ -471,7 +472,18 @@ namespace DataAccessLayer.Repositories
 					HabrCronExpression = chat.ChatPermissions.HabrCronExpression,
 					SendOnliner = chat.ChatPermissions.SendOnliner,
 					OnlinerCronExpression = chat.ChatPermissions.OnlinerCronExpression
-				}
+				},
+				ChatMessages = chat.ChatMessages.Select(c => new ChatMessagesDto()
+				{
+					MessageId = c.MessageId,
+					Text = c.Text,	
+					ChatId = c.ChatId,
+					UserId = c.UserId,
+					CreatedAt = c.CreatedAt,
+					ContentType = c.ContentType,
+					Id = c.Id,
+				}).ToList(),
+				
 			};
 		}
 
@@ -585,6 +597,12 @@ namespace DataAccessLayer.Repositories
 			per.SendOnliner= chatPermissions.SendOnliner;
 			per.OnlinerCronExpression= chatPermissions.OnlinerCronExpression;
 
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task AddTextMessages(ChatMessagesEntity message)
+		{
+			await _context.ChatMessages.AddAsync(message);
 			await _context.SaveChangesAsync();
 		}
 	}

@@ -25,5 +25,7 @@ namespace DomainLayer.Models
 		public List<TelegramPermissionsEntity> Permissions { get; set; } = new();
 
 		public ChatPermissionsEntity ChatPermissions { get; set; } = new();
+
+		public List<ChatMessagesEntity> ChatMessages { get; set; } = new();
 	}
 }

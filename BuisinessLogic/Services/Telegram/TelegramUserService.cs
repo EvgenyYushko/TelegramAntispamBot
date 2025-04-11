@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DomainLayer.Models;
 using DomainLayer.Repositories;
 using Infrastructure.Enumerations;
 using Infrastructure.Models;
@@ -176,6 +177,19 @@ namespace BuisinessLogic.Services.Telegram
 		public Task UpdateChatPermissions(Infrastructure.Models.ChatPermissions chatPermissions)
 		{
 			return _usersRepository.UpdateChatPermissions(chatPermissions);	
+		}
+
+		public Task AddTextMessages(ChatMessagesDto message)
+		{
+			return _usersRepository.AddTextMessages(new ChatMessagesEntity
+			{
+				MessageId = message.MessageId,
+				Text = message.Text,
+				UserId = message.UserId,
+				ChatId = message.ChatId,
+				CreatedAt = message.CreatedAt,
+				ContentType = message.ContentType,
+			});
 		}
 	}
 }

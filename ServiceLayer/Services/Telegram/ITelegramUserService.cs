@@ -44,5 +44,7 @@ namespace ServiceLayer.Services.Telegram
 		public List<TelegramUser> GetAllAdmins();
 
 		public Task UpdateChatPermissions(Infrastructure.Models.ChatPermissions chatPermissions);
+
+		public Task AddTextMessages(ChatMessagesDto message);
 	}
 }

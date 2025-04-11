@@ -137,7 +137,7 @@ namespace BuisinessLogic.Handlers
 			{
 				//await HandleChatMemberUpdateAsync(_telegramClient, update, cancellationToken);
 				return;
-			}					
+			}
 
 			switch (type)
 			{
@@ -249,6 +249,24 @@ namespace BuisinessLogic.Handlers
 				}
 				default:
 					return;
+			}
+
+
+			if (update.Message != null && !update.Message.Type.Equals(MessageType.ChatMembersAdded) &&
+				update.Message.Chat.Type.Equals(ChatType.Supergroup) &&
+				type is not UpdateType.InlineQuery and not UpdateType.MyChatMember)
+			{
+				if (update.Message is not null)
+				{
+					await _telegramUserService.AddTextMessages(new()
+					{
+						MessageId = update.Message.MessageId,
+						ChatId = update.Message.Chat.Id,
+						Text = update.GetMsgText(),
+						UserId = update.Message.From.Id,
+						ContentType = update.Message.Type.ToString()
+					});
+				}
 			}
 		}
 

@@ -48,5 +48,6 @@ namespace DomainLayer.Repositories
 		public List<TelegramChannelAdmin> GetAllAdmins();
 
 		public Task UpdateChatPermissions(Infrastructure.Models.ChatPermissions chatPermissions);
+		public Task AddTextMessages(ChatMessagesEntity message);
 	}
 }

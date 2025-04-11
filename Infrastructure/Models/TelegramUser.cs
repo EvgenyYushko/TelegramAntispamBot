@@ -57,6 +57,8 @@ namespace Infrastructure.Models
 
 		public ChatPermissions ChatPermission { get; set; } = new();
 
+		public List<ChatMessagesDto> ChatMessages { get; set; } = new();
+
 		public override string ToString()
 		{
 			return

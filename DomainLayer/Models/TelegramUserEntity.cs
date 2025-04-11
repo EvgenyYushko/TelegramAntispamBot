@@ -22,6 +22,8 @@ namespace DomainLayer.Models
 
 		public List<UserChannelMembership> ChannelMemberships { get; set; } = new();
 
+		public List<ChatMessagesEntity> ChatMessages { get; set; } = new();
+
 		public UserEntity? UserSite { get; set; }
 
 		public override string ToString()

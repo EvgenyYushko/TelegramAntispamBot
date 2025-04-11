@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.InjectSettings;
 using Infrastructure.Models.AI;
@@ -37,7 +38,11 @@ namespace TelegramAntispamBot.Jobs.Base
 				{ 
 					ChatTitle = chat.Title
 					, ChatDescription = null
-					, lastMessages = null
+					, lastMessages = chat.ChatMessages
+						.OrderByDescending(m => m.CreatedAt)
+						.Select(m => m.Text)
+						.Take(10)
+						.ToList()
 				});
 
 				if (content != null)
