@@ -56,7 +56,7 @@ namespace ML_SpamClassifier
 
 
 			// Отправляем запрос к Gemini API
-			var response = await _generativeLanguageModel.AskGemini(prompt);
+			var response = await _generativeLanguageModel.GeminiRequest(prompt);
 
 			// Парсим ответ и находим выбранные ленты
 			return ParseGeminiResponse(response);
@@ -120,7 +120,7 @@ namespace ML_SpamClassifier
 				"}";
 
 			// 3. Отправляем запрос к Gemini API
-			var response = await _generativeLanguageModel.AskGemini(prompt);
+			var response = await _generativeLanguageModel.GeminiRequest(prompt);
 
 			// 4. Парсим ответ и выбираем новость
 			return ParseGeminiResponse(feed, response);
@@ -172,7 +172,7 @@ namespace ML_SpamClassifier
 							  "\"Карьера в IT, Women in Tech, Разработка\"";
 
 				// 2. Отправляем запрос к Gemini API
-				var response = await _generativeLanguageModel.AskGemini(prompt);
+				var response = await _generativeLanguageModel.GeminiRequest(prompt);
 				var responseText = response.Trim();
 
 				// 3. Парсим ответ и валидируем результат

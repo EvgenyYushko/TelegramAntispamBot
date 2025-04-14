@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using GoogleServices.Gemini.Models;
+using GoogleServices.Gemini.Models.Request;
 using GoogleServices.Interfaces;
 using Newtonsoft.Json;
 using static Infrastructure.Helpers.Logger;
@@ -18,6 +19,7 @@ namespace GoogleServices.Gemini
 		private static readonly HttpClient httpClient = new();
 		private static readonly Stack<string> modelsStack = new();
 		private readonly string _geminiApiKey;
+		private readonly string MEDIA_TYPE = "application/json";
 
 		public GenerativeLanguageModel(string geminiApiKey)
 		{
@@ -25,6 +27,8 @@ namespace GoogleServices.Gemini
 			InitGeminiModels();
 			SwitchToNextModel();
 		}
+
+		private string GetUrl => $"https://generativelanguage.googleapis.com/v1beta/models/{GeminiModel}:generateContent?key={_geminiApiKey}";
 
 		public static string GeminiModel { get; set; }
 
@@ -46,7 +50,38 @@ namespace GoogleServices.Gemini
 			modelsStack.Push("gemini-2.0-flash");
 		}
 
-		public async Task<string> AskGemini(string prompt)
+		public async Task<HttpResponseMessage> GeminiRequest(GeminiRequest request)
+		{
+			return await Post(JsonConvert.SerializeObject(request));
+		}
+
+		public Task<string> GeminiRequest(string prompt)
+		{
+			var request = new
+			{
+				contents = new[]
+				{
+					new
+					{
+						parts = new[]
+						{
+							new { text = $"{prompt}" }
+						}
+					}
+				},
+				generationConfig = new
+				{
+					temperature = 0.1,
+					topK = 1,
+					topP = 0
+					//maxOutputTokens = 10
+				}
+			};
+
+			return GeminiRequestBase(JsonConvert.SerializeObject(request));
+		}
+
+		private async Task<string> GeminiRequestBase(string request)
 		{
 			const int maxRetries = 5; // Максимальное количество попыток
 			var attempt = 0;
@@ -55,38 +90,7 @@ namespace GoogleServices.Gemini
 			{
 				try
 				{
-					var url =
-						$"https://generativelanguage.googleapis.com/v1beta/models/{GeminiModel}:generateContent?key={_geminiApiKey}";
-
-					var request = new
-					{
-						contents = new[]
-						{
-							new
-							{
-								parts = new[]
-								{
-									new { text = $"{prompt}" }
-								}
-							}
-						},
-						generationConfig = new
-						{
-							temperature = 0.1,
-							topK = 1,
-							topP = 0
-							//maxOutputTokens = 10
-						}
-					};
-
-					var response = await httpClient.PostAsync(
-						url,
-						new StringContent(
-							JsonConvert.SerializeObject(request),
-							Encoding.UTF8,
-							"application/json"
-						)
-					);
+					var response = await Post(request);
 
 					// Проверяем статус ответа
 					if (!response.IsSuccessStatusCode)
@@ -139,6 +143,11 @@ namespace GoogleServices.Gemini
 			}
 
 			return null;
+		}
+
+		private Task<HttpResponseMessage> Post(string request)
+		{
+			return httpClient.PostAsync(GetUrl, new StringContent(request, Encoding.UTF8, MEDIA_TYPE));
 		}
 	}
 }

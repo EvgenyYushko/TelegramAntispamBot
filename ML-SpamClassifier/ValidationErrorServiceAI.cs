@@ -33,7 +33,7 @@ namespace ML_SpamClassifier
 				$"Cron-выражение: \"{invalidCroneExpression}\"";
 
 				// 2. Отправляем запрос к Gemini API
-				var response = await _generativeLanguageModel.AskGemini(prompt);
+				var response = await _generativeLanguageModel.GeminiRequest(prompt);
 
 				return response.Trim();
 			}

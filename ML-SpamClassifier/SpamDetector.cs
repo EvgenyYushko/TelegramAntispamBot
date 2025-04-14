@@ -136,7 +136,7 @@ namespace ML_SpamClassifier
 
 			// Подробный анализ через Gemini
 			var prompt = BuildSpamDetectionPrompt(message, theme, chatDescription, criteria);
-			var response = await _generativeLanguageModel.AskGemini(prompt);
+			var response = await _generativeLanguageModel.GeminiRequest(prompt);
 			var result = ParseGeminiResponse(response);
 			if (result.Details.Contains("Ошибка"))
 			{
@@ -324,7 +324,7 @@ namespace ML_SpamClassifier
 						 "Твой анализ:\n" +
 						 "#Постарайся отвечать как можно кратко. По существу и без лишней воды.";
 
-			return await _generativeLanguageModel.AskGemini(prompt);
+			return await _generativeLanguageModel.GeminiRequest(prompt);
 		}
 
 		private (bool IsSpam, string Details) ParseGeminiResponse(string jsonResponse)
