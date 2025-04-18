@@ -19,16 +19,19 @@ namespace GoogleServices.Gemini
 		private static readonly HttpClient httpClient = new();
 		private static readonly Stack<string> modelsStack = new();
 		private readonly string _geminiApiKey;
+		private readonly bool _isProd;
 		private readonly string MEDIA_TYPE = "application/json";
 
-		public GenerativeLanguageModel(string geminiApiKey)
+		public GenerativeLanguageModel(string geminiApiKey, bool isProd)
 		{
 			_geminiApiKey = geminiApiKey;
+			_isProd = isProd;
 			InitGeminiModels();
 			SwitchToNextModel();
 		}
 
 		private string GetUrl => $"https://generativelanguage.googleapis.com/v1beta/models/{GeminiModel}:generateContent?key={_geminiApiKey}";
+		private string GetUrlDev => "https://telegramantispambot.onrender.com/api/gemini/generate";
 
 		public static string GeminiModel { get; set; }
 
@@ -147,7 +150,8 @@ namespace GoogleServices.Gemini
 
 		private Task<HttpResponseMessage> Post(string request)
 		{
-			return httpClient.PostAsync(GetUrl, new StringContent(request, Encoding.UTF8, MEDIA_TYPE));
+			var url = _isProd ? GetUrl : GetUrlDev;
+			return httpClient.PostAsync(url, new StringContent(request, Encoding.UTF8, MEDIA_TYPE));
 		}
 	}
 }

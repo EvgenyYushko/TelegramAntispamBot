@@ -84,11 +84,7 @@ namespace TelegramAntispamBot.Controllers
 					});
 				}
 
-				return Ok(new
-				{
-					success = true,
-					text = jsonResponse
-				});
+				return Ok(jsonResponse);
 			}
 			catch (Exception ex)
 			{

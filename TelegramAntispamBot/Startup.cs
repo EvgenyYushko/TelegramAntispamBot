@@ -196,7 +196,7 @@ namespace TelegramAntispamBot
 			var geminiApiKey = Configuration.GetValue<string>(GEMINI_API_KEY) ?? Environment.GetEnvironmentVariable(GEMINI_API_KEY);
 			services.AddSingleton<IGenerativeLanguageModel>(provider =>
 			{
-				return new GenerativeLanguageModel(geminiApiKey);
+				return new GenerativeLanguageModel(geminiApiKey, env.IsProduction());
 			});
 
 			services.AddSingleton<NbrbCurrencyParser>();
